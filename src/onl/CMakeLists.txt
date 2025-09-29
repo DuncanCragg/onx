@@ -1,0 +1,1 @@
+add_subdirectory_exclude_platforms(M host rp2040)

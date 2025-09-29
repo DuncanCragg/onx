@@ -1,0 +1,1 @@
+add_subdirectory_exclude_platforms(rp2350-adafruit-feather host rp2040)
