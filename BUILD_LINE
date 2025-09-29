@@ -1,1 +1,2 @@
 cmake -DPICO_PLATFORM=rp2350 -DPICO_BOARD=adafruit_feather_rp2350 ..
+cmake -DBUILD_FOR_M=OFF ..
