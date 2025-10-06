@@ -1,0 +1,102 @@
+
+#include <stdio.h>
+#include <tests.h>
+#include <onx/log.h>
+#include <onx/items.h>
+
+// ---------------------------------------------------------------------------------
+
+void test_items() {
+
+  properties* op=properties_new(3);
+  list*       li=list_new(3);
+  value*      va=value_new("banana");
+  tests_assert(item_is_type(op, ITEM_PROPERTIES), "properties has the right type");
+  tests_assert(item_is_type(li, ITEM_LIST),       "list has the right type");
+  tests_assert(item_is_type(va, ITEM_VALUE),      "value has the right type");
+  list_free(li, false);
+  properties_free(op, true);
+}
+
+void test_properties() {
+
+  char buf[64];
+
+  properties* op=properties_new(3);
+
+                    properties_set(op,"x",value_new("y"));
+                    properties_set(op,"3",value_new("4"));
+
+  tests_assert(      properties_size(op)==2,                              "size should be 2");
+  tests_assert_equal(item_to_text(properties_get(op,"x"), buf, 64), "y",  "x returns y");
+  tests_assert_equal(item_to_text(properties_get(op,"3"), buf, 64), "4",  "3 returns 4");
+  tests_assert(     !properties_get(op,"?"),                              "? returns null");
+
+                    properties_set(op,"3",value_new("5"));
+
+  tests_assert_equal_num(properties_size(op), 2,                          "size should still be 2");
+  tests_assert_equal(item_to_text(properties_get(op,"3"), buf, 64), "5",  "3 now returns 5");
+
+                    properties_set(op,"*",value_new("+"));
+
+  tests_assert(      properties_size(op)==3,       "size should now be 3");
+  tests_assert(     !properties_set(op,"M",value_new("N")),   "shouldn't be able to add a fourth item");
+  tests_assert(      properties_size(op)==3,       "size should still be 3");
+
+  tests_assert_equal(             properties_key_n(op,1), "x",           "1st key is 'x'");
+  tests_assert_equal(item_to_text(properties_get_n(op,1), buf, 64), "y", "1st val is 'y'");
+  tests_assert_equal(             properties_key_n(op,2), "3",           "2nd key is '3'");
+  tests_assert_equal(item_to_text(properties_get_n(op,2), buf, 64), "5", "2nd val is '5'");
+  tests_assert_equal(             properties_key_n(op,3), "*",           "3rd key is '*'");
+  tests_assert_equal(item_to_text(properties_get_n(op,3), buf, 64), "+", "3rd val is '+'");
+  tests_assert(                  !properties_key_n(op,4),                "4th key is 0");
+  tests_assert(                  !properties_get_n(op,4),                "4th val is 0");
+  tests_assert(                  !properties_key_n(op,0),                "0th key is 0");
+  tests_assert(                  !properties_get_n(op,0),                "0th val is 0");
+
+  tests_assert_equal(item_to_text(op, buf, 64), "{\n  x: y\n  3: 5\n  *: +\n}\n", "serialise to string works");
+
+  tests_assert(      properties_set(op,"x", value_new("i")), "can set x");
+
+  tests_assert(((item*)properties_get(op,"x"))->type==ITEM_VALUE,         "x is a value");
+  tests_assert_equal(item_to_text(properties_get(op,"x"), buf, 64), "i",  "x now returns i");
+
+                    list* li=list_new(3);
+                    list_add(li,value_new("l"));
+                    list_add(li,value_new("m"));
+  tests_assert(      properties_set(op,"3",li),                            "can set 3");
+  tests_assert(((item*)properties_get(op,"3"))->type==ITEM_LIST,           "x is a list");
+
+  tests_assert_equal(item_to_text(op, buf, 64), "{\n  x: i\n  3: l m\n  *: +\n}\n", "serialise to string works");
+
+                    properties_del(op,"3");
+  tests_assert(      properties_size(op)==2,                               "after delete size should now be 2");
+                    properties_del(op,"x");
+  tests_assert(      properties_size(op)==1,                               "after delete size should now be 1");
+                    properties_del(op,"*");
+  tests_assert(      properties_size(op)==0,                               "after delete size should now be 0");
+  tests_assert_equal(item_to_text(op, buf, 64), "{\n}\n",                  "serialise to string works");
+
+  tests_assert(      properties_set(op,"x", value_new("i")),      "can set x");
+                    list_free(li, false);
+                    li=list_new(3);
+                    list_add(li,value_new("l"));
+                    list_add(li,value_new("m"));
+  tests_assert(      properties_set(op,"3",li),                   "can set 3");
+  tests_assert_equal(item_to_text(op, buf, 64), "{\n  x: i\n  3: l m\n}\n", "serialise to string works");
+                    properties_clear(op, true);
+  tests_assert_equal(item_to_text(op, buf, 64), "{\n}\n",                   "properties_clear empties");
+  tests_assert_equal(properties_to_text(0, buf, 64), "{ }\n",               "properties_to_text shows null");
+
+                    properties_log(op);
+  properties_free(op, true);
+}
+
+void run_properties_tests() {
+
+  log_write("------properties tests-----\n");
+
+  test_items();
+  test_properties();
+}
+
