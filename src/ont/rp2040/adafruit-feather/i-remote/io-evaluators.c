@@ -15,8 +15,8 @@
 
 // ------------------- evaluators ----------------
 
-#define BATT_V_PIN           26
-#define BATT_ADC_CHANNEL      0
+#define BATT_V_PIN           29
+#define BATT_ADC_CHANNEL      3
 #define BATT_SMOOTHING       70
 #define ADC_TOP_MV         3300
 #define ADC_BITS_RANGE     4096

@@ -313,7 +313,7 @@ void startup_core0_init(properties* config){
 
 void __not_in_flash_func(startup_core0_loop)(properties* config){
 
-  while(do_flip) tight_loop_contents();
+  while(do_flip) tight_loop_contents();  // REVISIT: expose do_flip and move core0 up to ont hx
 
   ont_hx_frame();
 
@@ -341,7 +341,7 @@ void startup_core1_init(){
   set_up_dma();
 }
 
-void __not_in_flash_func(startup_core1_loop)(){
+void X startup_core1_loop(){
 
   while(!fill_signal) tight_loop_contents();
 

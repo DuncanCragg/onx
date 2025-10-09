@@ -844,11 +844,9 @@ void test_timer() {
 
 // ---------------------------------------------------------------------------------
 
-void run_onn_tests(properties* config) {
+void run_onn_tests() {
 
   log_write("\n----------ONN tests-----------\n");
-
-  onn_init(config);
 
   test_object_set_up();
 

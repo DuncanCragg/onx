@@ -1296,7 +1296,11 @@ void object_log(object* o) {
 
 // -----------------------------------------------------------------------
 
+static volatile bool initialised=false;
+
 void onn_init(properties* config) {
+
+  if(initialised) return;
 
   log_write("Initialising ONN...\n");
 
@@ -1307,6 +1311,8 @@ void onn_init(properties* config) {
   persist_init(config);
   device_init();
   onp_init(config);
+
+  initialised=true;
 }
 
 #define NO_LOG_ONN_LOOP
