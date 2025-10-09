@@ -52,8 +52,18 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} \
 add_library(pico_sdk_libs INTERFACE)
 
 target_link_libraries(pico_sdk_libs INTERFACE
-    pico_stdlib pico_multicore pico_flash pico_sync pico_rand
-    hardware_dma hardware_spi hardware_gpio hardware_exception hardware_sync hardware_adc
+    pico_stdlib
+    pico_multicore
+    pico_flash
+    pico_sync
+    pico_rand
+    hardware_dma
+    hardware_i2c
+    hardware_spi
+    hardware_gpio
+    hardware_exception
+    hardware_sync
+    hardware_adc
 )
 
 add_subdirectory(src) # libonx

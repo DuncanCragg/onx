@@ -12,10 +12,13 @@ add_library(libonx
     onl/pico/random.c
 
     onl/pico/gpio.c
+    onl/pico/i2c.c
     onl/pico/spi.c
 
     onl/pico/spi-flash.c
     onl/pico/persistence.c
+
+    onl/drivers/seesaw.c
 
     lib/lib.c
     lib/chunkbuf.c

@@ -8,12 +8,18 @@
 #include <onx/mem.h>
 #include <onx/log.h>
 #include <onx/gpio.h>
+#include <onx/seesaw.h>
 
 #include <io-evaluators.h>
 
 #include <onn.h>
 
 // ------------------- evaluators ----------------
+
+#define ROTARY_ENC_ADDRESS 0x36
+#define ROTARY_ENC_BUTTON  24
+
+#define GAMEPAD_ADDRESS    0x50
 
 #define BATT_V_PIN           29
 #define BATT_ADC_CHANNEL      3
@@ -25,8 +31,28 @@
 #define BATT_100_PERCENT   4100
 #define BATT_PERCENT_STEPS    2
 
+static bool do_gamepad       =false;
+static bool do_rotary_encoder=false;
+
 void evaluators_init(){
+
   gpio_adc_init(BATT_V_PIN, BATT_ADC_CHANNEL);
+
+  time_delay_ms(50); // seesaw needs a minute to get its head straight
+  uint16_t version_hi_gamepad    = seesaw_status_version_hi(GAMEPAD_ADDRESS);
+  uint16_t version_hi_rotary_enc = seesaw_status_version_hi(ROTARY_ENC_ADDRESS);
+  if(version_hi_rotary_enc == 4991){
+    do_rotary_encoder=true;
+    log_write("rotary encoder found, doing rotaries\n");
+    seesaw_gpio_input_pullup(ROTARY_ENC_ADDRESS, ROTARY_ENC_BUTTON);
+  }
+  if(version_hi_gamepad == 5743){
+    do_gamepad=true;
+    log_write("gamepad found, doing games!\n");
+  }
+  if(!(do_rotary_encoder || do_gamepad)){
+    log_write("no rotary encoder or gamepad found: %d %d\n", version_hi_rotary_enc, version_hi_gamepad);
+  }
 }
 
 bool evaluate_battery_in(object* bat, void* d) {
