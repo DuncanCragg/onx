@@ -1,7 +1,15 @@
 
 #include <stdint.h>
+#include <stdio.h>
 
 #include <pico/stdlib.h>
+#if CYW43_USES_VSYS_PIN
+#include <pico/cyw43_arch.h>
+#endif
+#include <hardware/gpio.h>
+#include <hardware/adc.h>
+
+#include <tusb.h>
 
 #include <onx/log.h>
 #include <onx/gpio.h>
@@ -11,8 +19,13 @@
 static volatile bool initialised=false;
 
 void gpio_init_avoid_sdk() {
+
   if(initialised) return;
+
+  adc_init();
+
   // PORT enable gpio irqs
+
   initialised=true;
 }
 
@@ -153,15 +166,33 @@ void gpio_toggle(uint8_t pin) {
 // ------------------------------------------
 
 void gpio_adc_init(uint8_t pin, uint8_t channel) {
+
+  // REVISIT: oddity of pico sdk impl ?
+  if(channel==0 && !(pin==26 || pin==40)) return;
+  if(channel==1 && !(pin==27 || pin==41)) return;
+  if(channel==2 && !(pin==28 || pin==42)) return;
+  if(channel==3 && !(pin==29 || pin==43)) return;
+  if(channel==4 && !(pin== 0 || pin==44)) return; // temperature
+  if(channel==5 && !(           pin==45)) return;
+  if(channel==6 && !(           pin==46)) return;
+  if(channel==7 && !(           pin==47)) return;
+  if(channel==8 && !(           pin== 0)) return; // temperature
+
+  if(pin) adc_gpio_init(pin);
+
   //GAIN1_6,            //  \__ ADC Vin = 0..0.6V*6= 0..3.6V
   //REFERENCE_INTERNAL, //  /   0.6V
   //RESOLUTION_VAL_10bit;
 }
 
-int16_t gpio_read(uint8_t channel) {
+int16_t gpio_adc_read(uint8_t channel) {
+
   gpio_wake();
-//PORT: sample analogue
-  return 0; //value;
+
+  // REVISIT: is channel the one most recently set?
+  adc_select_input(channel);
+  uint16_t value = adc_read();
+  return value;
 }
 
 // ------------------------------------------
@@ -171,7 +202,14 @@ void gpio_show_power_status(){
 }
 
 bool gpio_usb_powered(){
-  return false; // PORT if power on USB
+#if defined CYW43_WL_GPIO_VBUS_PIN
+  return cyw43_arch_gpio_get(CYW43_WL_GPIO_VBUS_PIN);
+#elif defined PICO_VBUS_PIN
+  gpio_set_function(PICO_VBUS_PIN, GPIO_FUNC_SIO);
+  return gpio_get(PICO_VBUS_PIN);
+#else
+  return tud_cdc_connected(); // not ideal
+#endif
 }
 
 // ------------------------------------------

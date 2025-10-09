@@ -23,7 +23,7 @@ void    gpio_mode_cb(   uint8_t pin, uint8_t mode, uint8_t edge, gpio_pin_cb cb)
 uint8_t gpio_get_avoid_sdk(       uint8_t pin);
 #define gpio_get gpio_get_avoid_sdk
 void    gpio_adc_init(  uint8_t pin, uint8_t channel);
-int16_t gpio_read(      uint8_t  channel);
+int16_t gpio_adc_read(               uint8_t channel);
 void    gpio_set(       uint8_t pin, uint8_t value);
 void    gpio_toggle(    uint8_t pin);
 int     gpio_touch_read(uint8_t pin);

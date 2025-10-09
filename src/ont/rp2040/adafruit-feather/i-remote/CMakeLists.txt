@@ -1,9 +1,11 @@
 
 add_executable(onx-i-remote
+    io-evaluators.c
     onx.c
 )
 
 target_include_directories(onx-i-remote PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/src/onn
 )
