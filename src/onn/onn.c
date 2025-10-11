@@ -1162,6 +1162,7 @@ bool run_any_evaluators() {
 }
 
 void onn_show_notify(){
+  log_write("onn_show_notify\n");
   for(uint16_t n=0; n< MAX_TO_NOTIFY; n++){
     char* uid=value_string(to_notify[n].uid);
     uint8_t type=to_notify[n].type;

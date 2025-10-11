@@ -29,7 +29,7 @@ extern void run_database_tests(properties* config);
 extern void run_colour_tests(bool run_leds);
 extern void run_chunkbuf_tests();
 
-extern void run_onn_tests(properties* config);
+extern void run_onn_tests();
 
 void run_tests(properties* config) {
 
@@ -42,7 +42,7 @@ void run_tests(properties* config) {
   run_database_tests(config);
   run_chunkbuf_tests();
 
-  run_onn_tests(config);
+  run_onn_tests();
 
   int failures=tests_assert_summary();
 }

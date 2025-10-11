@@ -5,7 +5,6 @@ add_executable(onx-o-moon
 
 target_include_directories(onx-o-moon PRIVATE
     ${PROJECT_SOURCE_DIR}/include
-    ${PROJECT_SOURCE_DIR}/src/onn
 )
 
 target_link_libraries(onx-o-moon PRIVATE

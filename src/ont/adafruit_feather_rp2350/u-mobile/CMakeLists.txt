@@ -6,7 +6,6 @@ add_executable(onx-u-mobile
 
 target_include_directories(onx-u-mobile PRIVATE
     ${PROJECT_SOURCE_DIR}/include
-    ${PROJECT_SOURCE_DIR}/src/onl/pico
     ${PROJECT_SOURCE_DIR}/src/ont/images
 )
 
