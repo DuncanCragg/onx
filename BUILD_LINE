@@ -2,12 +2,12 @@
 cmake -DPICO_BOARD=adafruit_feather_rp2040 ..
 cmake -DPICO_BOARD=adafruit_feather_rp2350 ..
 
-picotool load -f -t uf2 ./src/ont/rp2040/adafruit-feather/i-remote/onx-i-remote.uf2
-picotool load -f -t uf2 ./src/ont/rp2040/adafruit-feather/o-moon/onx-o-moon.uf2
-picotool load -f -t uf2 ./tests/rp2040/adafruit-feather/onx-t-tests.uf2
+picotool load -f -t uf2 ./src/ont/adafruit_feather_rp2040/i-remote/onx-i-remote.uf2
+picotool load -f -t uf2 ./src/ont/adafruit_feather_rp2040/o-moon/onx-o-moon.uf2
+picotool load -f -t uf2 ./src/ont/adafruit_feather_rp2040/t-tests/onx-t-tests.uf2
 
-picotool load -f -t uf2 ./src/ont/rp2350/adafruit-feather/u-mobile/onx-u-mobile.uf2
-picotool load -f -t uf2 ./tests/rp2350/adafruit-feather/onx-t-tests.uf2
+picotool load -f -t uf2 ./src/ont/adafruit_feather_rp2350/u-mobile/onx-u-mobile.uf2
+picotool load -f -t uf2 ./src/ont/adafruit_feather_rp2350/t-tests/onx-t-tests.uf2
 
 
 

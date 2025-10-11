@@ -1,2 +1,2 @@
-add_subdirectory(src/ont/rp2350/adafruit-feather/u-mobile)
-add_subdirectory(tests/rp2350/adafruit-feather)
+add_subdirectory(src/ont/adafruit_feather_rp2350/u-mobile)
+add_subdirectory(src/ont/adafruit_feather_rp2350/t-tests)
