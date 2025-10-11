@@ -1,13 +1,13 @@
 
 add_executable(onx-i-remote
-    io-evaluators.c
+    ${PROJECT_SOURCE_DIR}/src/ont/io-evaluators.c
     onx.c
 )
 
 target_include_directories(onx-i-remote PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/src/onn
+    ${PROJECT_SOURCE_DIR}/src/ont
 )
 
 target_link_libraries(onx-i-remote PRIVATE

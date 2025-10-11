@@ -1,5 +1,6 @@
 
 add_executable(onx-u-mobile
+    ${PROJECT_SOURCE_DIR}/src/ont/io-evaluators.c
     ${PROJECT_SOURCE_DIR}/src/onl/drivers/radio-rfm69.c
     onx.c
 )
@@ -7,6 +8,7 @@ add_executable(onx-u-mobile
 target_include_directories(onx-u-mobile PRIVATE
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/src/ont/images
+    ${PROJECT_SOURCE_DIR}/src/ont
 )
 
 target_link_libraries(onx-u-mobile PRIVATE
