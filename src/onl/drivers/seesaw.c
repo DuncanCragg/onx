@@ -3,7 +3,8 @@
 #include <onx/i2c.h>
 #include <onx/seesaw.h>
 
-#define I2C_SPEED 400 // REVISIT
+#define SEESAW_I2C_SPEED_KHZ 100 // REVISIT see TWI_CLOCK in:
+                                 // ~/.arduino15/packages/rp2040/hardware/rp2040/5.1.0/libraries/Wire/src/Wire.h
 
 #define SEESAW_HI_STATUS         0x00
 #define SEESAW_HI_GPIO           0x01
@@ -46,57 +47,112 @@
 
 static void* i2c=0;
 
-static uint32_t seesaw_status_version(uint16_t i2c_address){
+void seesaw_init(uint16_t i2c_address, bool reset){
 
-  if(!i2c) i2c=i2c_init(I2C_SPEED);
+  if(!i2c) i2c=i2c_init(SEESAW_I2C_SPEED_KHZ);
+
+  if(reset){
+    uint8_t e;
+    uint8_t b=0xff;
+    e=i2c_write_register_hi_lo(i2c, i2c_address, SEESAW_HI_STATUS, SEESAW_LO_STATUS_SWRST, &b, 1);
+    time_delay_ms(50);
+  }
+}
+
+char* seesaw_device_chipset(uint16_t i2c_address){
 
   uint8_t e;
+  uint8_t c;
+  e=i2c_read_register_hi_lo(i2c, i2c_address, SEESAW_HI_STATUS, SEESAW_LO_STATUS_HW_ID, &c, 1);
+  if(e) return "error reading chipset";
 
+  switch(c){
+    case SEESAW_DEVICE_CHIPSET_SAMD09:   return "samd09";
+    case SEESAW_DEVICE_CHIPSET_TINY806:  return "tiny806";
+    case SEESAW_DEVICE_CHIPSET_TINY807:  return "tiny807";
+    case SEESAW_DEVICE_CHIPSET_TINY816:  return "tiny816";
+    case SEESAW_DEVICE_CHIPSET_TINY817:  return "tiny817";
+    case SEESAW_DEVICE_CHIPSET_TINY1616: return "tiny1616";
+    case SEESAW_DEVICE_CHIPSET_TINY1617: return "tiny1617";
+  }
+  return "unknown chipset";
+}
+
+uint32_t seesaw_device_id(uint16_t i2c_address){
+
+  uint8_t e;
   uint8_t data[4];
   e=i2c_read_register_hi_lo(i2c, i2c_address, SEESAW_HI_STATUS, SEESAW_LO_STATUS_VERSION, data, 4);
   if(e) return 0;
 
-  uint32_t version = ((uint32_t)data[0] << 24) |
-                     ((uint32_t)data[1] << 16) |
-                     ((uint32_t)data[2] <<  8) |
-                     ((uint32_t)data[3]      );
-  return version;
+  uint32_t id = ((uint32_t)data[0] << 24) |
+                ((uint32_t)data[1] << 16) |
+                ((uint32_t)data[2] <<  8) |
+                ((uint32_t)data[3]      );
+  return id;
 }
 
-uint16_t seesaw_status_version_hi(uint16_t i2c_address){
-  uint32_t version = seesaw_status_version(i2c_address);
-  uint16_t version_hi = ((version >> 16) & 0xFFFF);
-  return version_hi;
+uint16_t seesaw_device_id_hi(uint16_t i2c_address){
+  uint32_t id = seesaw_device_id(i2c_address);
+  uint16_t id_hi = ((id >> 16) & 0xffff);
+  return id_hi;
 }
 
-uint16_t seesaw_status_version_lo(uint16_t i2c_address){
-  uint32_t version = seesaw_status_version(i2c_address);
-  uint16_t version_lo = (version & 0xFFFF);
-  return version_lo;
+uint16_t seesaw_device_id_lo(uint16_t i2c_address){
+  uint32_t id = seesaw_device_id(i2c_address);
+  uint16_t id_lo = (id & 0xffff);
+  return id_lo;
 }
 
-void seesaw_gpio_input_pullup(uint16_t i2c_address, uint8_t pin){
+void seesaw_gpio_mode(uint16_t i2c_address, uint32_t gpio_mask, uint8_t mode){
 
-  if(!i2c) i2c=i2c_init(I2C_SPEED);
-
-  uint8_t e;
-
-  uint32_t pins = 1ul << pin;
-  uint8_t pin_bytes[] = {
-    (uint8_t)(pins >> 24),
-    (uint8_t)(pins >> 16),
-    (uint8_t)(pins >>  8),
-    (uint8_t)(pins      )
+  uint8_t m[] = {
+    (uint8_t)(gpio_mask >> 24),
+    (uint8_t)(gpio_mask >> 16),
+    (uint8_t)(gpio_mask >>  8),
+    (uint8_t)(gpio_mask      )
   };
 
-  e=i2c_write_register_hi_lo(i2c, i2c_address, SEESAW_HI_GPIO, SEESAW_LO_GPIO_DIRCLR_BULK, pin_bytes, 4);
-  e=i2c_write_register_hi_lo(i2c, i2c_address, SEESAW_HI_GPIO, SEESAW_LO_GPIO_PULLENSET,   pin_bytes, 4);
-  e=i2c_write_register_hi_lo(i2c, i2c_address, SEESAW_HI_GPIO, SEESAW_LO_GPIO_BULK_SET,    pin_bytes, 4);
+  uint8_t e;
+  switch(mode){
+    case SEESAW_GPIO_MODE_OUTPUT: {
+      e=i2c_write_register_hi_lo(i2c, i2c_address, SEESAW_HI_GPIO, SEESAW_LO_GPIO_DIRSET_BULK, m, 4);
+      break;
+    }
+    case SEESAW_GPIO_MODE_INPUT: {
+      e=i2c_write_register_hi_lo(i2c, i2c_address, SEESAW_HI_GPIO, SEESAW_LO_GPIO_DIRCLR_BULK, m, 4);
+      break;
+    }
+    case SEESAW_GPIO_MODE_INPUT_PULLUP: {
+      e=i2c_write_register_hi_lo(i2c, i2c_address, SEESAW_HI_GPIO, SEESAW_LO_GPIO_DIRCLR_BULK, m, 4);
+      e=i2c_write_register_hi_lo(i2c, i2c_address, SEESAW_HI_GPIO, SEESAW_LO_GPIO_PULLENSET,   m, 4);
+      e=i2c_write_register_hi_lo(i2c, i2c_address, SEESAW_HI_GPIO, SEESAW_LO_GPIO_BULK_SET,    m, 4);
+      break;
+    }
+    case SEESAW_GPIO_MODE_INPUT_PULLDOWN: {
+      e=i2c_write_register_hi_lo(i2c, i2c_address, SEESAW_HI_GPIO, SEESAW_LO_GPIO_DIRCLR_BULK, m, 4);
+      e=i2c_write_register_hi_lo(i2c, i2c_address, SEESAW_HI_GPIO, SEESAW_LO_GPIO_PULLENSET,   m, 4);
+      e=i2c_write_register_hi_lo(i2c, i2c_address, SEESAW_HI_GPIO, SEESAW_LO_GPIO_BULK_CLR,    m, 4);
+      break;
+    }
+  }
 }
 
-bool seesaw_gpio_read(uint16_t i2c_address, uint8_t pin){
+void seesaw_gpio_interrupts(uint16_t i2c_address, uint32_t gpio_mask, bool enabled){
 
-  if(!i2c) i2c=i2c_init(I2C_SPEED);
+  uint8_t m[] = {
+    (uint8_t)(gpio_mask >> 24),
+    (uint8_t)(gpio_mask >> 16),
+    (uint8_t)(gpio_mask >>  8),
+    (uint8_t)(gpio_mask      )
+  };
+
+  uint8_t e;
+  if (enabled) e=i2c_write_register_hi_lo(i2c, i2c_address, SEESAW_HI_GPIO, SEESAW_LO_GPIO_INTENSET, m, 4);
+  else         e=i2c_write_register_hi_lo(i2c, i2c_address, SEESAW_HI_GPIO, SEESAW_LO_GPIO_INTENCLR, m, 4);
+}
+
+uint32_t seesaw_gpio_read(uint16_t i2c_address){
 
   uint8_t data[4];
   uint8_t e;
@@ -108,14 +164,10 @@ bool seesaw_gpio_read(uint16_t i2c_address, uint8_t pin){
                       ((uint32_t)data[2] <<  8) |
                       ((uint32_t)data[3]      );
 
-  uint32_t pins = 1ul << pin;
-
-  return pin_bits & pins;
+  return pin_bits;
 }
 
 int32_t seesaw_encoder_position(uint16_t i2c_address) {
-
-  if(!i2c) i2c=i2c_init(I2C_SPEED);
 
   uint8_t e;
 

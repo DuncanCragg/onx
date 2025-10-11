@@ -16,10 +16,10 @@
 
 // ------------------- evaluators ----------------
 
-#define ROTARY_ENC_ADDRESS 0x36
-#define ROTARY_ENC_BUTTON  24
+#define ROTARY_ENC_ADDRESS    0x36
+#define ROTARY_ENC_BUTTON     (1UL<<24)
 
-#define GAMEPAD_ADDRESS    0x50
+#define GAMEPAD_ADDRESS       0x50
 
 #define BATT_V_PIN           29
 #define BATT_ADC_CHANNEL      3
@@ -39,19 +39,33 @@ void evaluators_init(){
   gpio_adc_init(BATT_V_PIN, BATT_ADC_CHANNEL);
 
   time_delay_ms(50); // seesaw needs a minute to get its head straight
-  uint16_t version_hi_gamepad    = seesaw_status_version_hi(GAMEPAD_ADDRESS);
-  uint16_t version_hi_rotary_enc = seesaw_status_version_hi(ROTARY_ENC_ADDRESS);
-  if(version_hi_rotary_enc == 4991){
+
+  seesaw_init(GAMEPAD_ADDRESS,    true);
+  seesaw_init(ROTARY_ENC_ADDRESS, true);
+
+  char* chipset;
+
+  chipset=seesaw_device_chipset(GAMEPAD_ADDRESS);
+  log_write("gamepad chipset=%s\n", chipset);
+
+  chipset=seesaw_device_chipset(ROTARY_ENC_ADDRESS);
+  log_write("rotary chipset=%s\n", chipset);
+
+  uint16_t device_id_hi_rotary_enc = seesaw_device_id_hi(ROTARY_ENC_ADDRESS);
+  uint16_t device_id_hi_gamepad    = seesaw_device_id_hi(GAMEPAD_ADDRESS);
+
+  if(device_id_hi_rotary_enc == 4991){
     do_rotary_encoder=true;
     log_write("rotary encoder found\n");
-    seesaw_gpio_input_pullup(ROTARY_ENC_ADDRESS, ROTARY_ENC_BUTTON);
+    seesaw_gpio_mode(      ROTARY_ENC_ADDRESS, ROTARY_ENC_BUTTON, SEESAW_GPIO_MODE_INPUT_PULLUP);
+//  seesaw_gpio_interrupts(ROTARY_ENC_ADDRESS, ROTARY_ENC_BUTTON, true); // ?
   }
-  if(version_hi_gamepad == 5743){
+  if(device_id_hi_gamepad == 5743){
     do_gamepad=true;
     log_write("gamepad found\n");
   }
   if(!(do_rotary_encoder || do_gamepad)){
-    log_write("no rotary encoder or gamepad found: %d %d\n", version_hi_rotary_enc, version_hi_gamepad);
+    log_write("no rotary encoder or gamepad found: %d %d\n", device_id_hi_rotary_enc, device_id_hi_gamepad);
   }
 }
 
@@ -95,7 +109,7 @@ bool evaluate_bcs_in(object* bcs, void* d){
   }
 
   int32_t rot_pos      = seesaw_encoder_position(ROTARY_ENC_ADDRESS);
-  bool    rot_pressed = !seesaw_gpio_read(ROTARY_ENC_ADDRESS, ROTARY_ENC_BUTTON);
+  bool    rot_pressed = !(seesaw_gpio_read(ROTARY_ENC_ADDRESS) & ROTARY_ENC_BUTTON);
 
   uint8_t brightness = 255/2;
   uint8_t colour     = (uint8_t)(rot_pos * 4); // lo byte, 4 lsb per click
