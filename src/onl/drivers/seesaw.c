@@ -3,6 +3,8 @@
 #include <onx/i2c.h>
 #include <onx/seesaw.h>
 
+#define I2C_SPEED 400 // REVISIT
+
 #define SEESAW_HI_STATUS         0x00
 #define SEESAW_HI_GPIO           0x01
 #define SEESAW_HI_SERCOM0        0x02
@@ -46,7 +48,7 @@ static void* i2c=0;
 
 static uint32_t seesaw_status_version(uint16_t i2c_address){
 
-  if(!i2c) i2c=i2c_init(400);
+  if(!i2c) i2c=i2c_init(I2C_SPEED);
 
   uint8_t e;
 
@@ -75,7 +77,7 @@ uint16_t seesaw_status_version_lo(uint16_t i2c_address){
 
 void seesaw_gpio_input_pullup(uint16_t i2c_address, uint8_t pin){
 
-  if(!i2c) i2c=i2c_init(400);
+  if(!i2c) i2c=i2c_init(I2C_SPEED);
 
   uint8_t e;
 
@@ -94,11 +96,10 @@ void seesaw_gpio_input_pullup(uint16_t i2c_address, uint8_t pin){
 
 bool seesaw_gpio_read(uint16_t i2c_address, uint8_t pin){
 
-  if(!i2c) i2c=i2c_init(400);
-
-  uint8_t e;
+  if(!i2c) i2c=i2c_init(I2C_SPEED);
 
   uint8_t data[4];
+  uint8_t e;
   e=i2c_read_register_hi_lo(i2c, i2c_address, SEESAW_HI_GPIO, SEESAW_LO_GPIO_BULK, data, 4);
   if(e) return 0;
 
@@ -114,7 +115,7 @@ bool seesaw_gpio_read(uint16_t i2c_address, uint8_t pin){
 
 int32_t seesaw_encoder_position(uint16_t i2c_address) {
 
-  if(!i2c) i2c=i2c_init(400);
+  if(!i2c) i2c=i2c_init(I2C_SPEED);
 
   uint8_t e;
 
