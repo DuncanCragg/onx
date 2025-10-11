@@ -9,8 +9,7 @@ target_include_directories(onx-o-moon PRIVATE
 )
 
 target_link_libraries(onx-o-moon PRIVATE
-    pico_sdk_libs
-    libonx
+    lib_onx
 )
 
 pico_enable_stdio_usb(onx-o-moon 1)

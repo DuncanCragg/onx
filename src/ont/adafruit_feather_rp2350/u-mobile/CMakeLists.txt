@@ -11,8 +11,7 @@ target_include_directories(onx-u-mobile PRIVATE
 )
 
 target_link_libraries(onx-u-mobile PRIVATE
-    pico_sdk_libs
-    libonx
+    lib_onx
 )
 
 pico_enable_stdio_usb(onx-u-mobile 1)

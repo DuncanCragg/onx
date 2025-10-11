@@ -11,8 +11,7 @@ target_include_directories(onx-i-remote PRIVATE
 )
 
 target_link_libraries(onx-i-remote PRIVATE
-    pico_sdk_libs
-    libonx
+    lib_onx
 )
 
 pico_enable_stdio_usb(onx-i-remote 1)

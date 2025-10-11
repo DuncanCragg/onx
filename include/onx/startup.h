@@ -3,8 +3,8 @@
 
 #include <onx/items.h>
 
-// the following are defined by board-determined peer modules within libonx, or
-// users of libonx (build targets)
+// the following are defined by board-determined peer modules within lib_onx, or
+// users of lib_onx (build targets)
 
 // references to external config consts
 extern const uint8_t  startup_vreg_v;

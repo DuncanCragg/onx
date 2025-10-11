@@ -14,14 +14,13 @@ add_executable(onx-t-tests
     onx.c
 )
 
-target_include_directories(onx-t-tests PRIVATE
+target_include_directories(onx-t-tests PUBLIC
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/src/onn
 )
 
-target_link_libraries(onx-t-tests PRIVATE
-    pico_sdk_libs
-    libonx
+target_link_libraries(onx-t-tests PUBLIC
+    lib_onx
 )
 
 pico_enable_stdio_usb(onx-t-tests 1)

@@ -1,5 +1,5 @@
 
-add_library(libonx
+add_library(lib_onx STATIC
 
     ${PICO_BOARD_SOURCES}
 
@@ -39,18 +39,29 @@ add_library(libonx
     onp/behaviours.c
 )
 
-target_include_directories(libonx PRIVATE
+target_include_directories(lib_onx PUBLIC
     ${PROJECT_SOURCE_DIR}/include
     onl/pico
     onn
     onp
 )
 
-target_link_libraries(libonx PRIVATE
-    pico_sdk_libs
+target_link_libraries(lib_onx PUBLIC
+    pico_stdlib
+    pico_multicore
+    pico_flash
+    pico_sync
+    pico_rand
+    hardware_dma
+    hardware_i2c
+    hardware_spi
+    hardware_gpio
+    hardware_exception
+    hardware_sync
+    hardware_adc
     cmsis_core
 )
 
-pico_enable_stdio_usb(libonx 1)
-pico_enable_stdio_uart(libonx 0)
+pico_enable_stdio_usb(lib_onx 1)
+pico_enable_stdio_uart(lib_onx 0)
 
