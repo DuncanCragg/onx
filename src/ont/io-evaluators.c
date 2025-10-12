@@ -20,6 +20,16 @@
 #define ROTARY_ENC_BUTTON     (1UL<<24)
 
 #define GAMEPAD_ADDRESS       0x50
+#define GAMEPAD_A_BUTTON      (1UL<< 5)
+#define GAMEPAD_B_BUTTON      (1UL<< 1)
+#define GAMEPAD_X_BUTTON      (1UL<< 6)
+#define GAMEPAD_Y_BUTTON      (1UL<< 2)
+#define GAMEPAD_SELECT_BUTTON (1UL<< 0)
+#define GAMEPAD_START_BUTTON  (1UL<<16)
+#define GAMEPAD_ALL_BUTTONS   (GAMEPAD_A_BUTTON | GAMEPAD_B_BUTTON | GAMEPAD_SELECT_BUTTON |  \
+                               GAMEPAD_X_BUTTON | GAMEPAD_Y_BUTTON | GAMEPAD_START_BUTTON     )
+#define GAMEPAD_X_JOYSTICK    14
+#define GAMEPAD_Y_JOYSTICK    15
 
 #define BATT_V_PIN           29
 #define BATT_ADC_CHANNEL      3
@@ -63,6 +73,8 @@ void evaluators_init(){
   if(device_id_hi_gamepad == 5743){
     do_gamepad=true;
     log_write("gamepad found\n");
+    seesaw_gpio_mode(      GAMEPAD_ADDRESS, GAMEPAD_ALL_BUTTONS, SEESAW_GPIO_MODE_INPUT_PULLUP);
+    seesaw_gpio_interrupts(GAMEPAD_ADDRESS, GAMEPAD_ALL_BUTTONS, true);
   }
   if(!(do_rotary_encoder || do_gamepad)){
     log_write("no rotary encoder or gamepad found: %d %d\n", device_id_hi_rotary_enc, device_id_hi_gamepad);
@@ -122,4 +134,71 @@ bool evaluate_bcs_in(object* bcs, void* d){
 
   return true;
 }
+
+bool evaluate_gamepad_in(object* gmp, void* d){
+
+  if(!do_gamepad){
+    object_property_set(gmp, "a",          "up");
+    object_property_set(gmp, "b",          "up");
+    object_property_set(gmp, "x",          "up");
+    object_property_set(gmp, "y",          "up");
+    object_property_set(gmp, "start",      "up");
+    object_property_set(gmp, "select",     "up");
+    object_property_set(gmp, "joystick-x", "0");
+    object_property_set(gmp, "joystick-y", "0");
+    return true;
+  }
+
+  uint32_t buttons=seesaw_gpio_read(GAMEPAD_ADDRESS);
+
+  bool a_pressed      = !(buttons & GAMEPAD_A_BUTTON);
+  bool b_pressed      = !(buttons & GAMEPAD_B_BUTTON);
+  bool x_pressed      = !(buttons & GAMEPAD_X_BUTTON);
+  bool y_pressed      = !(buttons & GAMEPAD_Y_BUTTON);
+  bool start_pressed  = !(buttons & GAMEPAD_START_BUTTON);
+  bool select_pressed = !(buttons & GAMEPAD_SELECT_BUTTON);
+
+  object_property_set(gmp, "a",      a_pressed?      "down": "up");
+  object_property_set(gmp, "b",      b_pressed?      "down": "up");
+  object_property_set(gmp, "x",      x_pressed?      "down": "up");
+  object_property_set(gmp, "y",      y_pressed?      "down": "up");
+  object_property_set(gmp, "start",  start_pressed?  "down": "up");
+  object_property_set(gmp, "select", select_pressed? "down": "up");
+
+  static int last_x = 0;
+  static int last_y = 0;
+  int16_t x = 512 - seesaw_analog_read(GAMEPAD_ADDRESS, GAMEPAD_X_JOYSTICK);
+  int16_t y = 512 - seesaw_analog_read(GAMEPAD_ADDRESS, GAMEPAD_Y_JOYSTICK);
+
+  if(x != last_x || y != last_y){
+
+    last_x = x; last_y = y;
+
+    object_property_set_fmt(gmp, "joystick-x", "%d", x);
+    object_property_set_fmt(gmp, "joystick-y", "%d", y);
+  }
+  return true;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

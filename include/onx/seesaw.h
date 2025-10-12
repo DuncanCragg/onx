@@ -28,6 +28,7 @@ void     seesaw_gpio_mode(        uint16_t i2c_address, uint32_t gpio_mask, uint
 void     seesaw_gpio_interrupts(  uint16_t i2c_address, uint32_t gpio_mask, bool enabled);
 
 uint32_t seesaw_gpio_read(        uint16_t i2c_address);
+uint16_t seesaw_analog_read(      uint16_t i2c_address, uint8_t pin);
 int32_t  seesaw_encoder_position( uint16_t i2c_address);
 
 #endif

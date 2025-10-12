@@ -88,7 +88,7 @@ uint8_t i2c_read_register_hi_lo(void* i2c_inst, uint8_t address, uint8_t reg_hi,
   int16_t n;
   n = i2c_write_blocking((i2c_inst_t*)i2c_inst, address, reg, 2, false);
   if(n<=0) return 1;
-  time_delay_us(250); // see ~/Sources/Adafruit_Seesaw/Adafruit_seesaw.h read(.. delay)
+  time_delay_us(250); // see ~/Sources/Adafruit_Seesaw/Adafruit_seesaw.h read(.. delay) REVISIT: put as arg?
   n = i2c_read_blocking((i2c_inst_t*)i2c_inst, address, buf, len, false);
   if(n<=0) return 1;
   return 0;

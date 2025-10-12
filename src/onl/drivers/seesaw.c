@@ -39,6 +39,13 @@
 #define SEESAW_LO_GPIO_PULLENSET   0x0B
 #define SEESAW_LO_GPIO_PULLENCLR   0x0C
 
+#define SEESAW_LO_ADC_STATUS         0x00
+#define SEESAW_LO_ADC_INTEN          0x02
+#define SEESAW_LO_ADC_INTENCLR       0x03
+#define SEESAW_LO_ADC_WINMODE        0x04
+#define SEESAW_LO_ADC_WINTHRESH      0x05
+#define SEESAW_LO_ADC_CHANNEL_OFFSET 0x07
+
 #define SEESAW_LO_ENCODER_STATUS   0x00
 #define SEESAW_LO_ENCODER_INTENSET 0x10
 #define SEESAW_LO_ENCODER_INTENCLR 0x20
@@ -55,7 +62,7 @@ void seesaw_init(uint16_t i2c_address, bool reset){
     uint8_t e;
     uint8_t b=0xff;
     e=i2c_write_register_hi_lo(i2c, i2c_address, SEESAW_HI_STATUS, SEESAW_LO_STATUS_SWRST, &b, 1);
-    time_delay_ms(50);
+    time_delay_ms(80);
   }
 }
 
@@ -165,6 +172,21 @@ uint32_t seesaw_gpio_read(uint16_t i2c_address){
                       ((uint32_t)data[3]      );
 
   return pin_bits;
+}
+
+uint16_t seesaw_analog_read(uint16_t i2c_address, uint8_t pin){
+
+  uint8_t e;
+
+  uint8_t data[2];      // REVISIT: adafruit have a 500us delay in the following as extra arg
+  e=i2c_read_register_hi_lo(i2c, i2c_address, SEESAW_HI_ADC, SEESAW_LO_ADC_CHANNEL_OFFSET+pin, data, 2);
+  if(e) return 0;
+
+  uint16_t value = ((uint16_t)data[0] << 8) |
+                   ((uint16_t)data[1]     );
+
+  time_delay_ms(1);
+  return value;
 }
 
 int32_t seesaw_encoder_position(uint16_t i2c_address) {
