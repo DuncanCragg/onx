@@ -33,21 +33,21 @@ void* i2c_init_avoid_sdk(uint16_t speed_khz) {
 
 uint8_t i2c_read(void* i2c_inst, uint8_t address, uint8_t* buf, uint16_t len) {
   i2c_wake();
-  uint16_t n;
+  int16_t n;
   n = i2c_read_blocking((i2c_inst_t*)i2c_inst, address, buf, len, false);
   return n<=0;
 }
 
 uint8_t i2c_write(void* i2c_inst, uint8_t address, uint8_t* buf, uint16_t len) {
   i2c_wake();
-  uint16_t n;
+  int16_t n;
   n = i2c_write_blocking((i2c_inst_t*)i2c_inst, address, buf, len, false);
   return n<=0;
 }
 
 uint8_t i2c_read_register(void* i2c_inst, uint8_t address, uint8_t reg, uint8_t* buf, uint16_t len) {
   i2c_wake();
-  uint16_t n;
+  int16_t n;
   n = i2c_write_blocking((i2c_inst_t*)i2c_inst, address, &reg, 1, true);
   if(n<=0) return 1;
   time_delay_us(800);
@@ -59,7 +59,7 @@ uint8_t i2c_read_register(void* i2c_inst, uint8_t address, uint8_t reg, uint8_t*
 
 uint8_t i2c_write_register(void* i2c_inst, uint8_t address, uint8_t reg, uint8_t* buf, uint16_t len) {
   i2c_wake();
-  uint16_t n;
+  int16_t n;
   n = i2c_write_blocking((i2c_inst_t*)i2c_inst, address, &reg, 1, true);
   if(n<=0) return 1;
   time_delay_us(800);
@@ -72,7 +72,7 @@ uint8_t i2c_write_register(void* i2c_inst, uint8_t address, uint8_t reg, uint8_t
 uint8_t i2c_write_register_byte(void* i2c_inst, uint8_t address, uint8_t reg, uint8_t val) {
   i2c_wake();
   uint8_t buf[2] = { reg, val };
-  uint16_t n;
+  int16_t n;
   n = i2c_write_blocking((i2c_inst_t*)i2c_inst, address, buf, 2, false);
   if(n<=0) return 1;
   time_delay_us(300);
@@ -82,26 +82,30 @@ uint8_t i2c_write_register_byte(void* i2c_inst, uint8_t address, uint8_t reg, ui
 uint8_t i2c_read_register_hi_lo(void* i2c_inst, uint8_t address, uint8_t reg_hi,
                                                                  uint8_t reg_lo, uint8_t* buf, uint16_t len){
   i2c_wake();
+
   uint8_t reg[] = { reg_hi, reg_lo };
-  uint16_t n;
-  n = i2c_write_blocking((i2c_inst_t*)i2c_inst, address, reg, 2, false); // REVISIT: why not ", true);"?
+
+  int16_t n;
+  n = i2c_write_blocking((i2c_inst_t*)i2c_inst, address, reg, 2, false);
   if(n<=0) return 1;
-  time_delay_us(250); // REVISIT: 800 above, 250 here?
+  time_delay_us(250); // see ~/Sources/Adafruit_Seesaw/Adafruit_seesaw.h read(.. delay)
   n = i2c_read_blocking((i2c_inst_t*)i2c_inst, address, buf, len, false);
-  if(n<=0) return 1;  // REVISIT: no time delay?
+  if(n<=0) return 1;
   return 0;
 }
 
 uint8_t i2c_write_register_hi_lo(void* i2c_inst, uint8_t address, uint8_t reg_hi,
                                                                   uint8_t reg_lo, uint8_t* buf, uint16_t len){
   i2c_wake();
-  uint8_t reg[] = { reg_hi, reg_lo };
-  uint16_t n;
-  n = i2c_write_blocking((i2c_inst_t*)i2c_inst, address, reg, 2, false); // REVISIT: why not ", true);"?
+
+  uint8_t b[2+len];
+  b[0]=reg_hi;
+  b[1]=reg_lo;
+  for(int i=0; i<len; i++) b[i+2]=buf[i];
+
+  int16_t n;
+  n = i2c_write_blocking((i2c_inst_t*)i2c_inst, address, b, 2+len, false);
   if(n<=0) return 1;
-  time_delay_us(250); // REVISIT: 800 above, 250 here?
-  n = i2c_write_blocking((i2c_inst_t*)i2c_inst, address, buf, len, false);
-  if(n<=0) return 1;  // REVISIT: no time delay?
   return 0;
 }
 
