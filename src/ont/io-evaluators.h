@@ -8,5 +8,6 @@ void evaluators_init();
 bool evaluate_battery_in(object* bat, void* d);
 bool evaluate_bcs_in(    object* bcs, void* d);
 bool evaluate_gamepad_in(object* gmp, void* d);
+bool evaluate_ledmx_out( object* lmx, void* d);
 
 #endif

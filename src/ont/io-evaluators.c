@@ -9,6 +9,8 @@
 #include <onx/log.h>
 #include <onx/gpio.h>
 #include <onx/seesaw.h>
+#include <onx/colours.h>
+#include <onx/led-strip.h>
 
 #include <io-evaluators.h>
 
@@ -180,6 +182,21 @@ bool evaluate_gamepad_in(object* gmp, void* d){
   return true;
 }
 
+bool evaluate_ledmx_out(object* lmx, void* d) {
+  if(object_property_is(lmx, "light", "on")){
+    char* col = object_property(lmx, "colour");
+//  led_matrix_fill_col(col);
+    led_strip_fill_col(col);
+//  led_matrix_show();
+    led_strip_show();
+  } else {
+//  led_matrix_fill_rgb((colours_rgb){0, 0, 0});
+    led_strip_fill_rgb((colours_rgb){0, 0, 0});
+//  led_matrix_show();
+    led_strip_show();
+  }
+  return true;
+}
 
 
 
