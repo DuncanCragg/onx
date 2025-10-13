@@ -1,0 +1,190 @@
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <inttypes.h>
+
+#include <tests.h>
+
+#include <onx/log.h>
+#include <onx/time.h>
+#include <onx/items.h>
+
+#include <onr.h>
+
+// ---------------------------------------------------------------------------------
+
+void run_evaluate_edit_rule_tests() {
+
+  log_write("------edit rule tests-----\n");
+
+  onn_set_evaluators("evaluate_edit_rule", evaluate_edit_rule, 0);
+
+  object* target=object_new(0, "evaluate_edit_rule", "editable fruit tracker", 3);
+  char* targetuid=object_property(target, "UID");
+
+  object* edit=object_new(0, 0, "fruit tracker edit rule", 3);
+  object_property_add(edit, "Notifying", targetuid);
+
+  // ----- set and append --------------
+
+  object_property_set(edit, "fruits", "=> mango orange fig");
+  onn_loop();
+  tests_assert_equal(object_property(target, "fruits:1"), "mango",    "evaluate_edit_rule set fruits to 'mango orange fig'");
+  tests_assert_equal(object_property(target, "fruits:2"), "orange",   "evaluate_edit_rule set fruits to 'mango orange fig'");
+  tests_assert_equal(object_property(target, "fruits:3"), "fig",      "evaluate_edit_rule set fruits to 'mango orange fig'");
+
+  object_property_set(edit, "fruits", "=> mango");
+  onn_loop();
+  tests_assert_equal(object_property(target, "fruits"), "mango",      "evaluate_edit_rule set fruits to 'mango'");
+
+  object_property_set(edit, "fruits", "=> @. orange");
+  onn_loop();
+  tests_assert_equal(object_property(target, "fruits:1"), "mango",    "evaluate_edit_rule set fruits to 'mango orange'");
+  tests_assert_equal(object_property(target, "fruits:2"), "orange",   "evaluate_edit_rule set fruits to 'mango orange'");
+
+  object_property_set(edit, "fruits", "=> @. fig banana tangerine");
+  onn_loop();
+  tests_assert_equal(object_property(target, "fruits:1"), "mango",     "evaluate_edit_rule set fruits to 'mango orange fig banana tangerine'");
+  tests_assert_equal(object_property(target, "fruits:2"), "orange",    "evaluate_edit_rule set fruits to 'mango orange fig banana tangerine'");
+  tests_assert_equal(object_property(target, "fruits:3"), "fig",       "evaluate_edit_rule set fruits to 'mango orange fig banana tangerine'");
+  tests_assert_equal(object_property(target, "fruits:4"), "banana",    "evaluate_edit_rule set fruits to 'mango orange fig banana tangerine'");
+  tests_assert_equal(object_property(target, "fruits:5"), "tangerine", "evaluate_edit_rule set fruits to 'mango orange fig banana tangerine'");
+
+  object_property_set(edit, "fruits", 0);
+
+  // ----- delete from list -------
+
+  object_property_set(edit, "fruits\\:3", "=>");
+  onn_loop();
+  tests_assert_equal(object_property(target, "fruits:1"), "mango",     "evaluate_edit_rule deletes middle item: 'fig'");
+  tests_assert_equal(object_property(target, "fruits:2"), "orange",    "evaluate_edit_rule deletes middle item: 'fig'");
+  tests_assert_equal(object_property(target, "fruits:3"), "banana",    "evaluate_edit_rule deletes middle item: 'fig'");
+  tests_assert_equal(object_property(target, "fruits:4"), "tangerine", "evaluate_edit_rule deletes middle item: 'fig'");
+  object_property_set(edit, "fruits\\:3", 0);
+
+  object_property_set(edit, "fruits\\:1", "=>");
+  onn_loop();
+  tests_assert_equal(object_property(target, "fruits:1"), "orange",    "evaluate_edit_rule deletes first item 'mango'");
+  tests_assert_equal(object_property(target, "fruits:2"), "banana",    "evaluate_edit_rule deletes first item 'mango'");
+  tests_assert_equal(object_property(target, "fruits:3"), "tangerine", "evaluate_edit_rule deletes first item 'mango'");
+  object_property_set(edit, "fruits\\:1", 0);
+
+  object_property_set(edit, "fruits\\:3", "=>");
+  onn_loop();
+  tests_assert_equal(object_property(target, "fruits:1"), "orange",    "evaluate_edit_rule deletes last item 'tangerine'");
+  tests_assert_equal(object_property(target, "fruits:2"), "banana",    "evaluate_edit_rule deletes last item 'tangerine'");
+  tests_assert_equal_num(object_property_length(target, "fruits"), 2,  "evaluate_edit_rule fruits is len 2");
+  object_property_set(edit, "fruits\\:3", 0);
+
+  object_property_set(edit, "fruits", "=>");
+  onn_loop();
+  tests_assert(         !object_property(       target, "fruits"),     "evaluate_edit_rule deletes all fruit");
+  tests_assert_equal_num(object_property_length(target, "fruits"), 0,  "evaluate_edit_rule fruits is len 2");
+  object_property_set(edit, "fruits", 0);
+
+  // ----- set in list -------
+
+  object_property_set(edit, "fruits", "=> mango @. banana");
+  onn_loop();
+  object_property_set(edit, "fruits", "=> fig orange @. papaya apple");
+  onn_loop();
+  tests_assert_equal(object_property(target, "fruits:1"), "fig",    "evaluate_edit_rule sets fruits:1 to fig");
+  tests_assert_equal(object_property(target, "fruits:2"), "orange", "evaluate_edit_rule sets fruits:2 to orange");
+  tests_assert_equal(object_property(target, "fruits:3"), "mango",  "evaluate_edit_rule sets fruits:3 to mango");
+  tests_assert_equal(object_property(target, "fruits:4"), "banana", "evaluate_edit_rule sets fruits:4 to banana");
+  tests_assert_equal(object_property(target, "fruits:5"), "papaya", "evaluate_edit_rule sets fruits:5 to papaya");
+  tests_assert_equal(object_property(target, "fruits:6"), "apple",  "evaluate_edit_rule sets fruits:6 to apple");
+
+  object_property_set(edit, "fruits", 0);
+
+  object_property_set(edit, "fruits\\:1", "=> potato");
+  object_property_set(edit, "fruits\\:3", "=>");
+  onn_loop();
+  tests_assert_equal(object_property(target, "fruits:1"), "potato", "evaluate_edit_rule sets fruits:1 to potato");
+  tests_assert_equal(object_property(target, "fruits:2"), "orange", "evaluate_edit_rule leaves value");
+  tests_assert_equal(object_property(target, "fruits:3"), "banana", "evaluate_edit_rule has deleted mango");
+  tests_assert_equal(object_property(target, "fruits:4"), "papaya", "evaluate_edit_rule leaves value");
+  tests_assert_equal(object_property(target, "fruits:5"), "apple",  "evaluate_edit_rule leaves value");
+  object_property_set(edit, "fruits\\:1", 0);
+  object_property_set(edit, "fruits\\:3", 0);
+
+  // ----- prepend in list -------
+
+  object_property_set(edit, "fruits", "=> tangerine @.");
+  onn_loop();
+  tests_assert_equal(object_property(target, "fruits:1"), "tangerine", "evaluate_edit_rule set fruits to 'tangerine potato ...'");
+  tests_assert_equal(object_property(target, "fruits:2"), "potato",    "evaluate_edit_rule set fruits to 'tangerine potato ...'");
+
+  object_property_set(edit, "fruits", "=> grapes @.");
+  onn_loop();
+  tests_assert_equal(object_property(target, "fruits:1"), "grapes",    "evaluate_edit_rule set fruits to 'grapes tangerine potato orange banana papaya apple'");
+  tests_assert_equal(object_property(target, "fruits:2"), "tangerine", "evaluate_edit_rule set fruits to 'grapes tangerine potato orange banana papaya apple'");
+  tests_assert_equal(object_property(target, "fruits:3"), "potato",    "evaluate_edit_rule set fruits to 'grapes tangerine potato orange banana papaya apple'");
+  tests_assert_equal(object_property(target, "fruits:4"), "orange",    "evaluate_edit_rule set fruits to 'grapes tangerine potato orange banana papaya apple'");
+  tests_assert_equal(object_property(target, "fruits:5"), "banana",    "evaluate_edit_rule set fruits to 'grapes tangerine potato orange banana papaya apple'");
+  tests_assert_equal(object_property(target, "fruits:6"), "papaya",    "evaluate_edit_rule set fruits to 'grapes tangerine potato orange banana papaya apple'");
+  tests_assert_equal(object_property(target, "fruits:7"), "apple",     "evaluate_edit_rule set fruits to 'grapes tangerine potato orange banana papaya apple'");
+  tests_assert(     !object_property(target, "fruits:8"),              "evaluate_edit_rule set fruits to 'grapes tangerine potato orange banana papaya apple'");
+
+  object_property_set(edit, "fruits", 0);
+
+  // ----- insert in list -------
+
+  object_property_set(edit, "fruits\\:3", "=> carrot swedes");
+  onn_loop();
+  tests_assert_equal(object_property(target, "fruits:1"), "grapes",    "evaluate_edit_rule leaves value");
+  tests_assert_equal(object_property(target, "fruits:2"), "tangerine", "evaluate_edit_rule leaves value");
+  tests_assert_equal(object_property(target, "fruits:3"), "carrot",    "evaluate_edit_rule replaces banana with carrot");
+  tests_assert_equal(object_property(target, "fruits:4"), "swedes",    "evaluate_edit_rule inserts swedes");
+  tests_assert_equal(object_property(target, "fruits:5"), "orange",    "evaluate_edit_rule leaves value");
+  tests_assert_equal(object_property(target, "fruits:6"), "banana",    "evaluate_edit_rule leaves value");
+  tests_assert_equal_num(object_property_length(target, "fruits"), 8,  "evaluate_edit_rule fruits is len 8");
+  object_property_set(edit, "fruits\\:3", 0);
+
+  object_property_set(edit, "fruits\\:1", "=> sprouts broccoli cabbage");
+  onn_loop();
+  tests_assert_equal(object_property(target, "fruits:1"), "sprouts",   "evaluate_edit_rule replaces grapes with veg");
+  tests_assert_equal(object_property(target, "fruits:2"), "broccoli",  "evaluate_edit_rule replaces grapes with veg");
+  tests_assert_equal(object_property(target, "fruits:3"), "cabbage",   "evaluate_edit_rule replaces grapes with veg");
+  tests_assert_equal(object_property(target, "fruits:4"), "tangerine", "evaluate_edit_rule leaves 2nd");
+  tests_assert_equal_num(object_property_length(target, "fruits"), 10, "evaluate_edit_rule fruits is len 10");
+  object_property_set(edit, "fruits\\:1", 0);
+
+  object_property_set(edit, "fruits\\:11", "=> peas courgette");
+  onn_loop();
+  tests_assert_equal(object_property(target, "fruits:10"), "apple",     "evaluate_edit_rule can append multi to size+1");
+  tests_assert_equal(object_property(target, "fruits:11"), "peas",      "evaluate_edit_rule can append multi to size+1");
+  tests_assert_equal(object_property(target, "fruits:12"), "courgette", "evaluate_edit_rule can append multi to size+1");
+  tests_assert_equal_num(object_property_length(target, "fruits"), 12,  "evaluate_edit_rule fruits is len 12");
+  object_property_set(edit, "fruits\\:11", 0);
+
+  object_property_set(edit, "fruits\\:12", "=> turnip beans");
+  onn_loop();
+  tests_assert_equal(object_property(target, "fruits:11"), "peas",   "evaluate_edit_rule can append multi on last/size");
+  tests_assert_equal(object_property(target, "fruits:12"), "turnip", "evaluate_edit_rule can append multi on last/size");
+  tests_assert_equal(object_property(target, "fruits:13"), "beans",  "evaluate_edit_rule can append multi on last/size");
+  tests_assert_equal_num(object_property_length(target, "fruits"), 13,  "evaluate_edit_rule fruits is len 13");
+  object_property_set(edit, "fruits\\:12", 0);
+
+  object_property_set(edit, "fruits\\:15", "=> gravy");
+  onn_loop();
+  tests_assert_equal_num(object_property_length(target, "fruits"), 13,  "evaluate_edit_rule can't append on size+2");
+  object_property_set(edit, "fruits\\:15", 0);
+
+  object_property_set(edit, "fruits\\:12", "=> cranberry gravy @. mustard tartare");
+  onn_loop();
+  tests_assert_equal(object_property(target, "fruits:11"), "peas",      "evaluate_edit_rule indexed prepend and append");
+  tests_assert_equal(object_property(target, "fruits:12"), "cranberry", "evaluate_edit_rule indexed prepend and append");
+  tests_assert_equal(object_property(target, "fruits:13"), "gravy",     "evaluate_edit_rule indexed prepend and append");
+  tests_assert_equal(object_property(target, "fruits:14"), "turnip",    "evaluate_edit_rule indexed prepend and append");
+  tests_assert_equal(object_property(target, "fruits:15"), "mustard",   "evaluate_edit_rule indexed prepend and append");
+  tests_assert_equal(object_property(target, "fruits:16"), "tartare",   "evaluate_edit_rule indexed prepend and append");
+  tests_assert_equal(object_property(target, "fruits:17"), "beans",     "evaluate_edit_rule indexed prepend and append");
+  tests_assert_equal_num(object_property_length(target, "fruits"), 17,  "evaluate_edit_rule fruits is len 17");
+  object_property_set(edit, "fruits\\:12", 0);
+
+  onn_loop(); time_delay_ms(150);
+  onn_loop(); time_delay_ms(150);
+}
+
+

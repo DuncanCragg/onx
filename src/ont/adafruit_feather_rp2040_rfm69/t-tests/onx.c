@@ -28,6 +28,7 @@ extern void run_properties_tests();
 extern void run_database_tests(properties* config);
 extern void run_colour_tests(bool run_leds);
 extern void run_chunkbuf_tests();
+extern void run_evaluate_edit_rule_tests();
 
 extern void run_onn_tests();
 
@@ -43,6 +44,7 @@ void run_tests(properties* config) {
   run_chunkbuf_tests();
 
   run_onn_tests();
+  run_evaluate_edit_rule_tests();
 
   int failures=tests_assert_summary();
 }

@@ -14,6 +14,7 @@
 #include <onx/led-strip.h>
 
 #include <onn.h>
+#include <onr.h>
 
 #include <onx/items.h>
 
@@ -57,7 +58,7 @@ void startup_core0_init(properties* config){
   evaluators_init();
   onn_set_evaluators("eval_battery", evaluate_battery_in, 0);
   onn_set_evaluators("eval_bcs",     evaluate_bcs_in, 0);
-  onn_set_evaluators("eval_ledmx", /*evaluate_edit_rule, evaluate_light_logic, */ evaluate_ledmx_out, 0);
+  onn_set_evaluators("eval_ledmx",   evaluate_edit_rule, /*evaluate_light_logic, */ evaluate_ledmx_out, 0);
 
   object* uid_0=onn_get_from_cache("uid-0");
   if(!uid_0){

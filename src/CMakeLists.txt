@@ -38,6 +38,7 @@ add_library(lib_onx STATIC
     onn/onn.c
     onp/onp.c
     onp/behaviours.c
+    onr/edit-rules.c
 )
 
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/generated)
