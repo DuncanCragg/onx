@@ -10,6 +10,7 @@ add_executable(onx-t-tests
     ${PROJECT_SOURCE_DIR}/src/tests/test-colours.c
 
     ${PROJECT_SOURCE_DIR}/src/tests/test-onn.c
+    ${PROJECT_SOURCE_DIR}/src/tests/test-rules.c
 
     onx.c
 )

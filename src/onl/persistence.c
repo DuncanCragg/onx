@@ -1,4 +1,7 @@
 
+// NOT sure what this is for: it's just a thin wrapper around database
+// move code to ONN?
+
 #if defined(BOARD_YOU_FLASH)
 #define FLASH_NOT_FAKE
 #endif
@@ -12,7 +15,7 @@
 #include <onx/mem.h>
 #include <onx/log.h>
 #if defined(FLASH_NOT_FAKE)
-#include <onx/spi-flash.h>
+#include <onx/qspi-flash.h>
 #include <onx/database.h>
 #endif
 
@@ -32,17 +35,17 @@ static void flash_db_init(database_storage* db){
 }
 
 static void flash_db_erase(database_storage* db, uint32_t address, uint16_t size, void (*cb)()){
-  char* err = spi_flash_erase(address, SPI_FLASH_ERASE_LEN_4KB, 0);
+  char* err = qspi_flash_erase(address, QSPI_FLASH_ERASE_LEN_4KB, 0);
   if(err){ log_write("flash_db_erase error: %s", err); return; }
 }
 
 static void flash_db_write(database_storage* db, uint32_t address, uint8_t* buf, uint16_t size, void (*cb)()){
-  char* err = spi_flash_write(address, buf, size, 0);
+  char* err = qspi_flash_write(address, buf, size, 0);
   if(err){ log_write("flash_db_write error: %s", err); return; }
 }
 
 static void flash_db_read(database_storage* db, uint32_t address, uint8_t* buf, uint16_t size, void (*cb)()){
-  char* err = spi_flash_read(address, buf, size, 0);
+  char* err = qspi_flash_read(address, buf, size, 0);
   if(decent_string((char*)buf)) log_write("flash_db_read: size=%d len=%d [%s]\n", size, strlen((char*)buf), buf);
   if(err){ log_write("flash_db_read error: %s", err); return; }
 }
@@ -90,7 +93,7 @@ list* persistence_init(properties* config){
 #if defined(FLASH_NOT_FAKE)
 
   char allids[64];
-  char* err = spi_flash_init(allids);
+  char* err = qspi_flash_init(allids);
   if(err){ log_write("persistence_init error: %s", err); return 0; }
   else     log_write("flash: %s\n", allids);
 

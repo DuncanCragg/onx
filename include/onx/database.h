@@ -33,8 +33,8 @@ typedef struct database_storage {
 
   // below properties set by backing store manager
 
-  uint16_t sector_size;  // 4096 for mmap and spi_flash; 64 for test
-  uint16_t sector_count; //  512 for 16Mbit spi_flash; 5 for test
+  uint16_t sector_size;  // 4096 for mmap and qspi_flash; 64 for test
+  uint16_t sector_count; //  512 for 16Mbit qspi_flash; 5 for test
 
   void (*init)  (database_storage* db);
   void (*format)(database_storage* db);

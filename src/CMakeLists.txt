@@ -6,7 +6,6 @@ add_library(lib_onx STATIC
     onl/pico/startup.c
     onl/pico/boot.c
     onl/pico/time.c
-    onl/pico/mem.c
     onl/pico/dma-mem.c
     onl/pico/log.c
     onl/pico/random.c
@@ -15,11 +14,8 @@ add_library(lib_onx STATIC
     onl/pico/i2c.c
     onl/pico/spi.c
 
-    onl/pico/led-strip-neopixel.c
-    onl/pico/spi-flash.c
-    onl/pico/persistence.c
-
-    onl/drivers/seesaw.c
+    onl/mem.c
+    onl/persistence.c
 
     lib/lib.c
     lib/chunkbuf.c
@@ -41,10 +37,9 @@ add_library(lib_onx STATIC
     onr/edit-rules.c
 )
 
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/generated)
-
+# foreach(PICO_PIO_TO_COMPILE)...
 pico_generate_pio_header(lib_onx
-    ${PROJECT_SOURCE_DIR}/src/onl/pico/led-strip-neopixel.pio
+    ${PROJECT_SOURCE_DIR}/${PICO_PIO_TO_COMPILE}
     OUTPUT_DIR ${CMAKE_BINARY_DIR}/generated
 )
 
