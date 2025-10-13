@@ -51,7 +51,7 @@ static volatile uint32_t stage_c=0;
 static volatile uint32_t stage_p=0;
 
 static void tick_cb(void* arg){
-  stage_c++;
+  if(stage_c == stage_p) stage_c++;
 }
 
 static void once_cb(void* arg){
@@ -74,8 +74,7 @@ void startup_core0_init(properties* config){
 
 void startup_core0_loop(properties* config){
   if(stage_c == stage_p) return;
-  stage_p = stage_c;
-  log_write("<stage %d>\n", stage_c);
+  log_write("-----------------stage %d----------------------\n", stage_c);
   if(stage_c==1) log_flash(1,1,1);
   if(stage_c==2) run_tests(config);
   if(stage_c==3) run_colour_tests(true);
@@ -85,6 +84,7 @@ void startup_core0_loop(properties* config){
   if(stage_c==7) value_dump();
   if(stage_c==8) mem_show_allocated(true);
   if(stage_c>=9) log_flash(1,1,1);
+  stage_p = stage_c;
 }
 
 void startup_core1_init(){ } // REVISIT not used, so...
