@@ -1,77 +1,36 @@
 
+#include <stdio.h>
+#include <string.h>
+
+#include "pico/stdlib.h"
+#include "pico/binary_info.h"
+
+#include "hardware/spi.h"
+
 #include "onx/log.h"
 #include <onx/spi.h>
+#undef spi_init
 #include <onx/gpio.h>
 
-static volatile bool     sending=false;
-static volatile uint8_t* curr_data;
-static volatile uint16_t curr_len;
-static          void     (*spi_done_cb)();
-
-void next_block_of_255() {
-    if(!curr_len){
-      if(spi_done_cb) spi_done_cb();
-      spi_done_cb=0;
- //   PORT gpio_pin_set(SPIM_SS_PIN);
-      sending=false;
-      return;
-    }
-
-    uint8_t m=curr_len>255? 255: curr_len;
-
-//  PORT send curr_data, m
-
-    curr_data+=m;
-    curr_len-=m;
-
-#if defined(SPI_BLOCKING)
- // PORT gpio_pin_set(SPIM_SS_PIN);
-    sending=false;
-#endif
-}
-
-/*
-void spi_event_handler(..) {
-    next_block_of_255();
-}
-*/
-
 // REVISIT: initialised?
-void spi_init() {
+void spi_init_avoid_sdk() {
 
-// PORT set MOSI MISO CLK CS
-// PORT set freq, mode 0, MSB first 
+  spi_init(spi1, 32 * 1000 * 1000);
 
-#if defined(SPI_BLOCKING)
-//  spi_init(..);
-#else
-//  spi_init(.. spi_event_handler,);
-#endif
+  gpio_set_function(PICO_DEFAULT_SPI1_SCK_PIN, GPIO_FUNC_SPI);
+  gpio_set_function(PICO_DEFAULT_SPI1_TX_PIN,  GPIO_FUNC_SPI);
 
+  bi_decl(bi_2pins_with_func(PICO_DEFAULT_SPI1_TX_PIN, PICO_DEFAULT_SPI1_SCK_PIN, GPIO_FUNC_SPI));
 }
 
-bool spi_sending() {
-  return sending;
-}
-
-void spi_tx(uint8_t* data, uint16_t len, void (*cb)()) {
-
-    sending=true;
-    curr_data=data;
-    curr_len =len;
-    spi_done_cb=cb;
-
-//  gpio_pin_clear(SPIM_SS_PIN);
-    spi_wake();
-
-    next_block_of_255();
-
-    if(!cb) while(sending);
+void spi_write(uint8_t* data, uint16_t len) {
+  spi_write_blocking(spi1, data, len);
 }
 
 static bool sleeping=false;
+
 void spi_sleep() {
-  if(sleeping || sending) return;
+  if(sleeping) return;
   sleeping=true;
 }
 

@@ -12,6 +12,7 @@
 #include <onx/mem.h>
 #include <onx/gpio.h>
 #include <onx/led-strip.h>
+#include <onx/led-matrix.h>
 
 #include <onn.h>
 #include <onr.h>
@@ -41,9 +42,14 @@ static void poll_input_evaluators(void*){
 
 void set_up_gpio(){
   gpio_init();
+
   led_strip_init();
   led_strip_fill_rgb((colours_rgb){0, 16, 0});
   led_strip_show();
+
+  led_matrix_init();
+  led_matrix_fill_rgb((colours_rgb){0, 16, 0});
+  led_matrix_show();
 }
 
 // -----------------------------------------------------
@@ -103,6 +109,9 @@ void startup_core0_init(properties* config){
 }
 
 void startup_core0_loop(properties* config){
+
+//led_matrix_set_scale(gpio_usb_powered()? 2: 5);
+
 }
 
 void startup_core1_init(){ }

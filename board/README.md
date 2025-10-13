@@ -16,6 +16,7 @@ Things that are physically wired onto any ont/.../onx.c target go in their corre
 CMakeLists, such as:
 
  - onl/seesaw.c              -- i2c rotary encoder, gamepad
+ - onl/led-matrix-dotstar.c  -- feather wing
 
 See src/ont/adafruit\_feather\_rp2040\_rfm69/o-moon/CMakeLists.txt
 

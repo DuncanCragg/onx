@@ -1,9 +1,12 @@
 #ifndef SPI_H
 #define SPI_H
 
-void spi_init();
-void spi_tx(uint8_t *data, uint16_t len, void (*cb)());
-bool spi_sending();
+#include <stdint.h>
+#include <stdbool.h>
+
+void spi_init_avoid_sdk();
+#define spi_init spi_init_avoid_sdk
+void spi_write(   uint8_t *data, uint16_t len);
 void spi_sleep();
 void spi_wake();
 
