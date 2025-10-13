@@ -5,6 +5,7 @@
 
 #include <onx/log.h>
 #include <onx/colours.h>
+#include <onx/led-strip.h>
 
 #include <tests.h>
 
@@ -106,35 +107,80 @@ void run_colour_tests(bool run_leds){
   log_write("%s = rgb: { %02x %02x %02x }\n", colour_chars, from_chars.r, from_chars.g, from_chars.b);
 
   if(!run_leds) return;
-/* REVISIT when API is in...
+
+  led_strip_init();
+
   led_strip_fill_col( "#ff0");
-  led_matrix_fill_col("#ff0");  led_strip_show(); led_matrix_show(); time_delay_ms(350);
+//led_matrix_fill_col("#ff0");
+  led_strip_show();
+//led_matrix_show();
+  time_delay_ms(350);
+
   led_strip_fill_col( "#f0f");
-  led_matrix_fill_col("#f0f");  led_strip_show(); led_matrix_show(); time_delay_ms(350);
+//led_matrix_fill_col("#f0f");
+  led_strip_show();
+//led_matrix_show();
+  time_delay_ms(350);
+
   led_strip_fill_col( "#0ff");
-  led_matrix_fill_col("#0ff");  led_strip_show(); led_matrix_show(); time_delay_ms(350);
+//led_matrix_fill_col("#0ff");
+  led_strip_show();
+//led_matrix_show();
+  time_delay_ms(350);
 
   led_strip_fill_col( "red");
-  led_matrix_fill_col("red");   led_strip_show(); led_matrix_show(); time_delay_ms(350);
+//led_matrix_fill_col("red");
+  led_strip_show();
+//led_matrix_show();
+  time_delay_ms(350);
+
   led_strip_fill_col( "green");
-  led_matrix_fill_col("green"); led_strip_show(); led_matrix_show(); time_delay_ms(350);
+//led_matrix_fill_col("green");
+  led_strip_show();
+//led_matrix_show();
+  time_delay_ms(350);
+
   led_strip_fill_col( "blue");
-  led_matrix_fill_col("blue");  led_strip_show(); led_matrix_show(); time_delay_ms(350);
+//led_matrix_fill_col("blue");
+  led_strip_show();
+//led_matrix_show();
+  time_delay_ms(350);
 
   led_strip_fill_rgb( (colours_rgb){ 255,255,  0 });
-  led_matrix_fill_rgb((colours_rgb){ 255,255,  0 }); led_strip_show(); led_matrix_show(); time_delay_ms(350);
+//led_matrix_fill_rgb((colours_rgb){ 255,255,  0 });
+  led_strip_show();
+//led_matrix_show();
+  time_delay_ms(350);
+
   led_strip_fill_rgb( (colours_rgb){ 255,  0,255 });
-  led_matrix_fill_rgb((colours_rgb){ 255,  0,255 }); led_strip_show(); led_matrix_show(); time_delay_ms(350);
+//led_matrix_fill_rgb((colours_rgb){ 255,  0,255 });
+  led_strip_show();
+//led_matrix_show();
+  time_delay_ms(350);
+
   led_strip_fill_rgb( (colours_rgb){   0,255,255 });
-  led_matrix_fill_rgb((colours_rgb){   0,255,255 }); led_strip_show(); led_matrix_show(); time_delay_ms(350);
+//led_matrix_fill_rgb((colours_rgb){   0,255,255 });
+  led_strip_show();
+//led_matrix_show();
+  time_delay_ms(350);
 
   led_strip_fill_hsv( (colours_hsv){   0,255,127 });
-  led_matrix_fill_hsv((colours_hsv){   0,255,127 }); led_strip_show(); led_matrix_show(); time_delay_ms(350);
+//led_matrix_fill_hsv((colours_hsv){   0,255,127 });
+  led_strip_show();
+//led_matrix_show();
+  time_delay_ms(350);
+
   led_strip_fill_hsv( (colours_hsv){  85,255,127 });
-  led_matrix_fill_hsv((colours_hsv){  85,255,127 }); led_strip_show(); led_matrix_show(); time_delay_ms(350);
+//led_matrix_fill_hsv((colours_hsv){  85,255,127 });
+  led_strip_show();
+//led_matrix_show();
+  time_delay_ms(350);
+
   led_strip_fill_hsv( (colours_hsv){ 171,255,127 });
-  led_matrix_fill_hsv((colours_hsv){ 171,255,127 }); led_strip_show(); led_matrix_show(); time_delay_ms(350);
-*/
+//led_matrix_fill_hsv((colours_hsv){ 171,255,127 });
+  led_strip_show();
+//led_matrix_show();
+  time_delay_ms(350);
 }
 
 

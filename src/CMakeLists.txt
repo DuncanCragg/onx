@@ -15,6 +15,7 @@ add_library(lib_onx STATIC
     onl/pico/i2c.c
     onl/pico/spi.c
 
+    onl/pico/led-strip-neopixel.c
     onl/pico/spi-flash.c
     onl/pico/persistence.c
 
@@ -39,6 +40,13 @@ add_library(lib_onx STATIC
     onp/behaviours.c
 )
 
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/generated)
+
+pico_generate_pio_header(lib_onx
+    ${PROJECT_SOURCE_DIR}/src/onl/pico/led-strip-neopixel.pio
+    OUTPUT_DIR ${CMAKE_BINARY_DIR}/generated
+)
+
 target_include_directories(lib_onx PUBLIC
     ${PROJECT_SOURCE_DIR}/include
     onl/pico
@@ -56,6 +64,7 @@ target_link_libraries(lib_onx PUBLIC
     hardware_i2c
     hardware_spi
     hardware_gpio
+    hardware_pio
     hardware_exception
     hardware_sync
     hardware_adc
