@@ -34,19 +34,19 @@ static database_storage* db = 0;
 static void flash_db_init(database_storage* db){
 }
 
-static void flash_db_erase(database_storage* db, uint32_t address, uint16_t size, void (*cb)()){
+static void flash_db_erase(database_storage* db, uint32_t address, uint16_t len, void (*cb)()){
   char* err = qspi_flash_erase(address, QSPI_FLASH_ERASE_LEN_4KB, 0);
   if(err){ log_write("flash_db_erase error: %s", err); return; }
 }
 
-static void flash_db_write(database_storage* db, uint32_t address, uint8_t* buf, uint16_t size, void (*cb)()){
-  char* err = qspi_flash_write(address, buf, size, 0);
+static void flash_db_write(database_storage* db, uint32_t address, uint8_t* buf, uint16_t len, void (*cb)()){
+  char* err = qspi_flash_write(address, buf, len, 0);
   if(err){ log_write("flash_db_write error: %s", err); return; }
 }
 
-static void flash_db_read(database_storage* db, uint32_t address, uint8_t* buf, uint16_t size, void (*cb)()){
-  char* err = qspi_flash_read(address, buf, size, 0);
-  if(decent_string((char*)buf)) log_write("flash_db_read: size=%d len=%d [%s]\n", size, strlen((char*)buf), buf);
+static void flash_db_read(database_storage* db, uint32_t address, uint8_t* buf, uint16_t len, void (*cb)()){
+  char* err = qspi_flash_read(address, buf, len, 0);
+  if(decent_string((char*)buf)) log_write("flash_db_read: len=%d len=%d [%s]\n", len, strlen((char*)buf), buf);
   if(err){ log_write("flash_db_read error: %s", err); return; }
 }
 

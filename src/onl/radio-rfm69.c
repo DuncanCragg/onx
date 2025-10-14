@@ -36,7 +36,7 @@ static volatile chunkbuf* radio_write_buf = 0;
 
 static void switch_to_tx();
 static void switch_to_rx();
-static bool write_a_packet(uint16_t size);
+static bool write_a_packet(uint16_t len);
 
 static volatile bool write_loop_in_progress=false;
 
@@ -46,9 +46,9 @@ static void do_tx_write_block(bool first_write){
 
   switch_to_tx();
 
-  uint16_t size = chunkbuf_read(radio_write_buf, rx_buffer+1, RADIO_MAX_PACKET_SIZE, -1);
+  uint16_t len = chunkbuf_read(radio_write_buf, rx_buffer+1, RADIO_MAX_PACKET_SIZE, -1);
 
-  if(!write_a_packet(size)){
+  if(!write_a_packet(len)){
     switch_to_rx();
   }
 }
@@ -88,11 +88,11 @@ static void switch_to_rx(){
 //PORT EnableIRQ(RADIO_IRQn);
 }
 
-static bool write_a_packet(uint16_t size){
+static bool write_a_packet(uint16_t len){
 
-  if(!size) return false;
+  if(!len) return false;
 
-  rx_buffer[0]=size;  // first byte is the size (!)
+  rx_buffer[0]=len;  // first byte is the len (!)
 
 //PORT do it
 
@@ -128,28 +128,28 @@ bool radio_init(list* bands, channel_recv_cb cb){
 
 #define NL_DELIM '\n'
 
-int16_t radio_read(char* buf, uint16_t size){
+int16_t radio_read(char* buf, uint16_t len){
   if(!initialised) return 0;
   uint16_t r=chunkbuf_readable(radio_read_buf, NL_DELIM);
   if(!r) return 0;
-  if(r > size){
+  if(r > len){
     log_flash(1,0,0); // can fill whole buffer without seeing delim
-    log_write("**** %d > %d\n", r, size);
+    log_write("**** %d > %d\n", r, len);
     return 0;
   }
-  uint16_t rr=chunkbuf_read(radio_read_buf, buf, size, NL_DELIM);
+  uint16_t rr=chunkbuf_read(radio_read_buf, buf, len, NL_DELIM);
   return rr? rr: -1;
 }
 
-uint16_t radio_write(char* band, char* buf, uint16_t size) {
+uint16_t radio_write(char* band, char* buf, uint16_t len) {
   radio_wake();
-  if(!chunkbuf_writable(radio_write_buf, size, NL_DELIM)){
-    log_flash(1,0,0); // no room for this size
+  if(!chunkbuf_writable(radio_write_buf, len, NL_DELIM)){
+    log_flash(1,0,0); // no room for this len
     return 0;
   }
-  chunkbuf_write(radio_write_buf, buf, size, NL_DELIM);
+  chunkbuf_write(radio_write_buf, buf, len, NL_DELIM);
   do_tx_write_block(true);
-  return size;
+  return len;
 }
 
 static int8_t last_rssi = -127;
@@ -163,14 +163,14 @@ uint16_t radio_available(){
   return chunkbuf_current_size(radio_read_buf);
 }
 
-static void received(char* buf, uint16_t size, int8_t rssi){
+static void received(char* buf, uint16_t len, int8_t rssi){
   last_rssi=rssi;
-  if(!chunkbuf_writable(radio_read_buf, size, -1)){
-    log_write("rrb full %d %d\n", size, chunkbuf_current_size(radio_read_buf));
+  if(!chunkbuf_writable(radio_read_buf, len, -1)){
+    log_write("rrb full %d %d\n", len, chunkbuf_current_size(radio_read_buf));
     //log_flash(1,0,0);
     return;
   }
-  chunkbuf_write(radio_read_buf, buf, size, -1);
+  chunkbuf_write(radio_read_buf, buf, len, -1);
   if(recv_cb) recv_cb(false, "radio");
 }
 
@@ -187,18 +187,18 @@ void RADIO_IRQHandler(void){
 
 //PORT if read data
   {
-    uint8_t size;
+    uint8_t len;
 //  PORT
 //  if(CRC OK) {
-//    size = rx_buffer[0];
+//    len = rx_buffer[0];
 //  }
 //  else{
       #define CORRUPTION_MAGIC "{ banana: 🍌 }\n"
-      size = strlen(CORRUPTION_MAGIC);
-      mem_strncpy(rx_buffer+1, CORRUPTION_MAGIC, size+1);
+      len = strlen(CORRUPTION_MAGIC);
+      mem_strncpy(rx_buffer+1, CORRUPTION_MAGIC, len+1);
 //  }
     int8_t rssi = 11; // PORT get RSSI
-    received(rx_buffer+1, size, rssi);
+    received(rx_buffer+1, len, rssi);
   }
 }
 

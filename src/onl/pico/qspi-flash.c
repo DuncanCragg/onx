@@ -102,8 +102,8 @@ char* qspi_flash_init(char* allids) {
 }
 
 char* qspi_flash_erase(uint32_t            address,
-                      qspi_flash_erase_len len,
-                      void (*cb)()){
+                       qspi_flash_erase_len len,
+                       void (*cb)()){
 
   if(busy) return "busy!erase";
   busy=true;
@@ -114,22 +114,22 @@ char* qspi_flash_erase(uint32_t            address,
 }
 
 char* qspi_flash_write(uint32_t address,
-                      uint8_t* data,
-                      uint32_t len,
-                      void (*cb)()){
+                       uint8_t* buf,
+                       uint32_t len,
+                       void (*cb)()){
 
   if(busy) return "busy!write";
   busy=true;
   qspi_flash_done_cb=cb;
-//if(qspi_write(data, len, address)) return "write!";
+//if(qspi_write(buf, len, address)) return "write!";
   if(!qspi_flash_done_cb) while(busy);
   return 0;
 }
 
 char* qspi_flash_read(uint32_t address,
-                     uint8_t* buf,
-                     uint32_t len,
-                     void (*cb)()){
+                      uint8_t* buf,
+                      uint32_t len,
+                      void (*cb)()){
 
   if(busy) return "busy!read";
   busy=true;

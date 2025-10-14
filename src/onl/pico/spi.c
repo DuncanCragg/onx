@@ -24,8 +24,8 @@ void spi_init_avoid_sdk() {
 #endif
 }
 
-void spi_write(uint8_t* data, uint16_t len) {
-  spi_write_blocking(spi1, data, len);
+void spi_write(uint8_t* buf, uint16_t len) {
+  spi_write_blocking(spi1, buf, len);
 }
 
 static bool sleeping=false;

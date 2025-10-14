@@ -30,10 +30,10 @@ uint16_t chunkbuf_current_size(chunkbuf* cb){
   return size_from_read_point(cb, cb->current_read);
 }
 
-bool chunkbuf_writable(chunkbuf* cb, uint16_t size, int8_t delim){
-  uint16_t s = (delim < 0?         size:
-                (cb->checksumming? size+2:
-                                   size+1));
+bool chunkbuf_writable(chunkbuf* cb, uint16_t len, int8_t delim){
+  uint16_t s = (delim < 0?         len:
+                (cb->checksumming? len+2:
+                                   len+1));
   return s <= ((cb->buf_size-1) - chunkbuf_current_size(cb));
 }
 
@@ -42,12 +42,12 @@ bool chunkbuf_writable(chunkbuf* cb, uint16_t size, int8_t delim){
 
 #define INC_CURRENT_WRITE cb->current_write++; if(cb->current_write==cb->buf_size) cb->current_write=0
 
-void chunkbuf_write(chunkbuf* cb, char* buf, uint16_t size, int8_t delim){
+void chunkbuf_write(chunkbuf* cb, char* buf, uint16_t len, int8_t delim){
 
-  if(!chunkbuf_writable(cb, size, delim)) return; // shoulda checked with chunkbuf_writable()!
+  if(!chunkbuf_writable(cb, len, delim)) return; // shoulda checked with chunkbuf_writable()!
 
   char checksum=0;
-  for(uint16_t i=0; i<size; i++){
+  for(uint16_t i=0; i<len; i++){
     cb->buffer[cb->current_write]=buf[i]; INC_CURRENT_WRITE;
     checksum ^= buf[i];
   }
@@ -78,12 +78,12 @@ uint16_t chunkbuf_readable(chunkbuf* cb, int8_t delim){
 #define INC_CURRENT_READ cb->current_read++; if(cb->current_read==cb->buf_size) cb->current_read=0
 
 // checksum+delims consumed but zero'd out, so buffer needs to be big enough for maybe 3 more zeroes
-uint16_t chunkbuf_read(chunkbuf* cb, char* buf, uint16_t size, int8_t delim){
-  if(!size) return 0;
+uint16_t chunkbuf_read(chunkbuf* cb, char* buf, uint16_t len, int8_t delim){
+  if(!len) return 0;
   if(!chunkbuf_current_size(cb)){ buf[0]=0; return 0; }
   uint16_t i;
   uint8_t num_delims=0;
-  for(i=0; i<size && chunkbuf_current_size(cb); i++){
+  for(i=0; i<len && chunkbuf_current_size(cb); i++){
 
     buf[i]=cb->buffer[cb->current_read]; INC_CURRENT_READ;
 
@@ -91,7 +91,7 @@ uint16_t chunkbuf_read(chunkbuf* cb, char* buf, uint16_t size, int8_t delim){
 
     if(IS_DELIM(buf[i])){
       buf[i]=0; num_delims++;
-  ;   if(i+1<size && chunkbuf_current_size(cb) && IS_NL_DELIM(cb->buffer[cb->current_read])) continue;
+  ;   if(i+1<len && chunkbuf_current_size(cb) && IS_NL_DELIM(cb->buffer[cb->current_read])) continue;
       i++;
   ;   break;
     }

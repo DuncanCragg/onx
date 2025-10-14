@@ -6,7 +6,7 @@
 
 void spi_init_avoid_sdk();
 #define spi_init spi_init_avoid_sdk
-void spi_write(   uint8_t *data, uint16_t len);
+void spi_write(uint8_t* buf, uint16_t len);
 void spi_sleep();
 void spi_wake();
 

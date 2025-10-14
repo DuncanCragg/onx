@@ -10,21 +10,21 @@
 
 #define LINE_LEN 32
 
-static void log_line(uint32_t addr, const uint8_t* data, uint16_t len) {
+static void log_line(uint32_t addr, const uint8_t* buf, uint16_t len) {
     log_write("%08x:", addr);
     for(uint16_t i = 0; i < LINE_LEN; i++){
-        if(i < len) log_write(" %02x", data[i]);
+        if(i < len) log_write(" %02x", buf[i]);
         else        log_write("   ");
     }
     log_write("  |");
     for(uint16_t i = 0; i < LINE_LEN; i++){
-        if(i < len) log_write("%c", isprint(data[i])? data[i]: '.');
+        if(i < len) log_write("%c", isprint(buf[i])? buf[i]: '.');
         else        log_write(" ");
     }
     log_write("|\n");
 }
 
-void show_bytes_and_chars(uint32_t base_addr, uint8_t* buf, uint16_t size) {
+void show_bytes_and_chars(uint32_t base_addr, uint8_t* buf, uint16_t len) {
 
     unsigned char curr[LINE_LEN];
     unsigned char prev[LINE_LEN];
@@ -33,9 +33,9 @@ void show_bytes_and_chars(uint32_t base_addr, uint8_t* buf, uint16_t size) {
     bool skipping = false;
     uint16_t skip_count = 0;
 
-    for(uint32_t offset = 0; offset < size; offset += LINE_LEN) {
+    for(uint32_t offset = 0; offset < len; offset += LINE_LEN) {
 
-        uint16_t n = (size - offset < LINE_LEN)? size - offset: LINE_LEN;
+        uint16_t n = (len - offset < LINE_LEN)? len - offset: LINE_LEN;
         memcpy(curr, buf + offset, n);
 
         if(have_prev && n == LINE_LEN && memcmp(curr, prev, LINE_LEN) == 0) {
@@ -64,7 +64,7 @@ void show_bytes_and_chars(uint32_t base_addr, uint8_t* buf, uint16_t size) {
         if(skip_count > 1) {
             log_write("-------  <repeats %u times>  -------\n", skip_count - 1);
         }
-        log_line(base_addr + size - LINE_LEN, prev, LINE_LEN);
+        log_line(base_addr + len - LINE_LEN, prev, LINE_LEN);
     }
 }
 
