@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "pico/stdlib.h"
-#include "pico/multicore.h"
-#include "pico/time.h"
+#include <pico/stdlib.h>
+#include <pico/multicore.h>
+#include <pico/time.h>
 
 #include <hardware/vreg.h>
 
@@ -20,6 +20,8 @@
 #include <onx/items.h>
 
 #include <tests.h>
+
+// -------------------------------------
 
 extern void run_value_tests();
 extern void run_list_tests();
@@ -50,6 +52,8 @@ void run_tests(properties* config) {
   int failures=tests_assert_summary();
 }
 
+// -------------------------------------------------
+
 static volatile uint32_t stage_c=0;
 static volatile uint32_t stage_p=0;
 
@@ -68,12 +72,14 @@ const uint32_t startup_clockspeed  = SYS_CLK_KHZ;
 
 void startup_core0_init(properties* config){
 
-  time_tick(tick_cb, "banana",  750);
+  time_tick(tick_cb, "banana",  250);
   time_once(once_cb, "mango!", 2500);
 
   log_write("---------- tests --------------------\n");
   log_flash(1,0,0);
 }
+
+// -------------------------------------------------
 
 void startup_core0_loop(properties* config){
   if(stage_c == stage_p) return;
