@@ -36,13 +36,10 @@
 
 #define BATT_V_PIN           29
 #define BATT_ADC_CHANNEL      3
-#define BATT_SMOOTHING       70
-#define ADC_TOP_MV         3300
-#define ADC_BITS_RANGE     4096
-#define BATT_RESISTOR_DIV     2
-#define BATT_ZERO_PERCENT  3400
-#define BATT_100_PERCENT   4100
-#define BATT_PERCENT_STEPS    2
+#define POT1_PIN             26
+#define POT1_ADC_CHANNEL      0
+#define POT2_PIN             27
+#define POT2_ADC_CHANNEL      1
 
 static bool do_gamepad       =false;
 static bool do_rotary_encoder=false;
@@ -72,6 +69,8 @@ void evaluators_init(){
     log_write("rotary encoder found\n");
     seesaw_gpio_mode(      ROTARY_ENC_ADDRESS, ROTARY_ENC_BUTTON, SEESAW_GPIO_MODE_INPUT_PULLUP);
 //  seesaw_gpio_interrupts(ROTARY_ENC_ADDRESS, ROTARY_ENC_BUTTON, true); // ?
+    gpio_adc_init(POT1_PIN, POT1_ADC_CHANNEL);
+    gpio_adc_init(POT2_PIN, POT2_ADC_CHANNEL);
   }
   if(device_id_hi_gamepad == 5743){
     do_gamepad=true;
@@ -83,6 +82,14 @@ void evaluators_init(){
     log_write("no rotary encoder or gamepad found: %d %d\n", device_id_hi_rotary_enc, device_id_hi_gamepad);
   }
 }
+
+#define BATT_SMOOTHING       70
+#define ADC_TOP_MV         3300
+#define ADC_BITS_RANGE     4096
+#define BATT_RESISTOR_DIV     2
+#define BATT_ZERO_PERCENT  3400
+#define BATT_100_PERCENT   4100
+#define BATT_PERCENT_STEPS    2
 
 bool evaluate_battery_in(object* bat, void* d) {
 
@@ -117,7 +124,7 @@ bool evaluate_bcs_in(object* bcs, void* d){
 
   if(!do_rotary_encoder){
     object_property_set(bcs, "brightness", " 63");
-    object_property_set(bcs, "colour",      "85"); // green
+    object_property_set(bcs, "colour",     "170");
     object_property_set(bcs, "softness",     "0");
     object_property_set(bcs, "state",       "up");
     return true;
@@ -126,9 +133,21 @@ bool evaluate_bcs_in(object* bcs, void* d){
   int32_t rot_pos      = seesaw_encoder_position(ROTARY_ENC_ADDRESS);
   bool    rot_pressed = !(seesaw_gpio_read(ROTARY_ENC_ADDRESS) & ROTARY_ENC_BUTTON);
 
-  uint8_t brightness = 255;
+  #define POT_SMOOTHING 8
+  static int32_t pot1prev = 0;
+  static int32_t pot2prev = 0;
+  int32_t pot1 = gpio_adc_read(POT1_ADC_CHANNEL);
+  int32_t pot2 = gpio_adc_read(POT2_ADC_CHANNEL);
+  if(pot1<0) pot1=0;
+  if(pot2<0) pot2=0;
+  pot1 = (pot1 * (10 - POT_SMOOTHING) + pot1prev * POT_SMOOTHING) / 10;
+  pot2 = (pot2 * (10 - POT_SMOOTHING) + pot2prev * POT_SMOOTHING) / 10;
+  pot1prev = pot1;
+  pot2prev = pot2;
+
+  uint8_t brightness = pot1*255/4095;
   uint8_t colour     = (uint8_t)(rot_pos * 4); // lo byte, 4 lsb per click
-  uint8_t softness   = 0;
+  uint8_t softness   = pot2*255/4095;
 
   object_property_set_fmt(bcs, "brightness", "%d", brightness);
   object_property_set_fmt(bcs, "colour",     "%d", colour);
