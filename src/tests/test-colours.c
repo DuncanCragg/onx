@@ -10,7 +10,7 @@
 
 #include <tests.h>
 
-void run_colour_tests(bool run_leds){
+void run_colour_tests(){
 
   log_write("-------- colour tests ---------\n");
 
@@ -106,8 +106,9 @@ void run_colour_tests(bool run_leds){
   log_write("%s = rgb: { %02x %02x %02x }\n", colour_chars, from_chars.r, from_chars.g, from_chars.b);
   colour_chars = "#557f7f"; from_chars = colours_parse_string(colour_chars);
   log_write("%s = rgb: { %02x %02x %02x }\n", colour_chars, from_chars.r, from_chars.g, from_chars.b);
+}
 
-  if(!run_leds) return;
+void run_actual_leds(){
 
   led_strip_init();
   led_matrix_init();

@@ -14,13 +14,14 @@
 
 // REVISIT: initialised?
 void spi_init_avoid_sdk() {
-
+#ifdef PICO_DEFAULT_SPI1_SCK_PIN
   spi_init(spi1, 32 * 1000 * 1000);
 
   gpio_set_function(PICO_DEFAULT_SPI1_SCK_PIN, GPIO_FUNC_SPI);
   gpio_set_function(PICO_DEFAULT_SPI1_TX_PIN,  GPIO_FUNC_SPI);
 
   bi_decl(bi_2pins_with_func(PICO_DEFAULT_SPI1_TX_PIN, PICO_DEFAULT_SPI1_SCK_PIN, GPIO_FUNC_SPI));
+#endif
 }
 
 void spi_write(uint8_t* data, uint16_t len) {
