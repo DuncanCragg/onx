@@ -64,14 +64,14 @@ void log_init(properties* config) {
     gpio_init();
 #define LEDS_ACTIVE_STATE 1 // REVISIT: set in board defs
 #if defined(PICO_DEFAULT_LED2_R_PIN)
-    gpio_mode(PICO_DEFAULT_LED2_R_PIN, OUTPUT);
-    gpio_mode(PICO_DEFAULT_LED2_G_PIN, OUTPUT);
-    gpio_mode(PICO_DEFAULT_LED2_B_PIN, OUTPUT);
+    gpio_mode(PICO_DEFAULT_LED2_R_PIN, GPIO_MODE_OUTPUT);
+    gpio_mode(PICO_DEFAULT_LED2_G_PIN, GPIO_MODE_OUTPUT);
+    gpio_mode(PICO_DEFAULT_LED2_B_PIN, GPIO_MODE_OUTPUT);
     gpio_set(PICO_DEFAULT_LED2_R_PIN, !LEDS_ACTIVE_STATE);
     gpio_set(PICO_DEFAULT_LED2_G_PIN, !LEDS_ACTIVE_STATE);
     gpio_set(PICO_DEFAULT_LED2_B_PIN, !LEDS_ACTIVE_STATE);
 #elif defined(PICO_DEFAULT_LED_PIN)
-    gpio_mode(PICO_DEFAULT_LED_PIN, OUTPUT);
+    gpio_mode(PICO_DEFAULT_LED_PIN, GPIO_MODE_OUTPUT);
     gpio_set(PICO_DEFAULT_LED_PIN,  !LEDS_ACTIVE_STATE);
 #endif
     time_init();

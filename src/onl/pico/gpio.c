@@ -34,14 +34,18 @@ void gpio_mode(uint8_t pin, uint8_t mode) {
   gpio_init(pin);
 
   switch (mode){
-    case INPUT:
-      // PORT set gpio in/pullup/etc
+    case GPIO_MODE_INPUT:
+      gpio_set_dir(pin, GPIO_IN);
     break;
-    case INPUT_PULLUP:
+    case GPIO_MODE_INPUT_PULLUP:
+      gpio_set_dir(pin, GPIO_IN);
+      gpio_pull_up(pin);
     break;
-    case INPUT_PULLDOWN:
+    case GPIO_MODE_INPUT_PULLDOWN:
+      gpio_set_dir(pin, GPIO_IN);
+      gpio_pull_down(pin);
     break;
-    case OUTPUT:
+    case GPIO_MODE_OUTPUT:
       gpio_set_dir(pin, GPIO_OUT);
     break;
   }
@@ -61,98 +65,74 @@ typedef struct gpio_interrupt {
 static uint8_t                 top_gpio_interrupt=0;
 static volatile gpio_interrupt gpio_interrupts[MAX_GPIO_INTERRUPTS];
 
-static void set_sense(int pin, int hi_lo_dis) {
-  if(pin<32){
-//  PORT ??
-  }
-#if (GPIO_COUNT == 2)
-  else{
-//  PORT ??
-  }
-#endif
-}
-
-static bool get_latch_and_clear(uint8_t pin) {
-  bool r=false;
-  if(pin<32){
-    uint32_t b=1<<pin;
-//  PORT ??
-  }
-#if (GPIO_COUNT == 2)
-  else{
-    uint32_t b=1<<(pin-32);
-//  PORT ??
-  }
-#endif
-  return r;
-}
-
-void GPIOTE_IRQHandler() {
-
-  gpio_disable_interrupts();
+void gpio_callback(uint pin, uint32_t events) {
 
   for(uint8_t i=0; i<top_gpio_interrupt; i++){
 
-    uint8_t pin=gpio_interrupts[i].pin;
+    uint8_t p=gpio_interrupts[i].pin;
 
-    bool latched=get_latch_and_clear(pin);
-
-    uint8_t state=gpio_get_avoid_sdk(pin);
-
-//  set_sense(pin, ..);
-
+    uint8_t state=gpio_get_avoid_sdk(p);
     bool changed=(state!=gpio_interrupts[i].last_state);
-
-    if(!(changed || latched)) continue;
-
+  ; if(!(p==pin || changed)) continue;
     gpio_interrupts[i].last_state=state;
 
-    bool quick_change=(!changed && latched);
-#if defined(LOG_GPIO_SUCCESSSSS)
-    if(changed && !latched) log_write("pin %d not DETECTed but change read\n", pin);
-    if(quick_change)        log_write("pin %d quick change missed but DETECTed by LATCH\n", pin);
-#endif
+    uint8_t edge=gpio_interrupts[i].edge;
+    bool awaiting_rise=(edge==GPIO_RISING  || edge==GPIO_RISING_AND_FALLING);
+    bool awaiting_fall=(edge==GPIO_FALLING || edge==GPIO_RISING_AND_FALLING);
 
-    switch(gpio_interrupts[i].edge){
-      case(RISING):             { if(quick_change ||  state) gpio_interrupts[i].cb(pin, RISING);                 break; }
-      case(FALLING):            { if(quick_change || !state) gpio_interrupts[i].cb(pin, FALLING);                break; }
-      case(RISING_AND_FALLING): {                            gpio_interrupts[i].cb(pin, state? RISING: FALLING); break; }
+    bool received_rise=false;
+    bool received_fall=false;
+
+    if(p==pin){
+      received_rise=(events & GPIO_IRQ_EDGE_RISE);
+      received_fall=(events & GPIO_IRQ_EDGE_FALL);
     }
+    else
+    if(changed){
+      received_rise= state;
+      received_fall=!state;
+    }
+    if(     awaiting_rise && received_rise && awaiting_fall && received_fall) gpio_interrupts[i].cb(p, GPIO_RISING_AND_FALLING);
+    else if(awaiting_rise && received_rise                                  ) gpio_interrupts[i].cb(p, GPIO_RISING);
+    else if(                                  awaiting_fall && received_fall) gpio_interrupts[i].cb(p, GPIO_FALLING);
   }
 }
 
 void gpio_mode_cb(uint8_t pin, uint8_t mode, uint8_t edge, gpio_pin_cb cb) {
+
   gpio_mode(pin, mode);
-  if(top_gpio_interrupt==MAX_GPIO_INTERRUPTS) return;
+
+; if(top_gpio_interrupt==MAX_GPIO_INTERRUPTS) return;
+
   uint8_t i=top_gpio_interrupt++;
+
   gpio_interrupts[i].pin=pin;
   gpio_interrupts[i].mode=mode;
   gpio_interrupts[i].edge=edge;
   gpio_interrupts[i].cb=cb;
-  uint8_t state=gpio_get_avoid_sdk(pin);
-  gpio_interrupts[i].last_state=state;
-//set_sense(pin, state? Low: High);
-}
+  gpio_interrupts[i].last_state=gpio_get_avoid_sdk(pin);
 
-void gpio_enable_interrupts() {
-  for(uint8_t i=0; i<top_gpio_interrupt; i++){
-    uint8_t pin=gpio_interrupts[i].pin;
-    uint8_t state=gpio_get_avoid_sdk(pin);
-    gpio_interrupts[i].last_state=state;
-//  set_sense(pin, ..);
-  }
-}
-
-void gpio_disable_interrupts() {
-  for(uint8_t i=0; i<top_gpio_interrupt; i++){
-//  set_sense(gpio_interrupts[i].pin, Disabled);
+  uint8_t e;
+  switch(edge){
+    case GPIO_RISING: {
+      gpio_set_irq_enabled_with_callback(pin, GPIO_IRQ_EDGE_RISE, true, gpio_callback);
+      break;
+    }
+    case GPIO_FALLING: {
+      gpio_set_irq_enabled_with_callback(pin, GPIO_IRQ_EDGE_FALL, true, gpio_callback);
+      break;
+    }
+    case GPIO_RISING_AND_FALLING: {
+      gpio_set_irq_enabled_with_callback(pin, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, gpio_callback);
+      break;
+    }
   }
 }
 
 // ------------------------------------------
 
 uint8_t gpio_get_avoid_sdk(uint8_t pin) {
-  return 0; //gpio_pin_read(pin);
+  return gpio_get(pin);
 }
 
 void gpio_set(uint8_t pin, uint8_t value) {

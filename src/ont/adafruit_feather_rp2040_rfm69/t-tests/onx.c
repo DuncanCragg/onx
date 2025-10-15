@@ -12,6 +12,7 @@
 #include <onx/time.h>
 #include <onx/log.h>
 #include <onx/mem.h>
+#include <onx/gpio.h>
 
 #include <onx/chunkbuf.h>
 #include <onx/colours.h>
@@ -20,6 +21,17 @@
 #include <onx/items.h>
 
 #include <tests.h>
+
+// -------------------------------------
+
+void button_changed(uint8_t pin, uint8_t type) {
+  bool pressed=(gpio_get(pin)==BUTTONS_ACTIVE_STATE);
+  log_write("button ************************* %s (%d %d)\n", pressed? "pressed": "released", pin, type);
+}
+
+static void set_up_gpio(void) {
+  gpio_mode_cb(PICO_DEFAULT_BUTTON_PIN, GPIO_MODE_INPUT_PULLUP, GPIO_RISING_AND_FALLING, button_changed);
+}
 
 // -------------------------------------
 
@@ -74,6 +86,8 @@ void startup_core0_init(properties* config){
 
   time_tick(tick_cb, "banana",  250);
   time_once(once_cb, "mango!", 2500);
+
+  set_up_gpio();
 
   log_write("---------- tests --------------------\n");
   log_flash(1,0,0);

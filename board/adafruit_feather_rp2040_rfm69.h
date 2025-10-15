@@ -6,6 +6,15 @@
 // Differences between Feather RP2040 vanilla and RFM69
 #undef  PICO_DEFAULT_WS2812_PIN
 
+// --- Button ---
+#ifndef PICO_DEFAULT_BUTTON_PIN
+#define PICO_DEFAULT_BUTTON_PIN 7
+#endif
+
+#ifndef BUTTONS_ACTIVE_STATE
+#define BUTTONS_ACTIVE_STATE 0
+#endif
+
 // --- NEOPIXEL ---
 #ifndef PICO_DEFAULT_WS2812_PIN
 #define PICO_DEFAULT_WS2812_PIN 4
