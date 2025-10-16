@@ -4,7 +4,7 @@
 #include <boards/adafruit_feather_rp2040.h>
 
 // Differences between Feather RP2040 vanilla and RFM69
-#undef  PICO_DEFAULT_WS2812_PIN
+#undef PICO_DEFAULT_WS2812_PIN
 
 // --- Button ---
 #ifndef PICO_DEFAULT_BUTTON_PIN
@@ -15,12 +15,12 @@
 #define BUTTONS_ACTIVE_STATE 0
 #endif
 
-// --- NEOPIXEL ---
+// --- NeoPixel ---
 #ifndef PICO_DEFAULT_WS2812_PIN
 #define PICO_DEFAULT_WS2812_PIN 4
 #endif
 
-// --- SPI1 assignments ---
+// --- SPI ----------------
 #ifndef PICO_DEFAULT_SPI1_SCK_PIN
 #define PICO_DEFAULT_SPI1_SCK_PIN 10
 #endif
