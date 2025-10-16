@@ -5,6 +5,10 @@
 
 // Differences between Feather RP2040 vanilla and RFM69
 #undef PICO_DEFAULT_WS2812_PIN
+#undef PICO_DEFAULT_SPI
+#undef PICO_DEFAULT_SPI_SCK_PIN
+#undef PICO_DEFAULT_SPI_TX_PIN
+#undef PICO_DEFAULT_SPI_RX_PIN
 
 // --- Button ---
 #ifndef PICO_DEFAULT_BUTTON_PIN
@@ -21,20 +25,20 @@
 #endif
 
 // --- SPI ----------------
-#ifndef PICO_DEFAULT_SPI1_SCK_PIN
-#define PICO_DEFAULT_SPI1_SCK_PIN 10
+#ifndef PICO_DEFAULT_SPI
+#define PICO_DEFAULT_SPI 1
 #endif
 
-#ifndef PICO_DEFAULT_SPI1_TX_PIN
-#define PICO_DEFAULT_SPI1_TX_PIN 11
+#ifndef PICO_DEFAULT_SPI_SCK_PIN
+#define PICO_DEFAULT_SPI_SCK_PIN 14
 #endif
 
-#ifndef PICO_DEFAULT_SPI1_RX_PIN
-#define PICO_DEFAULT_SPI1_RX_PIN 12
+#ifndef PICO_DEFAULT_SPI_TX_PIN
+#define PICO_DEFAULT_SPI_TX_PIN 15
 #endif
 
-#ifndef PICO_DEFAULT_SPI1_CS_PIN
-#define PICO_DEFAULT_SPI1_CS_PIN 13
+#ifndef PICO_DEFAULT_SPI_RX_PIN
+#define PICO_DEFAULT_SPI_RX_PIN  8
 #endif
 
 #endif

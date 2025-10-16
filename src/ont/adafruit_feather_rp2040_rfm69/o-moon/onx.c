@@ -47,7 +47,7 @@ void set_up_gpio(){
   led_strip_fill_rgb((colours_rgb){0, 16, 0});
   led_strip_show();
 
-  led_matrix_init();
+  led_matrix_init(2,3);
   led_matrix_fill_rgb((colours_rgb){0, 16, 0});
   led_matrix_show();
 }

@@ -111,7 +111,7 @@ void run_colour_tests(){
 void run_actual_leds(){
 
   led_strip_init();
-  led_matrix_init();
+  led_matrix_init(2,3);
 
   led_strip_fill_col( "#ff0");
   led_matrix_fill_col("#ff0");
