@@ -116,6 +116,25 @@ uint16_t chunkbuf_read(chunkbuf* cb, char* buf, uint16_t len, int8_t delim){
   return ok? j: 0;
 }
 
+void chunkbuf_dump(chunkbuf* cb){
+  if(!chunkbuf_current_size(cb)){
+    log_write("chunkbuf:[]\n");
+    return;
+  }
+  int8_t delim='\n';
+  #define BUFLENDUMP 512
+  char b[BUFLENDUMP]; uint16_t n=0;
+  uint16_t cr=cb->current_read;
+  while(size_from_read_point(cb,cr)){
+    char c=cb->buffer[cr++]; if(cr==cb->buf_size) cr=0;
+    if(c>=' ') n+=snprintf(b+n,BUFLENDUMP-n,"%c",       c);
+    else       n+=snprintf(b+n,BUFLENDUMP-n,"<0x%02x>", c);
+  ; if(n>=BUFLENDUMP){ b[BUFLENDUMP-1]='#'; break; }
+    if(IS_NL_DELIM(c)) n+=snprintf(b+n,BUFLENDUMP-n,"]\n[",   c);
+  }
+  log_write("chunkbuf:[%s]\n",b);
+}
+
 void chunkbuf_clear(chunkbuf* cb){
   cb->current_write=0;
   cb->current_read=0;
