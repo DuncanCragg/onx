@@ -78,9 +78,12 @@ uint16_t chunkbuf_readable(chunkbuf* cb, int8_t delim){
 #define INC_CURRENT_READ cb->current_read++; if(cb->current_read==cb->buf_size) cb->current_read=0
 
 // checksum+delims consumed but zero'd out, so buffer needs to be big enough for maybe 3 more zeroes
-uint16_t chunkbuf_read(chunkbuf* cb, char* buf, uint16_t len, int8_t delim){
-  if(!len) return 0;
+int16_t chunkbuf_read(chunkbuf* cb, char* buf, uint16_t len, int8_t delim){
+
+  if(!len) return CHUNKBUF_ERR_ZERO_LEN;
+
   if(!chunkbuf_current_size(cb)){ buf[0]=0; return 0; }
+
   uint16_t i;
   uint8_t num_delims=0;
   for(i=0; i<len && chunkbuf_current_size(cb); i++){
@@ -100,20 +103,20 @@ uint16_t chunkbuf_read(chunkbuf* cb, char* buf, uint16_t len, int8_t delim){
 
   if(!num_delims){
     // consumed whole chunkbuf or filled whole buf but no delim!
-    // shoulda checked 1st with chunkbuf_readable()
     buf[i-1]=0;
-    return 0;
+    return CHUNKBUF_ERR_CHECK_READABLE_FIRST;
   }
   if(!cb->checksumming) return i-num_delims;
 
-  if(i <= 1+num_delims){ buf[0]=0; return 0; }
+  if(i == 1+num_delims){ buf[0]=0; return CHUNKBUF_ERR_NO_DATA_OR_CHECKSUM; }
+  if(i ==   num_delims){ buf[0]=0; return CHUNKBUF_ERR_NO_DATA_NO_CHECKSUM; }
 
   char checksum=0;
   uint16_t j; for(j=0; j < i-1-num_delims; j++) checksum ^= buf[j];
   if(IS_DELIM(checksum)) checksum ^= 0x80;
   bool ok = (checksum==buf[j]);
   buf[j]=0;
-  return ok? j: 0;
+  return ok? j: CHUNKBUF_ERR_CHECKSUM_FAILED;
 }
 
 void chunkbuf_dump(chunkbuf* cb){

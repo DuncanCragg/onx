@@ -41,7 +41,7 @@ void run_chunkbuf_tests(){
     char pkt[7];
     int n=216-i*7;
     if(n>0) tests_assert_equal_num(chunkbuf_readable(wside, -1), n, "wside readable");
-    uint16_t rn = chunkbuf_read(wside, pkt, 7, -1);
+    int16_t rn = chunkbuf_read(wside, pkt, 7, -1);
   ; if(!rn) break;
     if(i==23){ log_write("ohh nooo! packet loossss!! %^#!&*~ (%.7s)\n", pkt); continue; }
     if(i==27){ log_write("ohh nooo! corrupptiooion!! %^#!&*~\n"); pkt[1]='#'; }
@@ -58,10 +58,15 @@ void run_chunkbuf_tests(){
     uint16_t rd = chunkbuf_readable(rside, '\n');
   ; if(!rd) break;
     tests_assert_equal_num(rd, l==1? 132: l==3? 14: 21, "---- rside readable (wrong when pkt lost)");
-    uint16_t rn = chunkbuf_read(rside, line, 132, '\n');
+    int16_t rn = chunkbuf_read(rside, line, 132, '\n');
     log_write("rn=%d line: \"%s\" len: %d\n", rn, line, strlen(line));
     if(l==1) tests_assert_equal_num(rn, 130, "first line is 130 long");
-    else     tests_assert_equal_num(rn, l==3 || l==4? 0: 19,  "next lines are 19 long unless corrupt");
+    else
+    if(l==3) tests_assert_equal_num(rn, CHUNKBUF_ERR_CHECKSUM_FAILED,  "line corrupt");
+    else
+    if(l==4) tests_assert_equal_num(rn, CHUNKBUF_ERR_CHECKSUM_FAILED,  "line corrupt");
+    else
+             tests_assert_equal_num(rn, 19,  "next lines are 19 long");
   }
 
   log_write("-------- chunkbuf done ----------\n");
