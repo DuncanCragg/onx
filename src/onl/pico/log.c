@@ -39,7 +39,7 @@ void log_init(properties* config) {
 
   if(initialised) return;
 
-  saved_messages = list_new(64);
+  saved_messages = list_new(256);
   gfx_log_buffer = list_new(32);
 
   log_to_gfx = list_vals_has(properties_get(config, "flags"), "log-to-gfx");
@@ -102,12 +102,19 @@ static void flush_saved_messages(uint8_t to){
 
   if(get_reason_to_save_logs()) return;
 
-  for(uint8_t i=1; i<=list_size(saved_messages); i++){
+  uint16_t ls=list_size(saved_messages);
+  if(!ls) return;
+  for(uint8_t i=1; i<=ls; i++){
 
     char* msg = list_get_n(saved_messages, i);
 
     if(to==FLUSH_TO_STDIO){
+      if(i==1)  printf("+---- saved messages --------------\n");
+      static bool within_line=false;
+      if(!within_line) printf("| ");
       printf("%s", msg);
+      if(i==ls) printf("+----------------------------------\n");
+      within_line=!strchr(msg,'\n');
       free(msg);
     }
     if(to==FLUSH_TO_GFX){
@@ -171,9 +178,13 @@ int16_t log_write_mode(uint8_t mode, char* file, uint32_t line, const char* fmt,
 
   char* save_reason=get_reason_to_save_logs();
   if(save_reason){
-    r+=    snprintf(log_buffer+r, LOG_BUF_SIZE-r, save_reason);                                          LOGCHK
-    r+=fl? snprintf(log_buffer+r, LOG_BUF_SIZE-r, "[%ld](%s:%ld) ", (uint32_t)time_ms(), file, line): 0; LOGCHK
-    r+=   vsnprintf(log_buffer+r, LOG_BUF_SIZE-r, fmt, args);                                            LOGCHK
+    static bool within_line=false;
+    if(!within_line){
+      r+=    snprintf(log_buffer+r, LOG_BUF_SIZE-r, save_reason);                                          LOGCHK
+      r+=fl? snprintf(log_buffer+r, LOG_BUF_SIZE-r, "[%ld](%s:%ld) ", (uint32_t)time_ms(), file, line): 0; LOGCHK
+    }
+    r+=     vsnprintf(log_buffer+r, LOG_BUF_SIZE-r, fmt, args);                                            LOGCHK
+    within_line=!strchr(log_buffer,'\n');
     char* lb=strdup(log_buffer);
     if(!list_add(saved_messages, lb)) free(lb);
     return 0;
