@@ -56,6 +56,7 @@ target_link_libraries(lib_onx PUBLIC
     pico_flash
     pico_sync
     pico_rand
+    hardware_sync
     hardware_dma
     hardware_i2c
     hardware_spi
