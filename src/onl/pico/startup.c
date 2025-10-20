@@ -70,7 +70,7 @@ void __not_in_flash_func(core0_main)() {
 
   log_init(config);
 
-  log_write("\n------------ core 0 start ----------------\n");
+  log_write("\n=============================== core 0 start ===============================\n");
 
   random_init();
 
@@ -97,7 +97,7 @@ void __not_in_flash_func(core0_main)() {
 
 void __not_in_flash_func(core1_main)(){
 
-  log_write("\n------------ core 1 start ----------------\n");
+  log_write("\n------------------------------- core 1 start -------------------------------\n");
 
   startup_core1_init();
 

@@ -69,7 +69,7 @@ uint16_t chunkbuf_readable(chunkbuf* cb, int8_t delim){
     char c=cb->buffer[cr++]; if(cr==cb->buf_size) cr=0;
     if(IS_DELIM(c)){
   ;   if(size_from_read_point(cb,cr) && IS_NL_DELIM(cb->buffer[cr])) continue;
-  ;   return s+1; // including checksum and all delims
+;     return s+1; // including checksum and all delims
     }
   }
   return 0; // either nothing to read or delim not found in readable
@@ -96,7 +96,7 @@ uint16_t chunkbuf_read(chunkbuf* cb, char* buf, uint16_t len, int8_t delim){
   ;   break;
     }
   }
-  if(delim < 0) return i;
+  if(delim < 0) return i; // and assume no checksum either
 
   if(!num_delims){
     // consumed whole chunkbuf or filled whole buf but no delim!

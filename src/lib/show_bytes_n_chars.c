@@ -33,6 +33,7 @@ void show_bytes_and_chars(uint32_t base_addr, uint8_t* buf, uint16_t len) {
     bool skipping = false;
     uint16_t skip_count = 0;
 
+    log_write("------------------ %d --------------------------------------------------------------\n", len);
     for(uint32_t offset = 0; offset < len; offset += LINE_LEN) {
 
         uint16_t n = (len - offset < LINE_LEN)? len - offset: LINE_LEN;
@@ -66,6 +67,7 @@ void show_bytes_and_chars(uint32_t base_addr, uint8_t* buf, uint16_t len) {
         }
         log_line(base_addr + len - LINE_LEN, prev, LINE_LEN);
     }
+    log_write("------------------------------------------------------------------------------------\n");
 }
 
 
