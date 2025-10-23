@@ -41,4 +41,9 @@
 #define PICO_DEFAULT_SPI_RX_PIN  8
 #endif
 
+// --- RFM69 -------------------
+#define RFM69_CS_PIN  16
+#define RFM69_RST_PIN 17
+#define RFM69_INT_PIN 21
+
 #endif

@@ -69,12 +69,22 @@ void spi_init_2(int8_t sck_pin, int8_t tx_pin, int8_t rx_pin, int8_t cs_pin){
 */
 }
 
+uint16_t spi_read(uint8_t* buf, uint16_t len){
+  return spi_read_blocking(spi_default, 0, buf, len);
+}
+
 void spi_write(uint8_t* buf, uint16_t len) {
   spi_write_blocking(spi_default, buf, len);
 }
 
 void spi_write_2(uint8_t* buf, uint16_t len) {
   spi_write_blocking(spi0, buf, len);
+}
+
+uint8_t spi_rw_byte(uint8_t out) {
+  uint8_t in;
+  int n=spi_write_read_blocking(spi_default, &out, &in, 1);
+  return in;
 }
 
 // ----------------------------------------------------

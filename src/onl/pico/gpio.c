@@ -67,34 +67,33 @@ static volatile gpio_interrupt gpio_interrupts[MAX_GPIO_INTERRUPTS];
 
 void gpio_callback(uint pin, uint32_t events) {
 
+  bool received_rise=(events & GPIO_IRQ_EDGE_RISE);
+  bool received_fall=(events & GPIO_IRQ_EDGE_FALL);
+
+  if(received_rise && !received_fall) printf("%d^\n", pin);
+  else
+  if(!received_rise && received_fall) printf("%dv\n", pin);
+  else {
+    static int8_t num_wtf=0;
+    if(num_wtf < 8){
+      num_wtf++;
+      printf("%d?\n", pin);
+    }
+;   return;
+  }
   for(uint8_t i=0; i<top_gpio_interrupt; i++){
-
     uint8_t p=gpio_interrupts[i].pin;
-
-    uint8_t state=gpio_get_avoid_sdk(p);
-    bool changed=(state!=gpio_interrupts[i].last_state);
-  ; if(!(p==pin || changed)) continue;
-    gpio_interrupts[i].last_state=state;
-
-    uint8_t edge=gpio_interrupts[i].edge;
-    bool awaiting_rise=(edge==GPIO_RISING  || edge==GPIO_RISING_AND_FALLING);
-    bool awaiting_fall=(edge==GPIO_FALLING || edge==GPIO_RISING_AND_FALLING);
-
-    bool received_rise=false;
-    bool received_fall=false;
-
     if(p==pin){
-      received_rise=(events & GPIO_IRQ_EDGE_RISE);
-      received_fall=(events & GPIO_IRQ_EDGE_FALL);
+      uint8_t edge=gpio_interrupts[i].edge;
+      bool awaiting_rise=(edge==GPIO_RISING  || edge==GPIO_RISING_AND_FALLING);
+      bool awaiting_fall=(edge==GPIO_FALLING || edge==GPIO_RISING_AND_FALLING);
+
+      if(awaiting_rise && received_rise) gpio_interrupts[i].cb(p, GPIO_RISING);
+      else
+      if(awaiting_fall && received_fall) gpio_interrupts[i].cb(p, GPIO_FALLING);
+
+  ;   break;
     }
-    else
-    if(changed){
-      received_rise= state;
-      received_fall=!state;
-    }
-    if(     awaiting_rise && received_rise && awaiting_fall && received_fall) gpio_interrupts[i].cb(p, GPIO_RISING_AND_FALLING);
-    else if(awaiting_rise && received_rise                                  ) gpio_interrupts[i].cb(p, GPIO_RISING);
-    else if(                                  awaiting_fall && received_fall) gpio_interrupts[i].cb(p, GPIO_FALLING);
   }
 }
 

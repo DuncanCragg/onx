@@ -8,6 +8,15 @@
 #include <onx/dma-mem.h>
 #include <onx/hstx.h>
 
+// --- RFM69 Wing simple wiring ---
+#define RFM69_CS_PIN   6
+#define RFM69_RST_PIN  9
+#define RFM69_INT_PIN  5
+
+const uint8_t radio_rfm69_cs_pin  = RFM69_CS_PIN;
+const uint8_t radio_rfm69_rst_pin = RFM69_RST_PIN;
+const uint8_t radio_rfm69_int_pin = RFM69_INT_PIN;
+
 // --------------------------------------
 
 #include "mountains_800x480_rgb565.h"
