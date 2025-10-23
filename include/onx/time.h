@@ -13,7 +13,6 @@ uint64_t time_us(); // us since startup
 
 void time_delay_ms(uint32_t ms);
 void time_delay_us(uint32_t us);
-void time_delay_ns(uint32_t ns);
 
 void     time_es_set(uint64_t es); // set current epoch seconds
 uint64_t time_es();                // Unix epoch seconds

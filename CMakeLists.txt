@@ -1,6 +1,12 @@
 
 cmake_minimum_required(VERSION 3.13)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_definitions(BUILD_DEBUG=1)
+else()
+    add_compile_definitions(BUILD_DEBUG=0)
+endif()
+
 set(PICO_BOARD_HEADER_DIRS ${CMAKE_CURRENT_LIST_DIR}/board ${PICO_BOARD_HEADER_DIRS} CACHE STRING "Board include paths" FORCE)
 
 include(board/${PICO_BOARD}_settings.cmake) # per-board settings

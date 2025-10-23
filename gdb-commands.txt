@@ -1,0 +1,6 @@
+target extended-remote localhost:3333
+file ./src/ont/adafruit_feather_rp2040/t-tests/onx-t-tests.elf
+set print pretty on
+break HardFault_Handler
+set unwindonsignal on
+monitor reset init

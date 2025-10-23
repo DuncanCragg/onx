@@ -82,7 +82,11 @@ void __not_in_flash_func(core0_main)() {
 
   startup_core0_init(config);
 
+#if BUILD_DEBUG
+  log_write("NOT launching core 1 in debug!\n");
+#else
   multicore_launch_core1(core1_main);
+#endif
 
   while(1){
 

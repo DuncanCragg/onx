@@ -1,7 +1,9 @@
 
 #include <stdio.h>
 
-#include "pico/stdlib.h"
+#include <pico/stdlib.h>
+
+#include <m-class-support.h>
 
 #include <onx/time.h>
 #include <onx/log.h>
@@ -51,15 +53,20 @@ uint64_t time_us(){
 // ----------------------------------------------------
 
 void time_delay_ms(uint32_t ms) {
+  if(in_interrupt_context()){
+    log_flash(1,0,0);
+    return;
+  }
   sleep_ms(ms);
 }
 
 void time_delay_us(uint32_t us) {
+  if(in_interrupt_context()){
+    if(us<=10) busy_wait_us_32(us);
+    else log_flash(1,0,0);
+    return;
+  }
   sleep_us(us);
-}
-
-void time_delay_ns(uint32_t ns){
-  sleep_us(ns/1000); // REVISIT!
 }
 
 // ----------------------------------------------------

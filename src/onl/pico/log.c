@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include <pico-support.h>
 #include <m-class-support.h>
 
 #include <tusb.h>
@@ -57,7 +58,7 @@ void log_init(properties* config) {
 
   if(log_to_std){
     stdio_init_all();
-    while(!stdio_connected()) sleep_ms(100);
+    while(!stdio_connected()) time_delay_ms(100);
   }
 
   if(log_to_led){
@@ -102,11 +103,16 @@ static void flush_saved_messages(uint8_t to){
 
   if(get_reason_to_save_logs()) return;
 
+  DISABLE_INTERRUPTS;
   uint16_t ls=list_size(saved_messages);
+  ENABLE_INTERRUPTS;
+
   if(!ls) return;
   for(uint8_t i=1; i<=ls; i++){
 
+    DISABLE_INTERRUPTS;
     char* msg = list_get_n(saved_messages, i);
+    ENABLE_INTERRUPTS;
 
     if(to==FLUSH_TO_STDIO){
       if(i==1)  printf("+---- saved messages --------------\n");
@@ -115,7 +121,6 @@ static void flush_saved_messages(uint8_t to){
       printf("%s", msg);
       if(i==ls) printf("+----------------------------------\n");
       within_line=!strchr(msg,'\n');
-      free(msg);
     }
     if(to==FLUSH_TO_GFX){
       list_add(gfx_log_buffer, msg);
@@ -123,11 +128,13 @@ static void flush_saved_messages(uint8_t to){
 #if defined(RTT_LOG_ENABLED)
     if(to==FLUSH_TO_RTT){
       RTT_LOG_DEBUG("%s", msg);
-      free(msg);
     }
 #endif
+    free(msg);
   }
+  DISABLE_INTERRUPTS_2;
   list_clear(saved_messages, false);
+  ENABLE_INTERRUPTS;
 
 #if defined(RTT_LOG_ENABLED)
   if(to==FLUSH_TO_RTT){
@@ -186,7 +193,9 @@ int16_t log_write_mode(uint8_t mode, char* file, uint32_t line, const char* fmt,
     r+=     vsnprintf(log_buffer+r, LOG_BUF_SIZE-r, fmt, args);                                            LOGCHK
     within_line=!strchr(log_buffer,'\n');
     char* lb=strdup(log_buffer);
+    DISABLE_INTERRUPTS;
     if(!list_add(saved_messages, lb)) free(lb);
+    ENABLE_INTERRUPTS;
     return 0;
   }
 
