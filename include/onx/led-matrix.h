@@ -6,7 +6,7 @@
 #define LED_MATRIX_WIDTH  12
 #define LED_MATRIX_HEIGHT  6
 
-void led_matrix_init(uint8_t sck_pin, uint8_t tx_pin);
+void led_matrix_init();
 void led_matrix_set_scale(uint8_t scale);
 void led_matrix_fill_hsv(colours_hsv hsv);
 void led_matrix_fill_rgb(colours_rgb rgb);

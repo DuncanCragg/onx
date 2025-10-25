@@ -6,9 +6,12 @@ static const uint16_t num_leds=LED_MATRIX_WIDTH*LED_MATRIX_HEIGHT;
 
 static uint8_t led_matrix_array[LED_MATRIX_WIDTH*LED_MATRIX_HEIGHT][3];
 
-void led_matrix_init(uint8_t sck_pin, uint8_t tx_pin){
+extern uint8_t led_matrix_dotstar_sck_pin;
+extern uint8_t led_matrix_dotstar_tx_pin;
+
+void led_matrix_init(){
   // it's not proper SPI, plus no CS, so need to avoid main SPI bus
-  spi_init_2(sck_pin, tx_pin, -1, -1);
+  spi_init_2(led_matrix_dotstar_sck_pin, led_matrix_dotstar_tx_pin, -1, -1);
 }
 
 void led_matrix_fill_hsv(colours_hsv hsv){

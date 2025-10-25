@@ -108,10 +108,16 @@ void run_colour_tests(){
   log_write("%s = rgb: { %02x %02x %02x }\n", colour_chars, from_chars.r, from_chars.g, from_chars.b);
 }
 
+#define LED_MATRIX_DOTSTAR_SCK_PIN 2
+#define LED_MATRIX_DOTSTAR_TX_PIN  3
+
+const uint8_t led_matrix_dotstar_sck_pin = LED_MATRIX_DOTSTAR_SCK_PIN;
+const uint8_t led_matrix_dotstar_tx_pin  = LED_MATRIX_DOTSTAR_TX_PIN;
+
 void run_actual_leds(){
 
   led_strip_init();
-  led_matrix_init(2,3);
+  led_matrix_init();
 
   led_strip_fill_col( "#ff0");
   led_matrix_fill_col("#ff0");

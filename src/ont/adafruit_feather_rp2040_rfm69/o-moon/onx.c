@@ -42,6 +42,12 @@ static void poll_input_evaluators(void*){
 
 // ---------------------------------------------------------
 
+#define LED_MATRIX_DOTSTAR_SCK_PIN 2
+#define LED_MATRIX_DOTSTAR_TX_PIN  3
+
+const uint8_t led_matrix_dotstar_sck_pin = LED_MATRIX_DOTSTAR_SCK_PIN;
+const uint8_t led_matrix_dotstar_tx_pin  = LED_MATRIX_DOTSTAR_TX_PIN;
+
 void set_up_gpio(){
 
   gpio_init();
@@ -50,7 +56,7 @@ void set_up_gpio(){
   led_strip_fill_rgb((colours_rgb){0, 16, 0});
   led_strip_show();
 
-  led_matrix_init(2,3);
+  led_matrix_init();
   led_matrix_fill_rgb((colours_rgb){0, 16, 0});
   led_matrix_show();
 }

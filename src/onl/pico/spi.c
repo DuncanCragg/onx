@@ -31,13 +31,15 @@ void spi_init_avoid_sdk() {
   initialised=true;
 }
 
+#define NON_DEFAULT_SPI (spi_default==spi0? spi1: spi0)
+
 void spi_init_2(int8_t sck_pin, int8_t tx_pin, int8_t rx_pin, int8_t cs_pin){
 
   if(initialised_2) return;
 
   if(sck_pin < 0) return;
 
-  spi_init(spi0, 32 * 1000 * 1000);
+  spi_init(NON_DEFAULT_SPI, 32 * 1000 * 1000);
 
   bool do_t=(tx_pin >=0);
   bool do_r=(rx_pin >=0);
@@ -78,7 +80,7 @@ void spi_write(uint8_t* buf, uint16_t len) {
 }
 
 void spi_write_2(uint8_t* buf, uint16_t len) {
-  spi_write_blocking(spi0, buf, len);
+  spi_write_blocking(NON_DEFAULT_SPI, buf, len);
 }
 
 uint8_t spi_rw_byte(uint8_t out) {
