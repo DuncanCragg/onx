@@ -40,7 +40,10 @@ static void poll_input_evaluators(void*){
   onn_run_evaluators(bcsuid, 0);
 }
 
+// ---------------------------------------------------------
+
 void set_up_gpio(){
+
   gpio_init();
 
   led_strip_init();

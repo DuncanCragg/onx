@@ -93,7 +93,7 @@ void __not_in_flash_func(core0_main)() {
     startup_core0_loop(config);
 
     if(!onn_loop()){
-      time_delay_ms(5);
+      time_delay_ms(5); // REVISIT
     }
     tight_loop_contents();
   }

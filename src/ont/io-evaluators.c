@@ -18,6 +18,7 @@
 #include <onn.h>
 
 // ------------------- evaluators ----------------
+// REVISIT: lots of config in a shared (non-target/onx) ont file...
 
 #define ROTARY_ENC_ADDRESS    0x36
 #define ROTARY_ENC_BUTTON     (1UL<<24)

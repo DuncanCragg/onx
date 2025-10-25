@@ -105,6 +105,7 @@ static void flush_saved_messages(uint8_t to){
 
   DISABLE_INTERRUPTS;
   uint16_t ls=list_size(saved_messages);
+  // REVISIT: do list_copy() and save all the palaver
   ENABLE_INTERRUPTS;
 
   if(!ls) return;
@@ -131,6 +132,10 @@ static void flush_saved_messages(uint8_t to){
     }
 #endif
     free(msg);
+
+    DISABLE_INTERRUPTS_2;
+    ls=list_size(saved_messages);
+    ENABLE_INTERRUPTS;
   }
   DISABLE_INTERRUPTS_2;
   list_clear(saved_messages, false);
