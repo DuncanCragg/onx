@@ -179,7 +179,7 @@ void startup_core0_loop(properties* config){
   check_big_radio_data();
 
   if(stage_c == stage_p) return;
-  if(stage_c<=20) log_write("-----------------stage %d----------------------\n", stage_c);
+  if(stage_c<=15) log_write("-----------------stage %d----------------------\n", stage_c);
   if(stage_c== 1) log_flash(1,1,1);
   if(stage_c== 2) run_tests(config);
   if(stage_c== 3) run_colour_tests();
