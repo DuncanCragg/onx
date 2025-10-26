@@ -1522,7 +1522,7 @@ void persist_pull_keep_active(list* keep_actives) {
     if(object_is_local_device(o)) onn_device_object = o;
     set_to_notify(o->uid, 0, 0, 0);
   }
-  list_free(keep_actives, false);
+//list_free(keep_actives, false); // REVISIT: don't need to? crashes fake db
 }
 
 // -----------------------------------------------------------------------

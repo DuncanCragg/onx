@@ -208,6 +208,6 @@ char* list_to_text(list* li, char* b, uint16_t s) {
 void list_log(list* li) {
   if(!li) return;
   char buf[MAX_TEXT_LEN];
-  log_write("%s\n", list_to_text(li,buf,MAX_TEXT_LEN));
+  log_write("[%s]\n", list_to_text(li,buf,MAX_TEXT_LEN));
 }
 

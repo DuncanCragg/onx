@@ -77,7 +77,7 @@ void gpio_callback(uint pin, uint32_t events) {
     static int8_t num_wtf=0;
     if(num_wtf < 8){
       num_wtf++;
-      printf("%d?\n", pin);
+      printf("%d?????\n", pin);
     }
 ;   return;
   }

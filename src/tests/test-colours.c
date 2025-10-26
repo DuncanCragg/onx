@@ -108,12 +108,13 @@ void run_colour_tests(){
   log_write("%s = rgb: { %02x %02x %02x }\n", colour_chars, from_chars.r, from_chars.g, from_chars.b);
 }
 
-#define LED_MATRIX_DOTSTAR_SCK_PIN 2
-#define LED_MATRIX_DOTSTAR_TX_PIN  3
+#define LED_MATRIX_DOTSTAR_SCK_PIN 2 // true of all boards, should be in onx, or just say SCL/SDA
+#define LED_MATRIX_DOTSTAR_TX_PIN  3 // needed cos RFM Feather can only use these pins
 
 const uint8_t led_matrix_dotstar_sck_pin = LED_MATRIX_DOTSTAR_SCK_PIN;
 const uint8_t led_matrix_dotstar_tx_pin  = LED_MATRIX_DOTSTAR_TX_PIN;
 
+#define DELAY_BETWEEN 350
 void run_actual_leds(){
 
   led_strip_init();
@@ -123,73 +124,73 @@ void run_actual_leds(){
   led_matrix_fill_col("#ff0");
   led_strip_show();
   led_matrix_show();
-  time_delay_ms(350);
+  time_delay_ms(DELAY_BETWEEN);
 
   led_strip_fill_col( "#f0f");
   led_matrix_fill_col("#f0f");
   led_strip_show();
   led_matrix_show();
-  time_delay_ms(350);
+  time_delay_ms(DELAY_BETWEEN);
 
   led_strip_fill_col( "#0ff");
   led_matrix_fill_col("#0ff");
   led_strip_show();
   led_matrix_show();
-  time_delay_ms(350);
+  time_delay_ms(DELAY_BETWEEN);
 
   led_strip_fill_col( "red");
   led_matrix_fill_col("red");
   led_strip_show();
   led_matrix_show();
-  time_delay_ms(350);
+  time_delay_ms(DELAY_BETWEEN);
 
   led_strip_fill_col( "green");
   led_matrix_fill_col("green");
   led_strip_show();
   led_matrix_show();
-  time_delay_ms(350);
+  time_delay_ms(DELAY_BETWEEN);
 
   led_strip_fill_col( "blue");
   led_matrix_fill_col("blue");
   led_strip_show();
   led_matrix_show();
-  time_delay_ms(350);
+  time_delay_ms(DELAY_BETWEEN);
 
   led_strip_fill_rgb( (colours_rgb){ 255,255,  0 });
   led_matrix_fill_rgb((colours_rgb){ 255,255,  0 });
   led_strip_show();
   led_matrix_show();
-  time_delay_ms(350);
+  time_delay_ms(DELAY_BETWEEN);
 
   led_strip_fill_rgb( (colours_rgb){ 255,  0,255 });
   led_matrix_fill_rgb((colours_rgb){ 255,  0,255 });
   led_strip_show();
   led_matrix_show();
-  time_delay_ms(350);
+  time_delay_ms(DELAY_BETWEEN);
 
   led_strip_fill_rgb( (colours_rgb){   0,255,255 });
   led_matrix_fill_rgb((colours_rgb){   0,255,255 });
   led_strip_show();
   led_matrix_show();
-  time_delay_ms(350);
+  time_delay_ms(DELAY_BETWEEN);
 
   led_strip_fill_hsv( (colours_hsv){   0,255,127 });
   led_matrix_fill_hsv((colours_hsv){   0,255,127 });
   led_strip_show();
   led_matrix_show();
-  time_delay_ms(350);
+  time_delay_ms(DELAY_BETWEEN);
 
   led_strip_fill_hsv( (colours_hsv){  85,255,127 });
   led_matrix_fill_hsv((colours_hsv){  85,255,127 });
   led_strip_show();
   led_matrix_show();
-  time_delay_ms(350);
+  time_delay_ms(DELAY_BETWEEN);
 
   led_strip_fill_hsv( (colours_hsv){ 171,255,127 });
   led_matrix_fill_hsv((colours_hsv){ 171,255,127 });
   led_strip_show();
   led_matrix_show();
-  time_delay_ms(350);
+  time_delay_ms(DELAY_BETWEEN);
 }
 
 

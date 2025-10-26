@@ -1,4 +1,4 @@
 .gitattributes
 .*.sw*
 docs/local/
-build/
+build*/
