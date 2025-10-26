@@ -70,13 +70,20 @@ bool radio_init(list* bands, channel_recv_cb cb){
 
 // -------------------------------------------------------------
 
-static volatile bool send_another_chunk_now=false;
-static          void send_another_chunk();
+static volatile uint64_t send_another_chunk_req=0;
+static          void     send_another_chunk();
+
+#if defined(PICO_RP2040)
+#define RADIO_RFM69_DELAY_BETWEEN_CHUNK_SENDS_US 50
+#elif defined(PICO_RP2350)
+#define RADIO_RFM69_DELAY_BETWEEN_CHUNK_SENDS_US 500
+#endif
 
 uint16_t radio_available(){
   if(!initialised) return 0;
-  if(send_another_chunk_now){
-    send_another_chunk_now=false;
+  if(send_another_chunk_req &&
+     (time_us() > send_another_chunk_req + RADIO_RFM69_DELAY_BETWEEN_CHUNK_SENDS_US)){
+    send_another_chunk_req=0;
     send_another_chunk();
   }
   return chunkbuf_current_size(radio_read_buf);
@@ -128,12 +135,12 @@ static void on_tx_write_chunk_1st(){
   if(write_loop_in_progress) return;
   log_write("=== tx start ===\n");
   write_loop_in_progress=true;
-  send_another_chunk_now=true;
+  send_another_chunk_req=time_us();
 }
 
 static void on_tx_write_chunk_ongoing(){
   if(chunkbuf_current_size(radio_write_buf)){
-    send_another_chunk_now=true;
+    send_another_chunk_req=time_us();
   }
   else{
     write_loop_in_progress = false;
