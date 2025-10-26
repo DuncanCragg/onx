@@ -20,7 +20,6 @@ add_library(lib_onx STATIC
     lib/lib.c
     lib/chunkbuf.c
     lib/colours.c
-    lib/config.c
 
     lib/database.c
     lib/show_bytes_n_chars.c

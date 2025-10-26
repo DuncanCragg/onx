@@ -59,7 +59,7 @@ void __not_in_flash_func(core0_main)() {
 
   properties* config = properties_new(32);
   properties_set(config, "flags", list_vals_new_from_fixed("log-to-std log-to-led"));
-//properties_set(config, "channels", list_vals_new_from_fixed("radio"));
+  properties_set(config, "channels", list_vals_new_from_fixed("radio"));
 //properties_set(config, "test-uid-prefix", value_new("tests")); // REVISIT setting that
 
   set_up_clocks();
