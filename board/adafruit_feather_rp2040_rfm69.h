@@ -15,8 +15,8 @@
 #define PICO_DEFAULT_BUTTON_PIN 7
 #endif
 
-#ifndef BUTTONS_ACTIVE_STATE
-#define BUTTONS_ACTIVE_STATE 0
+#ifndef PICO_DEFAULT_BUTTON_ACTIVE
+#define PICO_DEFAULT_BUTTON_ACTIVE 0
 #endif
 
 // --- NeoPixel ---
@@ -42,8 +42,8 @@
 #endif
 
 // --- RFM69 -------------------
-#define RFM69_CS_PIN  16
-#define RFM69_RST_PIN 17
-#define RFM69_INT_PIN 21
+#define PICO_DEFAULT_RADIO_RFM69_CS_PIN  16
+#define PICO_DEFAULT_RADIO_RFM69_RST_PIN 17
+#define PICO_DEFAULT_RADIO_RFM69_INT_PIN 21
 
 #endif

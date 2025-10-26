@@ -4,25 +4,25 @@
 #include <boards/adafruit_feather_rp2350.h>
 
 // --- PSRAM ---
-#ifndef PICO_DEFAULT_PSRAM_CS
-#define PICO_DEFAULT_PSRAM_CS 8
+#ifndef PICO_DEFAULT_PSRAM_CS_PIN
+#define PICO_DEFAULT_PSRAM_CS_PIN 8
 #endif
 
 // --- HSTX ---
-#ifndef PICO_DEFAULT_HSTX_CK
-#define PICO_DEFAULT_HSTX_CK 14
+#ifndef PICO_DEFAULT_HSTX_CK_PIN
+#define PICO_DEFAULT_HSTX_CK_PIN 14
 #endif
-#ifndef PICO_DEFAULT_HSTX_D0
-#define PICO_DEFAULT_HSTX_D0 18
+#ifndef PICO_DEFAULT_HSTX_D0_PIN
+#define PICO_DEFAULT_HSTX_D0_PIN 18
 #endif
-#ifndef PICO_DEFAULT_HSTX_D1
-#define PICO_DEFAULT_HSTX_D1 16
+#ifndef PICO_DEFAULT_HSTX_D1_PIN
+#define PICO_DEFAULT_HSTX_D1_PIN 16
 #endif
-#ifndef PICO_DEFAULT_HSTX_D2
-#define PICO_DEFAULT_HSTX_D2 12
+#ifndef PICO_DEFAULT_HSTX_D2_PIN
+#define PICO_DEFAULT_HSTX_D2_PIN 12
 #endif
-#ifndef PICO_DEFAULT_HSTX_IN
-#define PICO_DEFAULT_HSTX_IN true
+#ifndef PICO_DEFAULT_HSTX_INV
+#define PICO_DEFAULT_HSTX_INV true
 #endif
 
 #endif

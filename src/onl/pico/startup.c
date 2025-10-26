@@ -69,9 +69,8 @@ void __not_in_flash_func(core0_main)() {
 
   random_init();
 
-#ifdef PICO_DEFAULT_PSRAM_CS
-  psram_init(PICO_DEFAULT_PSRAM_CS, true);
-#endif
+  psram_init();
+  psram_tests();
 
   onn_init();
 

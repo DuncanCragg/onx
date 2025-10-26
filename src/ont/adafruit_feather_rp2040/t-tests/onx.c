@@ -148,13 +148,10 @@ const uint8_t  startup_vreg_v      = VREG_VOLTAGE_DEFAULT;
 const uint32_t startup_clockspeed  = SYS_CLK_KHZ;
 
 // --- RFM69 Wing simple wiring ---
-#define RFM69_CS_PIN   8
-#define RFM69_RST_PIN  9
-#define RFM69_INT_PIN  7
 
-const uint8_t radio_rfm69_cs_pin  = RFM69_CS_PIN;
-const uint8_t radio_rfm69_rst_pin = RFM69_RST_PIN;
-const uint8_t radio_rfm69_int_pin = RFM69_INT_PIN;
+const uint8_t radio_rfm69_cs_pin  = 8;
+const uint8_t radio_rfm69_rst_pin = 9;
+const uint8_t radio_rfm69_int_pin = 7;
 
 const bool log_to_std = true;
 const bool log_to_gfx = false;

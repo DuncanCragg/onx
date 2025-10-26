@@ -26,7 +26,7 @@
 // -------------------------------------
 
 void button_changed(uint8_t pin, uint8_t type) {
-  bool pressed=(gpio_get(pin)==BUTTONS_ACTIVE_STATE);
+  bool pressed=(gpio_get(pin)==PICO_DEFAULT_BUTTON_ACTIVE);
   log_write("========= button %s (%d %d)\n", pressed? "pressed": "released", pin, type);
 }
 

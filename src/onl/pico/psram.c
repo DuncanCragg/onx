@@ -90,7 +90,7 @@ static bool psram_test_ram_bw(char* region, volatile uint8_t* start, size_t len)
     return true;
 }
 
-static void test_psram(){
+void psram_tests(){
 
     volatile uint8_t* psram_raw_start = (uint8_t*)0x15000000;
     volatile uint8_t* psram_cch_start = (uint8_t*)0x11000000;
@@ -240,7 +240,13 @@ static void __no_inline_not_in_flash_func(set_psram_timing)(void) {
 */
 }
 
-size_t __no_inline_not_in_flash_func(psram_init)(uint32_t psram_cs_pin, bool run_tests){
+#ifdef PICO_DEFAULT_PSRAM_CS_PIN
+static const uint8_t psram_cs_pin = PICO_DEFAULT_PSRAM_CS_PIN;
+#else
+extern const uint8_t psram_cs_pin;
+#endif
+
+size_t __no_inline_not_in_flash_func(psram_init)(){
 
     gpio_set_function(psram_cs_pin, GPIO_FUNC_XIP_CS1);
 
@@ -307,8 +313,6 @@ size_t __no_inline_not_in_flash_func(psram_init)(uint32_t psram_cs_pin, bool run
     xip_ctrl_hw->ctrl |= XIP_CTRL_WRITABLE_M1_BITS;
 
     restore_interrupts(intr_stash);
-
-    if(run_tests) test_psram();
 
     return psram_size;
 }

@@ -203,10 +203,10 @@ with any other similar marks covering other goods and services.
 
 #include "radio-rfm69.h" // pages and pages from the datasheet
 
-#ifdef RFM69_CS_PIN
-static const uint8_t radio_rfm69_cs_pin  = RFM69_CS_PIN;
-static const uint8_t radio_rfm69_rst_pin = RFM69_RST_PIN;
-static const uint8_t radio_rfm69_int_pin = RFM69_INT_PIN;
+#ifdef PICO_DEFAULT_RADIO_RFM69_CS_PIN
+static const uint8_t radio_rfm69_cs_pin  = PICO_DEFAULT_RADIO_RFM69_CS_PIN;
+static const uint8_t radio_rfm69_rst_pin = PICO_DEFAULT_RADIO_RFM69_RST_PIN;
+static const uint8_t radio_rfm69_int_pin = PICO_DEFAULT_RADIO_RFM69_INT_PIN;
 #else
 extern const uint8_t radio_rfm69_cs_pin;
 extern const uint8_t radio_rfm69_rst_pin;

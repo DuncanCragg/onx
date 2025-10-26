@@ -242,19 +242,19 @@ void set_up_dma(){
     //   GP16 D1+  GP17 D1-  12+4,5 16
     //   GP18 D2+  GP19 D2-  12+6,7 18
     //
-    // REVISIT: if(PICO_DEFAULT_HSTX_IN) for clock too?
-    hstx_ctrl_hw->bit[PICO_DEFAULT_HSTX_CK-12] = HSTX_CTRL_BIT0_CLK_BITS;
-    hstx_ctrl_hw->bit[PICO_DEFAULT_HSTX_CK-11] = HSTX_CTRL_BIT0_CLK_BITS | HSTX_CTRL_BIT0_INV_BITS;
+    // REVISIT: if(PICO_DEFAULT_HSTX_INV) for clock too?
+    hstx_ctrl_hw->bit[PICO_DEFAULT_HSTX_CK_PIN-12] = HSTX_CTRL_BIT0_CLK_BITS;
+    hstx_ctrl_hw->bit[PICO_DEFAULT_HSTX_CK_PIN-11] = HSTX_CTRL_BIT0_CLK_BITS | HSTX_CTRL_BIT0_INV_BITS;
     static const int lane_to_output_bit[3] = {
-      PICO_DEFAULT_HSTX_D0-12,
-      PICO_DEFAULT_HSTX_D1-12,
-      PICO_DEFAULT_HSTX_D2-12
+      PICO_DEFAULT_HSTX_D0_PIN-12,
+      PICO_DEFAULT_HSTX_D1_PIN-12,
+      PICO_DEFAULT_HSTX_D2_PIN-12
     };
     for (uint lane = 0; lane < 3; ++lane) {
         int bit = lane_to_output_bit[lane];
         uint32_t lane_data_sel_bits = (lane * 10    ) << HSTX_CTRL_BIT0_SEL_P_LSB |
                                       (lane * 10 + 1) << HSTX_CTRL_BIT0_SEL_N_LSB;
-        if(PICO_DEFAULT_HSTX_IN){
+        if(PICO_DEFAULT_HSTX_INV){
             hstx_ctrl_hw->bit[bit    ] = lane_data_sel_bits;
             hstx_ctrl_hw->bit[bit + 1] = lane_data_sel_bits | HSTX_CTRL_BIT0_INV_BITS;
         } else {

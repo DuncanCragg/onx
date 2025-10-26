@@ -5,12 +5,12 @@ added to lib\_onx:
  - onl/pico/led-strip-neopixel.c -- most Adafruit boards (one LED in "strip")
  - onl/pico/hstx.c               -- RP2350 boards
  - onl/pico/psram.c              -- RP2350 boards
+ - onl/psram-stub.c
  - onl/radio-rfm69.c             -- Feather RP2040 RFM69 board
  - onl/radio-stub.c
  - onl/ipv6-stub.c
 
-The stubs are needed at the moment when there's no radio or ipv6, but that'll probably be
-fixed soon.
+The stubs are needed at the moment when there's no radio or ipv6 or psram.
 
 Things that are physically wired onto any ont/.../onx.c target go in their corresponding
 CMakeLists, such as:
