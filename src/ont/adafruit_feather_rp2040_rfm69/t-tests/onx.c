@@ -158,6 +158,20 @@ static void check_big_radio_data(){
 const uint8_t  startup_vreg_v      = VREG_VOLTAGE_DEFAULT;
 const uint32_t startup_clockspeed  = SYS_CLK_KHZ;
 
+const bool log_to_std = true;
+const bool log_to_gfx = false;
+const bool log_to_rtt = false;
+const bool log_to_led = true;
+
+const bool  onp_log         = false;
+const char* onp_channels    = 0;
+const char* onp_ipv6_groups = 0;
+const char* onp_radio_bands = 0;
+
+const char* onn_test_uid_prefix = 0;
+
+// --------------------------------------
+
 void startup_core0_init(){
 
   time_tick(tick_cb, "banana",  250);
@@ -165,7 +179,7 @@ void startup_core0_init(){
 
   set_up_gpio();
 
-  radio_ok=radio_init(0, radio_cb);
+  radio_ok=radio_init(radio_cb);
   log_write("radio %s\n", radio_ok? "up": "init failed");
 
   log_write("---------- tests --------------------\n");

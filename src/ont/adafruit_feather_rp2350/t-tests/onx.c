@@ -69,15 +69,6 @@ static void once_cb(void* arg){
 
 // -------------------------------------------------
 
-// --- RFM69 Wing simple wiring ---
-#define RFM69_CS_PIN   6
-#define RFM69_RST_PIN  9
-#define RFM69_INT_PIN  5
-
-const uint8_t radio_rfm69_cs_pin  = RFM69_CS_PIN;
-const uint8_t radio_rfm69_rst_pin = RFM69_RST_PIN;
-const uint8_t radio_rfm69_int_pin = RFM69_INT_PIN;
-
 static int8_t radio_rssi;
 
 void radio_cb(bool connect, char* channel){
@@ -157,12 +148,35 @@ const uint8_t  startup_vreg_v      = VREG_VOLTAGE_DEFAULT;
 const uint32_t startup_clockspeed  = SYS_CLK_KHZ;
 const uint8_t  startup_hstxdivisor = 2;
 
+// --- RFM69 Wing simple wiring ---
+#define RFM69_CS_PIN   6
+#define RFM69_RST_PIN  9
+#define RFM69_INT_PIN  5
+
+const uint8_t radio_rfm69_cs_pin  = RFM69_CS_PIN;
+const uint8_t radio_rfm69_rst_pin = RFM69_RST_PIN;
+const uint8_t radio_rfm69_int_pin = RFM69_INT_PIN;
+
+const bool log_to_std = true;
+const bool log_to_gfx = false;
+const bool log_to_rtt = false;
+const bool log_to_led = true;
+
+const bool  onp_log         = false;
+const char* onp_channels    = 0;
+const char* onp_ipv6_groups = 0;
+const char* onp_radio_bands = 0;
+
+const char* onn_test_uid_prefix = 0;
+
+// -------------------------------------------------
+
 void startup_core0_init(){
 
   time_tick(tick_cb, "banana",  250);
   time_once(once_cb, "mango!", 2500);
 
-  radio_ok=radio_init(0, radio_cb);
+  radio_ok=radio_init(radio_cb);
   log_write("radio %s\n", radio_ok? "up": "init failed");
 
   log_write("---------- tests --------------------\n");

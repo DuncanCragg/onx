@@ -55,14 +55,7 @@ static void set_up_clocks(){
 static void __not_in_flash_func(core0_main)();
 static void __not_in_flash_func(core1_main)();
 
-properties* startup_config = 0;
-
 void __not_in_flash_func(core0_main)() {
-
-  startup_config = properties_new(32);
-  properties_set(startup_config, "flags", list_vals_new_from_fixed("log-to-std log-to-led"));
-  properties_set(startup_config, "channels", list_vals_new_from_fixed("radio"));
-//properties_set(startup_config, "test-uid-prefix", value_new("tests")); // REVISIT setting that
 
   set_up_clocks();
 

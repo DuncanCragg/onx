@@ -47,7 +47,9 @@ static void rh_sleep();
 
 // -------------------------------------------------------------
 
-bool radio_init(list* bands, channel_recv_cb cb){
+extern const list* onp_radio_bands;
+
+bool radio_init(channel_recv_cb cb){
 
   recv_cb = cb;
 

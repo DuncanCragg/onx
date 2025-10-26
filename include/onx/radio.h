@@ -10,7 +10,7 @@
 
 #include <onx/channels.h>
 
-bool     radio_init(list* bands, channel_recv_cb cb);
+bool     radio_init(channel_recv_cb cb);
 int16_t  radio_read(char* buf, uint16_t len);
 uint16_t radio_write(char* band, char* buf, uint16_t len);
 int8_t   radio_last_rssi();

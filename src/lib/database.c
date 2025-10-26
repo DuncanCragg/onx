@@ -193,15 +193,11 @@ static void free_uid_to_obj_info(database_storage* db){
   db->uid_to_obj_info=0;
 }
 
-extern properties* startup_config;
-
-list* database_init(database_storage* db){
-
-  bool db_format=list_vals_has(properties_get(startup_config, "flags"), "db-format");
+list* database_init(database_storage* db, bool format_db){
 
   (*db).init(db);
 
-  if(db_format){
+  if(format_db){
     database_wipe(db);
 ;   return 0;
   }

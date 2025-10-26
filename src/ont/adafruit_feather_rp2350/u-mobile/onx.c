@@ -7,6 +7,9 @@
 
 #include <onx/dma-mem.h>
 #include <onx/hstx.h>
+#include <onx/items.h>
+
+// -----------------------------------------------------
 
 // --- RFM69 Wing simple wiring ---
 #define RFM69_CS_PIN   6
@@ -16,6 +19,18 @@
 const uint8_t radio_rfm69_cs_pin  = RFM69_CS_PIN;
 const uint8_t radio_rfm69_rst_pin = RFM69_RST_PIN;
 const uint8_t radio_rfm69_int_pin = RFM69_INT_PIN;
+
+const bool log_to_std = true;
+const bool log_to_gfx = false;
+const bool log_to_rtt = false;
+const bool log_to_led = true;
+
+const bool  onp_log         = false;
+const char* onp_channels    = "radio";
+const char* onp_ipv6_groups = 0;
+const char* onp_radio_bands = 0;
+
+const char* onn_test_uid_prefix = 0;
 
 // --------------------------------------
 
@@ -93,6 +108,7 @@ void copy_mountain_to_psram(){
 }
 
 void ont_hx_init(){
+
   copy_mountain_to_psram();
 }
 

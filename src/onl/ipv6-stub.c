@@ -6,7 +6,9 @@
 #include <onx/log.h>
 #include <onx/ipv6.h>
 
-bool ipv6_init(list* groups, channel_recv_cb cb){
+extern const list* onp_ipv6_groups;
+
+bool ipv6_init(channel_recv_cb cb){
   return true;
 }
 

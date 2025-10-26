@@ -88,7 +88,7 @@ typedef struct object {
 
 // ---------------------------------
 
-static char* test_uid_prefix=0;
+extern const char* onn_test_uid_prefix;
 
 object* onn_device_object=0;
 
@@ -96,9 +96,9 @@ object* onn_device_object=0;
 
 value* generate_uid() {
   char b[24];
-  if(test_uid_prefix && strlen(test_uid_prefix) >= 4)
+  if(onn_test_uid_prefix && strlen(onn_test_uid_prefix) >= 4)
   snprintf(b, 24, "uid-%.4s-%02x%02x-%02x%02x-%02x%02x",
-    test_uid_prefix,
+    onn_test_uid_prefix,
     random_ish_byte(), random_ish_byte(),
     random_ish_byte(), random_ish_byte(),
     random_ish_byte(), random_ish_byte()
@@ -1299,8 +1299,6 @@ void object_log(object* o) {
 
 static volatile bool initialised=false;
 
-extern properties* startup_config;
-
 void onn_init() {
 
   if(initialised) return;
@@ -1308,8 +1306,6 @@ void onn_init() {
   log_write("Initialising ONN...\n");
 
   CRITICAL_SECTION_INIT(cs);
-
-  test_uid_prefix=value_string(properties_get(startup_config, "test-uid-prefix"));
 
   persist_init();
   device_init();

@@ -19,12 +19,6 @@
 
 #include <onn.h>
 
-bool log_to_gfx=false;
-bool log_to_rtt=false;
-bool log_to_led=false;
-bool log_to_std=false;
-bool log_onp=false;
-
 #define LOG_BUF_SIZE 1024
 static volatile char log_buffer[LOG_BUF_SIZE];
 static volatile list* saved_messages = 0;
@@ -36,20 +30,12 @@ bool stdio_connected(){
   return tud_cdc_connected();
 }
 
-extern properties* startup_config;
-
 void log_init() {
 
   if(initialised) return;
 
   saved_messages = list_new(256);
   gfx_log_buffer = list_new(32);
-
-  log_to_gfx = list_vals_has(properties_get(startup_config, "flags"), "log-to-gfx");
-  log_to_rtt = list_vals_has(properties_get(startup_config, "flags"), "log-to-rtt");
-  log_to_led = list_vals_has(properties_get(startup_config, "flags"), "log-to-led");
-  log_to_std = list_vals_has(properties_get(startup_config, "flags"), "log-to-std");
-  log_onp    = list_vals_has(properties_get(startup_config, "flags"), "log-onp");
 
 #if defined(RTT_LOG_ENABLED)
   if(log_to_rtt){

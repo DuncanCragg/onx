@@ -8,11 +8,11 @@
 #include <onx/items.h>
 #include <onx/time.h>
 
-extern bool log_to_gfx;
-extern bool log_to_rtt;
-extern bool log_to_led;
-extern bool log_to_std;
-extern bool log_onp;
+// define all of these in your target exe
+extern const bool log_to_gfx;
+extern const bool log_to_rtt;
+extern const bool log_to_led;
+extern const bool log_to_std;
 
 extern volatile list* gfx_log_buffer;
 

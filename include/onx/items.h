@@ -59,9 +59,8 @@ char* unknown_to_text(void* u, char* b, uint16_t s);
 
 /* Assoc array/dictionary/map/hash. */
 
-#define properties_new(max_size) properties_new_((char*)__FUNCTION__, __LINE__, max_size)
-
 properties* properties_new_(char* func, uint32_t line, uint16_t max_size);
+#define     properties_new(max_size) properties_new_((char*)__FUNCTION__, __LINE__, max_size)
 bool        properties_set(properties* op, char* key, void* i);
 void*       properties_get(properties* op, char* key);
 void*       properties_del(properties* op, char* key);
@@ -85,7 +84,7 @@ list*    list_new(uint16_t max_size);
 list*    list_vals_new_from(char* text, uint16_t max_size);
 list*    list_vals_new_from_fixed(char* text);
 list*    list_new_from_array(void** items, uint16_t max_size);
-#define list_new_from(...) list_new_from_array((void*[]){__VA_ARGS__}, sizeof((void*[]){__VA_ARGS__}) / sizeof(void*))
+#define  list_new_from(...) list_new_from_array((void*[]){__VA_ARGS__}, sizeof((void*[]){__VA_ARGS__}) / sizeof(void*))
 bool     list_add(list* li, void* val);
 bool     list_vals_add(list* li, char* v);
 void*    list_vals_del(list* li, char* v);

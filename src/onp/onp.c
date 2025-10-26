@@ -19,10 +19,16 @@ static void send(char* chansub);
 static void log_sent(char* prefix, uint16_t size, char* chansub);
 static void log_recv(char* prefix, uint16_t size, char* chansub, object* o, observe obs);
 
-static list* channels=0;
-static list* ipv6_groups=0;
-static list* radio_bands=0;
-static char* test_uid_prefix=0;
+// -------------------------------------------
+
+extern const char* onp_channels;
+extern const char* onp_ipv6_groups;
+extern const char* onp_radio_bands;
+extern const bool  onp_log;
+
+extern const char* onn_test_uid_prefix;
+
+// -------------------------------------------
 
 static properties*    radio_pending_obs = 0;
 static properties*    radio_pending_obj = 0;
@@ -56,15 +62,15 @@ void channel_on_recv(bool connect, char* channel) {
 #define MAX_OBJ_PENDING 32
 #define MAX_PEERS 32
 
-extern properties* startup_config;
+list* channels    = 0;
+list* ipv6_groups = 0;
+list* radio_bands = 0;
 
 void onp_init() {
 
-  channels    = properties_get(startup_config, "channels");
-  ipv6_groups = properties_get(startup_config, "ipv6_groups");
-  radio_bands = properties_get(startup_config, "radio_bands");
-
-  test_uid_prefix=value_string(properties_get(startup_config, "test-uid-prefix"));
+  channels    = list_vals_new_from_fixed(onp_channels);
+  ipv6_groups = list_vals_new_from_fixed(onp_ipv6_groups);
+  radio_bands = list_vals_new_from_fixed(onp_radio_bands);
 
   onp_channel_ipv6   = list_vals_has(channels,"ipv6");
   onp_channel_radio  = list_vals_has(channels,"radio");
@@ -83,8 +89,8 @@ void onp_init() {
   device_to_chansub  = properties_new(MAX_PEERS);
   connected_channels = list_new(MAX_PEERS);
 
-  if(onp_channel_radio)  radio_init(radio_bands, channel_on_recv);
-  if(onp_channel_ipv6)   ipv6_init(ipv6_groups, channel_on_recv);
+  if(onp_channel_radio)  radio_init(channel_on_recv);
+  if(onp_channel_ipv6)   ipv6_init( channel_on_recv);
 
   if(onp_channel_radio)   log_write("ONP channel radio\n");
   if(onp_channel_ipv6)    log_write("ONP channel IPv6\n");
@@ -227,8 +233,8 @@ void on_connect(char* channel) {
   num_waiting_on_connect++;
   time_delay_ms(10); // REVISIT
   log_write("%s%son_connect(%s) %d\n",
-             test_uid_prefix? test_uid_prefix: "",
-             test_uid_prefix? " ":             "",
+             onn_test_uid_prefix? onn_test_uid_prefix: "",
+             onn_test_uid_prefix? " ":             "",
              channel,
              num_waiting_on_connect);
 }
@@ -383,7 +389,7 @@ void send(char* chansub){ // return false if *_write() couldn't fit data in, etc
 }
 
 void log_sent(char* prefix, uint16_t size, char* chansub) {
-  if(!log_onp) return;
+  if(!onp_log) return;
   if(log_to_gfx){
     if(size>=5 && !strncmp(send_buff,"OBS: ",5)){
       log_write("[%s]%d\n", send_buff, size);
@@ -402,7 +408,7 @@ void log_sent(char* prefix, uint16_t size, char* chansub) {
 }
 
 void log_recv(char* prefix, uint16_t size, char* chansub, object* o, observe obs) {
-  if(!log_onp) return;
+  if(!onp_log) return;
   if(log_to_gfx){
     if(o)       log_write("U:%s\n", object_property_values(o, "is"));
     if(obs.uid) log_write("O:%s\n", obs.uid);

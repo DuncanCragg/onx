@@ -86,8 +86,6 @@ static properties* persistence_objects_text=0;
 
 #endif
 
-extern properties* startup_config;
-
 static list* keep_actives = 0;
 
 list* persistence_init(){
@@ -101,7 +99,7 @@ list* persistence_init(){
 
   db = flash_db_storage_new();
 
-  keep_actives = database_init(db);
+  keep_actives = database_init(db, true);
   return keep_actives;
 #else
   persistence_objects_text=properties_new(MAX_OBJECTS);
@@ -114,9 +112,7 @@ list* persistence_init(){
 list* persistence_reload(){
 #if defined(FLASH_NOT_FAKE)
   database_free(db);
-  properties_set_del(startup_config, "flags", "db-format");
-  keep_actives = database_init(db);
-  properties_set_ins(startup_config, "flags", "db-format");
+  keep_actives = database_init(db, false);
 #endif
   return keep_actives;
 }
