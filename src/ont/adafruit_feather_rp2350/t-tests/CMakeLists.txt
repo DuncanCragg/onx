@@ -7,6 +7,8 @@ add_executable(onx-t-tests
 
     ${PROJECT_SOURCE_DIR}/src/tests/test-database.c
     ${PROJECT_SOURCE_DIR}/src/tests/test-chunkbuf.c
+
+    ${PROJECT_SOURCE_DIR}/src/onl/led-matrix-dotstar.c
     ${PROJECT_SOURCE_DIR}/src/tests/test-colours.c
 
     ${PROJECT_SOURCE_DIR}/src/tests/test-onn.c

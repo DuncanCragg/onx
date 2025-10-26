@@ -31,6 +31,7 @@ extern void run_properties_tests();
 
 extern void run_database_tests(properties* config);
 extern void run_colour_tests();
+extern void run_actual_leds();
 extern void run_chunkbuf_tests();
 extern void run_evaluate_edit_rule_tests();
 
@@ -179,6 +180,7 @@ void startup_core0_loop(properties* config){
   if(stage_c== 1) log_flash(1,1,1);
   if(stage_c== 2) run_tests(config);
   if(stage_c== 3) run_colour_tests();
+  if(stage_c== 3) run_actual_leds();
   if(stage_c== 4) onn_show_cache();
   if(stage_c== 5) onn_show_notify();
   if(stage_c== 6) value_dump_small();
