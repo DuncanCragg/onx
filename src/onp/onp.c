@@ -56,13 +56,15 @@ void channel_on_recv(bool connect, char* channel) {
 #define MAX_OBJ_PENDING 32
 #define MAX_PEERS 32
 
-void onp_init(properties* config) {
+extern properties* startup_config;
 
-  channels    = properties_get(config, "channels");
-  ipv6_groups = properties_get(config, "ipv6_groups");
-  radio_bands = properties_get(config, "radio_bands");
+void onp_init() {
 
-  test_uid_prefix=value_string(properties_get(config, "test-uid-prefix"));
+  channels    = properties_get(startup_config, "channels");
+  ipv6_groups = properties_get(startup_config, "ipv6_groups");
+  radio_bands = properties_get(startup_config, "radio_bands");
+
+  test_uid_prefix=value_string(properties_get(startup_config, "test-uid-prefix"));
 
   onp_channel_ipv6   = list_vals_has(channels,"ipv6");
   onp_channel_radio  = list_vals_has(channels,"radio");

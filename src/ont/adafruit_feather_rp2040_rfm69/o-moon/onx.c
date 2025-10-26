@@ -63,7 +63,7 @@ void set_up_gpio(){
 
 // -----------------------------------------------------
 
-void startup_core0_init(properties* config){
+void startup_core0_init(){
 
   log_write("---------- Moon --------------------\n");
 
@@ -117,7 +117,7 @@ void startup_core0_init(properties* config){
   onn_run_evaluators(ledmxuid, 0);
 }
 
-void startup_core0_loop(properties* config){
+void startup_core0_loop(){
 
 //led_matrix_set_scale(gpio_usb_powered()? 2: 5);
 

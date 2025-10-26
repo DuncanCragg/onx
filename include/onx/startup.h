@@ -12,8 +12,8 @@ extern const uint32_t startup_clockspeed;
 extern const uint8_t  startup_hstxdivisor;
 
 // calls to external functions
-void startup_core0_init(properties* config);
-void startup_core0_loop(properties* config);
+void startup_core0_init();
+void startup_core0_loop();
 void startup_core1_init();
 void startup_core1_loop();
 

@@ -40,7 +40,7 @@ void set_up_gpio(){
 
 // -----------------------------------------------------
 
-void startup_core0_init(properties* config){
+void startup_core0_init(){
 
   log_write("---------- Remote --------------------\n");
 
@@ -82,7 +82,7 @@ void startup_core0_init(properties* config){
   time_tick(poll_input_evaluators, 0, 50);
 }
 
-void startup_core0_loop(properties* config){
+void startup_core0_loop(){
 }
 
 void startup_core1_init(){ }

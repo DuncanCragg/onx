@@ -16,7 +16,7 @@ extern bool log_onp;
 
 extern volatile list* gfx_log_buffer;
 
-void log_init(properties* config);
+void log_init();
 bool log_loop();
 
 // mode 0 is current simple one

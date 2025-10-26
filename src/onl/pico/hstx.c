@@ -306,12 +306,12 @@ void set_up_dma(){
 
 // ------------------------------------------------------
 
-void startup_core0_init(properties* config){
+void startup_core0_init(){
 
   ont_hx_init();
 }
 
-void __not_in_flash_func(startup_core0_loop)(properties* config){
+void __not_in_flash_func(startup_core0_loop)(){
 
   while(do_flip) tight_loop_contents();  // REVISIT: expose do_flip and move core0 up to ont hx
 

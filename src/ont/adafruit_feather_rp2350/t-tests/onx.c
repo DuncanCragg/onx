@@ -29,7 +29,7 @@ extern void run_value_tests();
 extern void run_list_tests();
 extern void run_properties_tests();
 
-extern void run_database_tests(properties* config);
+extern void run_database_tests();
 extern void run_colour_tests();
 extern void run_actual_leds();
 extern void run_chunkbuf_tests();
@@ -37,7 +37,7 @@ extern void run_evaluate_edit_rule_tests();
 
 extern void run_onn_tests();
 
-void run_tests(properties* config) {
+void run_tests() {
 
   log_write("----------------- Tests ------------------------\n");
 
@@ -45,7 +45,7 @@ void run_tests(properties* config) {
   run_list_tests();
   run_properties_tests();
 
-  run_database_tests(config);
+  run_database_tests();
   run_chunkbuf_tests();
 
   run_onn_tests();
@@ -157,7 +157,7 @@ const uint8_t  startup_vreg_v      = VREG_VOLTAGE_DEFAULT;
 const uint32_t startup_clockspeed  = SYS_CLK_KHZ;
 const uint8_t  startup_hstxdivisor = 2;
 
-void startup_core0_init(properties* config){
+void startup_core0_init(){
 
   time_tick(tick_cb, "banana",  250);
   time_once(once_cb, "mango!", 2500);
@@ -171,14 +171,14 @@ void startup_core0_init(properties* config){
 
 // -------------------------------------------------
 
-void startup_core0_loop(properties* config){
+void startup_core0_loop(){
 
   check_big_radio_data();
 
   if(stage_c == stage_p) return;
   if(stage_c<=15) log_write("-----------------stage %d----------------------\n", stage_c);
   if(stage_c== 1) log_flash(1,1,1);
-  if(stage_c== 2) run_tests(config);
+  if(stage_c== 2) run_tests();
   if(stage_c== 3) run_colour_tests();
   if(stage_c== 3) run_actual_leds();
   if(stage_c== 4) onn_show_cache();

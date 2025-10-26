@@ -59,7 +59,7 @@ static void    run_evaluators(object* o, void* data, value* alerted, bool timedo
 static bool    run_any_evaluators();
 static void    set_to_notify(value* uid, void* data, value* alerted, uint64_t timeout);
 
-static void    persist_init(properties* config);
+static void    persist_init();
 static void    persist_put(object* o, bool saving_metadata);
 static bool    persist_loop();
 static void    persist_flush();
@@ -1299,7 +1299,9 @@ void object_log(object* o) {
 
 static volatile bool initialised=false;
 
-void onn_init(properties* config) {
+extern properties* startup_config;
+
+void onn_init() {
 
   if(initialised) return;
 
@@ -1307,11 +1309,11 @@ void onn_init(properties* config) {
 
   CRITICAL_SECTION_INIT(cs);
 
-  test_uid_prefix=value_string(properties_get(config, "test-uid-prefix"));
+  test_uid_prefix=value_string(properties_get(startup_config, "test-uid-prefix"));
 
-  persist_init(config);
+  persist_init();
   device_init();
-  onp_init(config);
+  onp_init();
 
   initialised=true;
 }
@@ -1456,9 +1458,9 @@ void run_evaluators(object* o, void* data, value* alerted, bool timedout){
 
 static properties* objects_to_save=0;
 
-void persist_init(properties* config){
+void persist_init(){
   objects_to_save=properties_new(MAX_OBJECTS);
-  list* keep_actives = persistence_init(config);
+  list* keep_actives = persistence_init();
   persist_pull_keep_active(keep_actives);
 }
 

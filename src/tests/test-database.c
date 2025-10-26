@@ -95,7 +95,9 @@ static database_storage* test_stub_storage_new(){
     | uid-456/1 | uid-abc/4 | uid-123/1 |*uid-456/1*|
 */
 
-void run_database_tests(properties* config){
+extern properties* startup_config;
+
+void run_database_tests(){
 
   log_write("----------- database tests --------------------\n");
 
@@ -127,7 +129,7 @@ void run_database_tests(properties* config){
 
   // ----- Initialisation
   database_storage* db = test_stub_storage_new();
-  list_free(database_init(db,config), false);
+  list_free(database_init(db), false);
 
   char* base = (char*)test_db_storage + sizeof(database_sector_info);
   uint16_t w_point;
@@ -184,9 +186,9 @@ void run_database_tests(properties* config){
   // ----- Re-initialisation
   database_show(db);
   database_free(db);
-  properties_set_del(config, "flags", "db-format");
-  list_free(database_init(db,config), false);
-  properties_set_ins(config, "flags", "db-format");
+  properties_set_del(startup_config, "flags", "db-format");
+  list_free(database_init(db), false);
+  properties_set_ins(startup_config, "flags", "db-format");
   database_show(db);
 
   // ----- Sector 1 Object 2

@@ -193,9 +193,11 @@ static void free_uid_to_obj_info(database_storage* db){
   db->uid_to_obj_info=0;
 }
 
-list* database_init(database_storage* db, properties* config){
+extern properties* startup_config;
 
-  bool db_format=list_vals_has(properties_get(config, "flags"), "db-format");
+list* database_init(database_storage* db){
+
+  bool db_format=list_vals_has(properties_get(startup_config, "flags"), "db-format");
 
   (*db).init(db);
 

@@ -214,7 +214,7 @@ extern object* onn_device_object;
                  ipv6_groups: ff12::1234 ff12::4321
                }
  */
-void onn_init(properties* config);
+void onn_init();
 
 /** call when you want your evaluator run
     can be used to set some state within a transaction etc with given data arg

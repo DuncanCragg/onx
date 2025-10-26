@@ -55,12 +55,14 @@ static void set_up_clocks(){
 static void __not_in_flash_func(core0_main)();
 static void __not_in_flash_func(core1_main)();
 
+properties* startup_config = 0;
+
 void __not_in_flash_func(core0_main)() {
 
-  properties* config = properties_new(32);
-  properties_set(config, "flags", list_vals_new_from_fixed("log-to-std log-to-led"));
-  properties_set(config, "channels", list_vals_new_from_fixed("radio"));
-//properties_set(config, "test-uid-prefix", value_new("tests")); // REVISIT setting that
+  startup_config = properties_new(32);
+  properties_set(startup_config, "flags", list_vals_new_from_fixed("log-to-std log-to-led"));
+  properties_set(startup_config, "channels", list_vals_new_from_fixed("radio"));
+//properties_set(startup_config, "test-uid-prefix", value_new("tests")); // REVISIT setting that
 
   set_up_clocks();
 
@@ -68,7 +70,7 @@ void __not_in_flash_func(core0_main)() {
 
   time_init();
 
-  log_init(config);
+  log_init();
 
   log_write("\n=============================== core 0 start ===============================\n");
 
@@ -78,9 +80,9 @@ void __not_in_flash_func(core0_main)() {
   psram_init(PICO_DEFAULT_PSRAM_CS, true);
 #endif
 
-  onn_init(config);
+  onn_init();
 
-  startup_core0_init(config);
+  startup_core0_init();
 
 #if BUILD_DEBUG
   log_write("NOT launching core 1 in debug!\n");
@@ -90,7 +92,7 @@ void __not_in_flash_func(core0_main)() {
 
   while(1){
 
-    startup_core0_loop(config);
+    startup_core0_loop();
 
     if(!onn_loop()){
       time_delay_ms(5); // REVISIT
