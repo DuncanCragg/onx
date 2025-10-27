@@ -39,11 +39,8 @@ const char* onp_radio_bands = 0;
 
 const char* onn_test_uid_prefix = 0;
 
-#define LED_MATRIX_DOTSTAR_SCK_PIN 2
-#define LED_MATRIX_DOTSTAR_TX_PIN  3
-
-const uint8_t led_matrix_dotstar_sck_pin = LED_MATRIX_DOTSTAR_SCK_PIN;
-const uint8_t led_matrix_dotstar_tx_pin  = LED_MATRIX_DOTSTAR_TX_PIN;
+const uint8_t led_matrix_dotstar_sck_pin = 2;
+const uint8_t led_matrix_dotstar_tx_pin  = 3;
 
 // -----------------------------------------------------
 

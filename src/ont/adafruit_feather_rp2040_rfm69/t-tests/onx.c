@@ -40,6 +40,9 @@ const char* onp_radio_bands = 0;
 
 const char* onn_test_uid_prefix = 0;
 
+const uint8_t led_matrix_dotstar_sck_pin = 2;
+const uint8_t led_matrix_dotstar_tx_pin  = 3;
+
 // -----------------------------------------------------
 
 void button_changed(uint8_t pin, uint8_t type) {

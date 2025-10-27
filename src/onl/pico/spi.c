@@ -19,7 +19,7 @@ void spi_init_avoid_sdk() {
 
   if(initialised) return;
 
-  spi_init(spi_default,  1 * 1000 * 1000);
+  spi_init(spi_default,  1 * 1000 * 1000); // REVISIT: configure speed
 
   gpio_set_function(PICO_DEFAULT_SPI_SCK_PIN, GPIO_FUNC_SPI);
   gpio_set_function(PICO_DEFAULT_SPI_TX_PIN,  GPIO_FUNC_SPI);
@@ -39,7 +39,7 @@ void spi_init_2(int8_t sck_pin, int8_t tx_pin, int8_t rx_pin, int8_t cs_pin){
 
   if(sck_pin < 0) return;
 
-  spi_init(NON_DEFAULT_SPI, 32 * 1000 * 1000);
+  spi_init(NON_DEFAULT_SPI, 32 * 1000 * 1000); // REVISIT: configure speed
 
   bool do_t=(tx_pin >=0);
   bool do_r=(rx_pin >=0);

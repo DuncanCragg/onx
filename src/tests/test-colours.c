@@ -110,14 +110,6 @@ void run_colour_tests(){
 
 // -----------------------------------------------------
 
-#define LED_MATRIX_DOTSTAR_SCK_PIN 2 // true of all boards, should be in onx, or just say SCL/SDA
-#define LED_MATRIX_DOTSTAR_TX_PIN  3 // needed cos RFM Feather can only use these pins
-
-const uint8_t led_matrix_dotstar_sck_pin = LED_MATRIX_DOTSTAR_SCK_PIN;
-const uint8_t led_matrix_dotstar_tx_pin  = LED_MATRIX_DOTSTAR_TX_PIN;
-
-// -----------------------------------------------------
-
 #define DELAY_BETWEEN 350
 void run_actual_leds(){
 
