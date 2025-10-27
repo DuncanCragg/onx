@@ -60,7 +60,7 @@ static void poll_input_evaluators(void*){
   onn_run_evaluators(bcsuid, 0);
 }
 
-// ---------------------------------------------------------
+// -----------------------------------------------------
 
 void set_up_gpio(){
 
@@ -141,9 +141,4 @@ void startup_core1_init(){ }
 void startup_core1_loop(){ }
 
 // -----------------------------------------------------
-
-
-
-
-
 

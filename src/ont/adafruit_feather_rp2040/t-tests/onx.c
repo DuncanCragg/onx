@@ -23,7 +23,7 @@
 
 #include <tests.h>
 
-// -------------------------------------
+// -----------------------------------------------------
 
 extern void run_value_tests();
 extern void run_list_tests();
@@ -54,7 +54,7 @@ void run_tests() {
   int failures=tests_assert_summary();
 }
 
-// -------------------------------------------------
+// -----------------------------------------------------
 
 static volatile uint32_t stage_c=0;
 static volatile uint32_t stage_p=0;
@@ -67,7 +67,7 @@ static void once_cb(void* arg){
   log_write("once_cb %s\n", (char*)arg);
 }
 
-// -------------------------------------------------
+// -----------------------------------------------------
 
 static int8_t radio_rssi;
 
@@ -142,12 +142,10 @@ static void check_big_radio_data(){
   } while(true);
 }
 
-// --------------------------------------
+// -----------------------------------------------------
 
 const uint8_t  startup_vreg_v      = VREG_VOLTAGE_DEFAULT;
 const uint32_t startup_clockspeed  = SYS_CLK_KHZ;
-
-// --- RFM69 Wing simple wiring ---
 
 const uint8_t radio_rfm69_cs_pin  = 8;
 const uint8_t radio_rfm69_rst_pin = 9;
@@ -165,7 +163,7 @@ const char* onp_radio_bands = 0;
 
 const char* onn_test_uid_prefix = 0;
 
-// --------------------------------------
+// -----------------------------------------------------
 
 void startup_core0_init(){
 
@@ -179,7 +177,7 @@ void startup_core0_init(){
   log_flash(1,0,0);
 }
 
-// -------------------------------------------------
+// -----------------------------------------------------
 
 void startup_core0_loop(){
 
@@ -204,4 +202,5 @@ void startup_core0_loop(){
 void startup_core1_init(){ } // REVISIT not used, so...
 void startup_core1_loop(){ }
 
-// --------------------------------------------------------------------
+// -----------------------------------------------------
+

@@ -11,8 +11,6 @@
 
 // -----------------------------------------------------
 
-// --- RFM69 Wing simple wiring ---
-
 const uint8_t radio_rfm69_cs_pin  = 6;
 const uint8_t radio_rfm69_rst_pin = 9;
 const uint8_t radio_rfm69_int_pin = 5;
@@ -29,13 +27,13 @@ const char* onp_radio_bands = 0;
 
 const char* onn_test_uid_prefix = 0;
 
-// --------------------------------------
+// -----------------------------------------------------
 
 #include "mountains_800x480_rgb565.h"
 
 #define NO_MOUNTAINS     // DO_MOUNTAINS
 
-// --------------------------------------
+// -----------------------------------------------------
 
 #define RGB_BYTES_TO_RGB555(r,g,b) (((r)&0b11111000)<<7)|(((g)&0b11111000)<<2)|(((b)&0b11111000)>>3)
 
@@ -165,23 +163,5 @@ void X ont_hx_scanline(uint16_t* buf, uint32_t scan_y){
   fill_line_sprites(buf, scan_y);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// -----------------------------------------------------
 
