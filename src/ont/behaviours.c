@@ -96,6 +96,7 @@ bool evaluate_light_logic(object* o, void* d){
      object_property(o, "motion:is")   ) return true;
 
   discover_io_peer(o, "button", "button");
+  discover_io_peer(o, "bcs", "bcs");
 #ifdef DO_TOUCH_LINK
   discover_io_peer(o, "touch", "touch");
 #endif
@@ -104,6 +105,10 @@ bool evaluate_light_logic(object* o, void* d){
 
     object_property_set(o, "light", "off");
   }
+  return true;
+}
+
+bool evaluate_bcs_logic(object* o, void* d){
   return true;
 }
 

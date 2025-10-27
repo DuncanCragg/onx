@@ -100,9 +100,12 @@ void startup_core0_init(){
 
     object_set_persist(battery, "none");
 
+    char* deviceuid=object_property(onn_device_object, "UID");
+
     object_property_set(ledmx, "light", "on");
     object_property_set(ledmx, "colour", "%0300ff");
-    object_property_set(ledmx, "bcs", bcsuid);
+//  object_property_set(ledmx, "bcs", bcsuid);
+    object_property_set(ledmx, "device", deviceuid);
 
     object_property_set(onn_device_object, "name", "Moon");
     object_property_add(onn_device_object, "io", batteryuid);

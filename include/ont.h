@@ -7,6 +7,8 @@
 
 bool evaluate_light_logic(object* o, void* d);
 
+bool evaluate_bcs_logic(object* o, void* d);
+
 bool evaluate_clock_sync(object* o, void* d);
 
 bool evaluate_clock(object* o, void* d);
