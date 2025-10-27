@@ -144,7 +144,7 @@ void gpio_toggle(uint8_t pin) {
 
 // ------------------------------------------
 
-void gpio_adc_init(uint8_t pin, uint8_t channel) {
+void gpio_adc(uint8_t pin, uint8_t channel) {
 
   // REVISIT: oddity of pico sdk impl ?
   if(channel==0 && !(pin==26 || pin==40)) return;

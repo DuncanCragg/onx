@@ -4,9 +4,9 @@ set(PICO_RP2350_A2_SUPPORTED 1)
 set(PICO_BOARD_SOURCES
     onl/pico/led-strip-neopixel.c
     onl/radio-rfm69.c
+    onl/pico/psram.c
     onl/ipv6-stub.c
     onl/pico/hstx.c
-    onl/pico/psram.c
 )
 set(PICO_PIO_TO_COMPILE
     src/onl/pico/led-strip-neopixel.pio

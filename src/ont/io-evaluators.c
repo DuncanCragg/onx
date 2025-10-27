@@ -47,7 +47,7 @@ static bool do_rotary_encoder=false;
 
 void evaluators_init(){
 
-  gpio_adc_init(BATT_V_PIN, BATT_ADC_CHANNEL);
+  gpio_adc(BATT_V_PIN, BATT_ADC_CHANNEL);
 
   time_delay_ms(50); // seesaw needs a minute to get its head straight
 
@@ -70,8 +70,8 @@ void evaluators_init(){
     log_write("rotary encoder found\n");
     seesaw_gpio_mode(      ROTARY_ENC_ADDRESS, ROTARY_ENC_BUTTON, SEESAW_GPIO_MODE_INPUT_PULLUP);
 //  seesaw_gpio_interrupts(ROTARY_ENC_ADDRESS, ROTARY_ENC_BUTTON, true); // ?
-    gpio_adc_init(POT1_PIN, POT1_ADC_CHANNEL);
-    gpio_adc_init(POT2_PIN, POT2_ADC_CHANNEL);
+    gpio_adc(POT1_PIN, POT1_ADC_CHANNEL);
+    gpio_adc(POT2_PIN, POT2_ADC_CHANNEL);
   }
   if(device_id_hi_gamepad == 5743){
     do_gamepad=true;

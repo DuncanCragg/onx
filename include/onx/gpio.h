@@ -18,15 +18,15 @@ typedef void (*gpio_pin_cb)(uint8_t, uint8_t); // (pin, edge) (edge: GPIO_RISING
 
 void    gpio_init_avoid_sdk();
 #define gpio_init gpio_init_avoid_sdk
-void    gpio_mode(      uint8_t pin, uint8_t mode);
-void    gpio_mode_cb(   uint8_t pin, uint8_t mode, uint8_t edge, gpio_pin_cb cb);
+void    gpio_mode(         uint8_t pin, uint8_t mode);
+void    gpio_mode_cb(      uint8_t pin, uint8_t mode, uint8_t edge, gpio_pin_cb cb);
 uint8_t gpio_get_avoid_sdk(uint8_t pin);
 #define gpio_get gpio_get_avoid_sdk
-void    gpio_adc_init(  uint8_t pin, uint8_t channel);
-int16_t gpio_adc_read(               uint8_t channel);
-void    gpio_set(       uint8_t pin, uint8_t value);
-void    gpio_toggle(    uint8_t pin);
-int     gpio_touch_read(uint8_t pin);
+void    gpio_adc(          uint8_t pin, uint8_t channel);
+int16_t gpio_adc_read(                  uint8_t channel);
+void    gpio_set(          uint8_t pin, uint8_t value);
+void    gpio_toggle(       uint8_t pin);
+int     gpio_touch_read(   uint8_t pin);
 void    gpio_enable_interrupts();
 void    gpio_disable_interrupts();
 void    gpio_show_power_status();
