@@ -17,18 +17,19 @@
 #define SEESAW_DEVICE_CHIPSET_TINY1616 0x88
 #define SEESAW_DEVICE_CHIPSET_TINY1617 0x89
 
-void     seesaw_init(             uint16_t i2c_address, bool reset);
+void     seesaw_init(            uint8_t addr, bool reset);
+void     seesaw_init_2(          uint8_t addr, bool reset, uint8_t sda_pin, uint8_t scl_pin);
 
-uint32_t seesaw_device_id(        uint16_t i2c_address);
-uint16_t seesaw_device_id_hi(     uint16_t i2c_address);
-uint16_t seesaw_device_id_lo(     uint16_t i2c_address);
-char*    seesaw_device_chipset(   uint16_t i2c_address);
+uint32_t seesaw_device_id(       uint8_t addr);
+uint16_t seesaw_device_id_hi(    uint8_t addr);
+uint16_t seesaw_device_id_lo(    uint8_t addr);
+char*    seesaw_device_chipset(  uint8_t addr);
 
-void     seesaw_gpio_mode(        uint16_t i2c_address, uint32_t gpio_mask, uint8_t mode);
-void     seesaw_gpio_interrupts(  uint16_t i2c_address, uint32_t gpio_mask, bool enabled);
+void     seesaw_gpio_mode(       uint8_t addr, uint32_t gpio_mask, uint8_t mode);
+void     seesaw_gpio_interrupts( uint8_t addr, uint32_t gpio_mask, bool enabled);
 
-uint32_t seesaw_gpio_read(        uint16_t i2c_address);
-uint16_t seesaw_analog_read(      uint16_t i2c_address, uint8_t pin);
-int32_t  seesaw_encoder_position( uint16_t i2c_address);
+uint32_t seesaw_gpio_read(       uint8_t addr);
+uint16_t seesaw_analog_read(     uint8_t addr, uint8_t pin);
+int32_t  seesaw_encoder_position(uint8_t addr);
 
 #endif

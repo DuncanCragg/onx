@@ -51,8 +51,8 @@ void evaluators_init(){
 
   time_delay_ms(50); // seesaw needs a minute to get its head straight
 
-  seesaw_init(GAMEPAD_ADDRESS,    true);
-  seesaw_init(ROTARY_ENC_ADDRESS, true);
+  seesaw_init(  GAMEPAD_ADDRESS,    true);
+  seesaw_init_2(ROTARY_ENC_ADDRESS, true, 24, 25);
 
   char* chipset;
 
