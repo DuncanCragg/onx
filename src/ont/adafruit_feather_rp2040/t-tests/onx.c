@@ -25,6 +25,27 @@
 
 // -----------------------------------------------------
 
+const uint8_t  startup_vreg_v      = VREG_VOLTAGE_DEFAULT;
+const uint32_t startup_clockspeed  = SYS_CLK_KHZ;
+
+const uint8_t radio_rfm69_cs_pin  = 8;
+const uint8_t radio_rfm69_rst_pin = 9;
+const uint8_t radio_rfm69_int_pin = 7;
+
+const bool log_to_std = true;
+const bool log_to_gfx = false;
+const bool log_to_rtt = false;
+const bool log_to_led = true;
+
+const bool  onp_log         = false;
+const char* onp_channels    = 0;
+const char* onp_ipv6_groups = 0;
+const char* onp_radio_bands = 0;
+
+const char* onn_test_uid_prefix = 0;
+
+// -----------------------------------------------------
+
 extern void run_value_tests();
 extern void run_list_tests();
 extern void run_properties_tests();
@@ -141,27 +162,6 @@ static void check_big_radio_data(){
     log_write("-----------------(rssi=%d)--\n", radio_rssi);
   } while(true);
 }
-
-// -----------------------------------------------------
-
-const uint8_t  startup_vreg_v      = VREG_VOLTAGE_DEFAULT;
-const uint32_t startup_clockspeed  = SYS_CLK_KHZ;
-
-const uint8_t radio_rfm69_cs_pin  = 8;
-const uint8_t radio_rfm69_rst_pin = 9;
-const uint8_t radio_rfm69_int_pin = 7;
-
-const bool log_to_std = true;
-const bool log_to_gfx = false;
-const bool log_to_rtt = false;
-const bool log_to_led = true;
-
-const bool  onp_log         = false;
-const char* onp_channels    = 0;
-const char* onp_ipv6_groups = 0;
-const char* onp_radio_bands = 0;
-
-const char* onn_test_uid_prefix = 0;
 
 // -----------------------------------------------------
 
