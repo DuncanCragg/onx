@@ -67,12 +67,14 @@ static void sw_reset(uint8_t addr){
 }
 
 void seesaw_init(uint8_t addr, bool reset){
+  time_delay_ms(50); // seesaw needs a minute to get its head straight
   if(!i2c_d) i2c_d=i2c_init(SEESAW_I2C_SPEED_KHZ);
   i2c_is_default[addr]=true;
   if(reset) sw_reset(addr);
 }
 
 void seesaw_init_2(uint8_t addr, bool reset, uint8_t sda_pin, uint8_t scl_pin){
+  time_delay_ms(50); // seesaw needs a minute to get its head straight
   if(!i2c_2) i2c_2=i2c_init_2(SEESAW_I2C_SPEED_KHZ, sda_pin, scl_pin);
   i2c_is_default[addr]=false;
   if(reset) sw_reset(addr);

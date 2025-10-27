@@ -62,7 +62,7 @@ void startup_core0_init(){
 
   set_up_gpio();
 
-  evaluators_init();
+  remote_io_evaluators_init();
   onn_set_evaluators("eval_battery", evaluate_battery_in, 0);
   onn_set_evaluators("eval_gamepad", evaluate_gamepad_in, 0);
 

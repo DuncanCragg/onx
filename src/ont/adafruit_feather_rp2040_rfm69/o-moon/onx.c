@@ -82,7 +82,7 @@ void startup_core0_init(){
 
   set_up_gpio();
 
-  evaluators_init();
+  moon_io_evaluators_init();
   onn_set_evaluators("eval_battery", evaluate_battery_in, 0);
   onn_set_evaluators("eval_bcs",     evaluate_bcs_in, 0);
   onn_set_evaluators("eval_ledmx",   evaluate_edit_rule, evaluate_light_logic, evaluate_ledmx_out, 0);

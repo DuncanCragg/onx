@@ -42,46 +42,39 @@
 #define POT2_PIN             27
 #define POT2_ADC_CHANNEL      1
 
-static bool do_gamepad       =false;
-static bool do_rotary_encoder=false;
+static bool do_gamepad        =false;
+static bool do_rotary_controls=false;
 
-void evaluators_init(){
-
+void moon_io_evaluators_init(){
   gpio_adc(BATT_V_PIN, BATT_ADC_CHANNEL);
-
-  time_delay_ms(50); // seesaw needs a minute to get its head straight
-
-  seesaw_init(  GAMEPAD_ADDRESS,    true);
   seesaw_init_2(ROTARY_ENC_ADDRESS, true, 24, 25);
-
-  char* chipset;
-
-  chipset=seesaw_device_chipset(GAMEPAD_ADDRESS);
-  log_write("gamepad chipset=%s\n", chipset);
-
-  chipset=seesaw_device_chipset(ROTARY_ENC_ADDRESS);
+  char* chipset=seesaw_device_chipset(ROTARY_ENC_ADDRESS);
   log_write("rotary chipset=%s\n", chipset);
-
   uint16_t device_id_hi_rotary_enc = seesaw_device_id_hi(ROTARY_ENC_ADDRESS);
-  uint16_t device_id_hi_gamepad    = seesaw_device_id_hi(GAMEPAD_ADDRESS);
-
   if(device_id_hi_rotary_enc == 4991){
-    do_rotary_encoder=true;
+    do_rotary_controls=true;
     log_write("rotary encoder found\n");
     seesaw_gpio_mode(      ROTARY_ENC_ADDRESS, ROTARY_ENC_BUTTON, SEESAW_GPIO_MODE_INPUT_PULLUP);
-//  seesaw_gpio_interrupts(ROTARY_ENC_ADDRESS, ROTARY_ENC_BUTTON, true); // ?
+//  seesaw_gpio_interrupts(ROTARY_ENC_ADDRESS, ROTARY_ENC_BUTTON, true); // REVISIT
     gpio_adc(POT1_PIN, POT1_ADC_CHANNEL);
     gpio_adc(POT2_PIN, POT2_ADC_CHANNEL);
   }
+  else log_write("no rotary encoder found: %d\n", device_id_hi_rotary_enc);
+}
+
+void remote_io_evaluators_init(){
+  gpio_adc(BATT_V_PIN, BATT_ADC_CHANNEL);
+  seesaw_init(GAMEPAD_ADDRESS, true);
+  char* chipset=seesaw_device_chipset(GAMEPAD_ADDRESS);
+  log_write("gamepad chipset=%s\n", chipset);
+  uint16_t device_id_hi_gamepad = seesaw_device_id_hi(GAMEPAD_ADDRESS);
   if(device_id_hi_gamepad == 5743){
     do_gamepad=true;
     log_write("gamepad found\n");
     seesaw_gpio_mode(      GAMEPAD_ADDRESS, GAMEPAD_ALL_BUTTONS, SEESAW_GPIO_MODE_INPUT_PULLUP);
     seesaw_gpio_interrupts(GAMEPAD_ADDRESS, GAMEPAD_ALL_BUTTONS, true);
   }
-  if(!(do_rotary_encoder || do_gamepad)){
-    log_write("no rotary encoder or gamepad found: %d %d\n", device_id_hi_rotary_enc, device_id_hi_gamepad);
-  }
+  else log_write("no gamepad found: %d\n", device_id_hi_gamepad);
 }
 
 #define BATT_SMOOTHING       70
@@ -123,7 +116,7 @@ bool evaluate_battery_in(object* bat, void* d) {
 
 bool evaluate_bcs_in(object* bcs, void* d){
 
-  if(!do_rotary_encoder){
+  if(!do_rotary_controls){
     object_property_set(bcs, "brightness", " 63");
     object_property_set(bcs, "colour",     "170");
     object_property_set(bcs, "softness",     "0");
