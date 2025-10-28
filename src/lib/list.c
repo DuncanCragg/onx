@@ -13,9 +13,9 @@
 
 typedef struct list {
   item_type type;
-  uint16_t max_size;
-  void**  vals;
-  uint16_t size;
+  uint16_t  max_size;
+  void**    vals;
+  uint16_t  size;
 } list;
 
 list* list_new(uint16_t max_size) {
@@ -53,6 +53,15 @@ list* list_new_from_array(void** items, uint16_t max_size){
     if(!list_add(li, items[i])) break;
   }
   return li;
+}
+
+list* list_copy(list* li){
+  if(!li) return 0;
+  list* lj=list_new(li->max_size);
+  for(uint16_t j=0; j<li->size; j++){
+    list_add(lj,li->vals[j]);
+  }
+  return lj;
 }
 
 bool list_add(list* li, void* val) {

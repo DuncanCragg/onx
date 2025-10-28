@@ -144,6 +144,20 @@ void test_list() {
   tests_assert_equal(item_to_text(li, buf, 32), "one two three", "can parse whitespace separated lists");
 
   list_free(li, false);
+
+  char* a="a"; char* b="b"; char* c="c";
+  lj=list_new_from(a,b,c);
+  li=list_copy(lj);
+
+  tests_assert(         list_size( li)  == 3,  "size should be 3");
+  tests_assert_equal(   list_get_n(li,1), "a", "list_copy correct 1st el");
+  tests_assert_equal(   list_get_n(li,2), "b", "list_copy correct 2nd el");
+  tests_assert_equal(   list_get_n(li,3), "c", "list_copy correct 3rd el");
+  tests_assert(         list_get_n(li,1)==a,   "list_copy correct 1st el");
+  tests_assert(         list_get_n(li,2)==b,   "list_copy correct 2nd el");
+  tests_assert(         list_get_n(li,3)==c,   "list_copy correct 3rd el");
+
+  list_free(lj, false);
 }
 
 void run_list_tests() {

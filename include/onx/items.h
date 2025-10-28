@@ -85,6 +85,7 @@ list*    list_vals_new_from(char* text, uint16_t max_size);
 list*    list_vals_new_from_fixed(char* text);
 list*    list_new_from_array(void** items, uint16_t max_size);
 #define  list_new_from(...) list_new_from_array((void*[]){__VA_ARGS__}, sizeof((void*[]){__VA_ARGS__}) / sizeof(void*))
+list*    list_copy(list* li);
 bool     list_add(list* li, void* val);
 bool     list_vals_add(list* li, char* v);
 void*    list_vals_del(list* li, char* v);
