@@ -46,7 +46,6 @@ void log_init() {
 
   if(log_to_std){
     stdio_init_all();
-    while(!stdio_connected()) time_delay_ms(100);
   }
 
   if(log_to_led){
