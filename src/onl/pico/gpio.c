@@ -184,10 +184,10 @@ bool gpio_usb_powered(){
 #if defined CYW43_WL_GPIO_VBUS_PIN
   return cyw43_arch_gpio_get(CYW43_WL_GPIO_VBUS_PIN);
 #elif defined PICO_VBUS_PIN
-  gpio_set_function(PICO_VBUS_PIN, GPIO_FUNC_SIO);
+  gpio_set_function(PICO_VBUS_PIN, GPIO_FUNC_SIO); // REVISIT!
   return gpio_get(PICO_VBUS_PIN);
 #else
-  return tud_cdc_connected(); // not ideal
+  return stdio_usb_connected(); // REVISIT: not ideal but workable
 #endif
 }
 

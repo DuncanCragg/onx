@@ -133,8 +133,24 @@ void startup_core0_init(){
 
 void startup_core0_loop(){
 
-//led_matrix_set_scale(gpio_usb_powered()? 2: 5);
+  static uint64_t last_usb_powered_check=0;
+  uint64_t t=time_ms();
 
+  if(t - last_usb_powered_check > 500){
+    last_usb_powered_check=t;
+
+    static bool was_usb_powered=false;
+    bool usb_powered=gpio_usb_powered();
+
+    if(was_usb_powered!=usb_powered){
+      was_usb_powered=usb_powered;
+
+      uint8_t scale=usb_powered? 3: 5;
+      log_write("setting brightness scale: %d\n", scale);
+
+      led_matrix_set_scale(scale);
+    }
+  }
 }
 
 void startup_core1_init(){ }
