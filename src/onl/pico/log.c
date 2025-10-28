@@ -34,7 +34,7 @@ void log_init() {
 
   if(initialised) return;
 
-  saved_messages = list_new(256);
+  saved_messages = list_new(64);
   gfx_log_buffer = list_new(32);
 
 #if defined(RTT_LOG_ENABLED)
@@ -93,15 +93,16 @@ static void flush_saved_messages(uint8_t to){
 
   DISABLE_INTERRUPTS;
   uint16_t ls=list_size(saved_messages);
-  // REVISIT: do list_copy() and save all the palaver
+  list* saved_messages_copy;
+  if(ls){
+    saved_messages_copy = list_copy(saved_messages);
+    list_clear(saved_messages, false);
+  }
   ENABLE_INTERRUPTS;
-
   if(!ls) return;
   for(uint8_t i=1; i<=ls; i++){
 
-    DISABLE_INTERRUPTS;
-    char* msg = list_get_n(saved_messages, i);
-    ENABLE_INTERRUPTS;
+    char* msg = list_get_n(saved_messages_copy, i);
 
     if(to==FLUSH_TO_STDIO){
       if(i==1)  printf("+---- saved messages --------------\n");
@@ -120,14 +121,8 @@ static void flush_saved_messages(uint8_t to){
     }
 #endif
     free(msg);
-
-    DISABLE_INTERRUPTS_2;
-    ls=list_size(saved_messages);
-    ENABLE_INTERRUPTS;
   }
-  DISABLE_INTERRUPTS_2;
-  list_clear(saved_messages, false);
-  ENABLE_INTERRUPTS;
+  list_free(saved_messages_copy, false);
 
 #if defined(RTT_LOG_ENABLED)
   if(to==FLUSH_TO_RTT){
