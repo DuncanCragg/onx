@@ -107,10 +107,11 @@ void startup_core0_init(){
     gamepaduid = object_property(uid_0, "gamepad");
 
     battery = onn_get_from_cache(batteryuid);
-    bcsuid     = object_property(uid_0, "bcs");
+    bcs     = onn_get_from_cache(bcsuid);
     gamepad = onn_get_from_cache(gamepaduid);
   }
   time_tick(poll_input_evaluators, 0, 50);
+  onn_run_evaluators(bcsuid, 0);
 }
 
 void startup_core0_loop(){

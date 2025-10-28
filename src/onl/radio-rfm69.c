@@ -76,7 +76,7 @@ static volatile uint64_t send_another_chunk_req=0;
 static          void     send_another_chunk();
 
 #if defined(PICO_RP2040)
-#define RADIO_RFM69_DELAY_BETWEEN_CHUNK_SENDS_US 50
+#define RADIO_RFM69_DELAY_BETWEEN_CHUNK_SENDS_US 100
 #elif defined(PICO_RP2350)
 #define RADIO_RFM69_DELAY_BETWEEN_CHUNK_SENDS_US 500
 #endif
