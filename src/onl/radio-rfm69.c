@@ -135,7 +135,6 @@ static volatile bool write_loop_in_progress=false;
 
 static void on_tx_write_chunk_1st(){
   if(write_loop_in_progress) return;
-  log_write("=== tx start ===\n");
   write_loop_in_progress=true;
   send_another_chunk_req=time_us();
 }
@@ -147,7 +146,6 @@ static void on_tx_write_chunk_ongoing(){
   else{
     write_loop_in_progress = false;
     rh_set_mode_rx();
-    log_write("=== tx end ===\n");
   }
 }
 
@@ -271,7 +269,7 @@ static void rh_spi_write(uint8_t reg, const uint8_t* buf, uint8_t len) {
 #define RADIO_BROADCAST_ADDRESS 0xff
 
 static void rh_write_fifo(uint8_t* buf, size_t len) {
-#ifdef TRACK_CHUNK_ASSEMBLY
+#ifdef X_TRACK_CHUNK_ASSEMBLY
   log_write("rh_write_fifo len=%d [%.*s]\n", len, len, buf);
 #endif
   TIMING_CRITICAL_ENTER;
@@ -293,7 +291,7 @@ static void rh_read_fifo() {
     uint8_t buf[128];
     spi_read(buf,len);
     last_rssi = -((int8_t)(rh_spi_read_register(RFM69_REG_24_RSSIVALUE) >> 1));
-#ifdef TRACK_CHUNK_ASSEMBLY
+#ifdef X_TRACK_CHUNK_ASSEMBLY
     log_write("rh_read_fifo len=%d [%.*s]\n", len, len, buf);
 #endif
     on_receive(buf,len);

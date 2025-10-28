@@ -83,12 +83,10 @@ void __not_in_flash_func(core0_main)() {
 #endif
 
   while(1){
-
-    startup_core0_loop();
-
     if(!onn_loop()){
       time_delay_ms(5); // REVISIT
     }
+    startup_core0_loop();
     tight_loop_contents();
   }
 }

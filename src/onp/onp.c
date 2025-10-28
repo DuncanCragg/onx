@@ -103,6 +103,28 @@ void onp_init() {
 static char recv_buff[RECV_BUFF_SIZE];
 static char send_buff[SEND_BUFF_SIZE];
 
+#define BYTES_TO_CHARS_OR_HEX_BUF_LEN 512
+char  bytes_to_chars_or_hex_buf[BYTES_TO_CHARS_OR_HEX_BUF_LEN];
+char* bytes_to_chars_or_hex(char* buf){
+  uint16_t n=0;
+  for(uint16_t i=0; i< BYTES_TO_CHARS_OR_HEX_BUF_LEN; i++){
+    char c=buf[i];
+    if(c>=' ' && c<=126) n+=snprintf(bytes_to_chars_or_hex_buf+n,BYTES_TO_CHARS_OR_HEX_BUF_LEN-n,"%c",       c);
+    else
+    if(c=='\n')          n+=snprintf(bytes_to_chars_or_hex_buf+n,BYTES_TO_CHARS_OR_HEX_BUF_LEN-n,"\n");
+    else
+                         n+=snprintf(bytes_to_chars_or_hex_buf+n,BYTES_TO_CHARS_OR_HEX_BUF_LEN-n,"<0x%02x>", c);
+
+    if(n>=BYTES_TO_CHARS_OR_HEX_BUF_LEN){
+      bytes_to_chars_or_hex_buf[BYTES_TO_CHARS_OR_HEX_BUF_LEN-2]='#';
+      bytes_to_chars_or_hex_buf[BYTES_TO_CHARS_OR_HEX_BUF_LEN-1]=0;
+  ;   break;
+    }
+  ; if(c==0) break;
+  }
+  return bytes_to_chars_or_hex_buf;
+}
+
 bool handle_all_recv(){
 
   bool ka=true;
@@ -119,7 +141,7 @@ bool handle_all_recv(){
         if(strlen(recv_buff) < 48) log_write("**/%s/\n",           recv_buff);
         else                       log_write("**/%.16s//%.32s/\n", recv_buff, isp? isp: "");
 #else
-        ;                          log_write("**/%s/\n",           recv_buff);
+        log_write("\n******** radio read error: %d { %s }\n\n", size, bytes_to_chars_or_hex(recv_buff));
 #endif
         continue;
       }

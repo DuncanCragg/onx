@@ -77,6 +77,7 @@ void remote_io_evaluators_init(){
   else log_write("no gamepad found: %d\n", device_id_hi_gamepad);
 }
 
+#define BATT_EVAL_RATE       40 // * 50ms
 #define BATT_SMOOTHING       70
 #define ADC_TOP_MV         3300
 #define ADC_BITS_RANGE     4096
@@ -89,7 +90,7 @@ bool evaluate_battery_in(object* bat, void* d) {
 
   static int32_t num_calls=0;
   num_calls++;
-; if(num_calls % 10) return true;
+; if(num_calls % BATT_EVAL_RATE) return true;
 
   static int32_t bvprev = 0;
   int32_t bv = gpio_adc_read(BATT_ADC_CHANNEL);
@@ -109,7 +110,7 @@ bool evaluate_battery_in(object* bat, void* d) {
   bool usb_powered=gpio_usb_powered();
   object_property_set(bat, "status", usb_powered? "charging": "powering");
 
-  onn_show_cache();
+//onn_show_cache();
 
   return true;
 }

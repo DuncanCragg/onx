@@ -130,9 +130,9 @@ void chunkbuf_dump(chunkbuf* cb){
   uint16_t cr=cb->current_read;
   while(size_from_read_point(cb,cr)){
     char c=cb->buffer[cr++]; if(cr==cb->buf_size) cr=0;
-    if(c>=' ') n+=snprintf(b+n,BUFLENDUMP-n,"%c",       c);
-    else       n+=snprintf(b+n,BUFLENDUMP-n,"<0x%02x>", c);
-  ; if(n>=BUFLENDUMP){ b[BUFLENDUMP-1]='#'; break; }
+    if(c>=' ' && c<=126) n+=snprintf(b+n,BUFLENDUMP-n,"%c",       c);
+    else                 n+=snprintf(b+n,BUFLENDUMP-n,"<0x%02x>", c);
+  ; if(n>=BUFLENDUMP){ b[BUFLENDUMP-2]='#'; b[BUFLENDUMP-1]=0; break; }
     if(IS_NL_DELIM(c)) n+=snprintf(b+n,BUFLENDUMP-n,"]\n[",   c);
   }
   log_write("chunkbuf:[%s]\n",b);

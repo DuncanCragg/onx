@@ -70,9 +70,9 @@ void gpio_callback(uint pin, uint32_t events) {
   bool received_rise=(events & GPIO_IRQ_EDGE_RISE);
   bool received_fall=(events & GPIO_IRQ_EDGE_FALL);
 
-  if(received_rise && !received_fall) printf("%d^\n", pin);
+  if(received_rise && !received_fall);
   else
-  if(!received_rise && received_fall) printf("%dv\n", pin);
+  if(!received_rise && received_fall);
   else {
     static int8_t num_wtf=0;
     if(num_wtf < 8){
