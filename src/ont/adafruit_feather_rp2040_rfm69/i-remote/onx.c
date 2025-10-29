@@ -75,7 +75,7 @@ void startup_core0_init(){
   if(!uid_0){
 
     battery=object_new(0, "eval_battery", "battery",  4);
-    bcs    =object_new(0, "eval_bcs",     "bcs",      8);
+    bcs    =object_new(0, "eval_bcs",     "bcs",     10);
     gamepad=object_new(0, "eval_gamepad", "gamepad", 10);
 
     batteryuid =object_property(battery, "UID");

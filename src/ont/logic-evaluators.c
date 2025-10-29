@@ -139,6 +139,48 @@ bool evaluate_bcs_logic(object* bcs, void* d){
     object_property_set_fmt(bcs, "brightness", "%d", brightness);
     object_property_set_fmt(bcs, "colour",     "%d", p.angle);
     object_property_set_fmt(bcs, "softness",   "%d", 255-p.radius);
+
+    object_property_set_fmt(bcs, "a-colour",   "%d %d", p.angle, 255-p.radius);
+    object_property_set(bcs, "a-or-b", "a");
+  }
+  else
+  if(b){
+    uint8_t brightness = (uint8_t)255;
+    polar_t p=cartesian_to_polar((int16_t)object_property_int32(bcs, "gamepad:joystick-x"),
+                                 (int16_t)object_property_int32(bcs, "gamepad:joystick-y"));
+    object_property_set_fmt(bcs, "brightness", "%d", brightness);
+    object_property_set_fmt(bcs, "colour",     "%d", p.angle);
+    object_property_set_fmt(bcs, "softness",   "%d", 255-p.radius);
+
+    object_property_set_fmt(bcs, "b-colour",   "%d %d", p.angle, 255-p.radius);
+    object_property_set(bcs, "a-or-b", "b");
+  }
+  if(object_property_is(bcs, "Timer", "0")){
+    if(object_property_is(bcs, "a-or-b", "a")){
+      char* a_col=object_property(bcs, "a-colour:1");
+      char* a_sof=object_property(bcs, "a-colour:2");
+      if(a_col){
+        object_property_set(bcs, "colour",   a_col);
+        object_property_set(bcs, "softness", a_sof);
+      }
+      object_property_set(bcs, "a-or-b", "b");
+    }
+    else
+    if(object_property_is(bcs, "a-or-b", "b")){
+      char* b_col=object_property(bcs, "b-colour:1");
+      char* b_sof=object_property(bcs, "b-colour:2");
+      if(b_col){
+        object_property_set(bcs, "colour",   b_col);
+        object_property_set(bcs, "softness", b_sof);
+      }
+      object_property_set(bcs, "a-or-b", "a");
+    }
+    object_property_set(bcs, "Timer", "1000");
+    return true;
+  }
+  if(!object_property(  bcs, "a-or-b")){
+    object_property_set(bcs, "a-or-b", "a");
+    object_property_set(bcs, "Timer", "1000");
   }
 
   return true;

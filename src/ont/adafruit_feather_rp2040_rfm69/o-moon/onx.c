@@ -90,8 +90,8 @@ void startup_core0_init(){
   object* uid_0=onn_get_from_cache("uid-0");
   if(!uid_0){
 
-    battery=object_new(0, "eval_battery", "battery", 4);
-    bcs    =object_new(0, "eval_bcs",     "bcs", 5);
+    battery=object_new(0, "eval_battery", "battery",        4);
+    bcs    =object_new(0, "eval_bcs",     "bcs",            5);
     ledmx  =object_new(0, "eval_ledmx",   "editable light", 8);
 
     batteryuid =object_property(battery, "UID");
