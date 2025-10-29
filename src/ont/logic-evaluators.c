@@ -123,64 +123,54 @@ bool evaluate_light_logic(object* o, void* d){
   return true;
 }
 
+void set_bcs_from_gamepad(object* bcs, char* abxy_colour){
+  uint8_t brightness = (uint8_t)255;
+  polar_t p=cartesian_to_polar((int16_t)object_property_int32(bcs, "gamepad:joystick-x"),
+                               (int16_t)object_property_int32(bcs, "gamepad:joystick-y"));
+  object_property_set_fmt(bcs, "brightness", "%d", brightness);
+  object_property_set_fmt(bcs, "colour",     "%d", p.angle);
+  object_property_set_fmt(bcs, "softness",   "%d", 255-p.radius);
+  object_property_set_fmt(bcs, abxy_colour,  "%d %d", p.angle, 255-p.radius);
+  object_property_set(bcs, "abxy-colour", abxy_colour);
+}
+
 bool evaluate_bcs_logic(object* bcs, void* d){
 
   bool a=object_property_is(bcs, "gamepad:a", "down");
   bool b=object_property_is(bcs, "gamepad:b", "down");
   bool x=object_property_is(bcs, "gamepad:x", "down");
   bool y=object_property_is(bcs, "gamepad:y", "down");
+
   bool t=object_property_is(bcs, "gamepad:start",  "down");
   bool e=object_property_is(bcs, "gamepad:select", "down");
 
-  if(a){
-    uint8_t brightness = (uint8_t)255;
-    polar_t p=cartesian_to_polar((int16_t)object_property_int32(bcs, "gamepad:joystick-x"),
-                                 (int16_t)object_property_int32(bcs, "gamepad:joystick-y"));
-    object_property_set_fmt(bcs, "brightness", "%d", brightness);
-    object_property_set_fmt(bcs, "colour",     "%d", p.angle);
-    object_property_set_fmt(bcs, "softness",   "%d", 255-p.radius);
-
-    object_property_set_fmt(bcs, "a-colour",   "%d %d", p.angle, 255-p.radius);
-    object_property_set(bcs, "a-or-b", "a");
-  }
+  if(a) set_bcs_from_gamepad(bcs, "a-colour");
   else
-  if(b){
-    uint8_t brightness = (uint8_t)255;
-    polar_t p=cartesian_to_polar((int16_t)object_property_int32(bcs, "gamepad:joystick-x"),
-                                 (int16_t)object_property_int32(bcs, "gamepad:joystick-y"));
-    object_property_set_fmt(bcs, "brightness", "%d", brightness);
-    object_property_set_fmt(bcs, "colour",     "%d", p.angle);
-    object_property_set_fmt(bcs, "softness",   "%d", 255-p.radius);
+  if(b) set_bcs_from_gamepad(bcs, "b-colour");
+  else
+  if(x) set_bcs_from_gamepad(bcs, "x-colour");
+  else
+  if(y) set_bcs_from_gamepad(bcs, "y-colour");
 
-    object_property_set_fmt(bcs, "b-colour",   "%d %d", p.angle, 255-p.radius);
-    object_property_set(bcs, "a-or-b", "b");
-  }
   if(object_property_is(bcs, "Timer", "0")){
-    if(object_property_is(bcs, "a-or-b", "a")){
-      char* a_col=object_property(bcs, "a-colour:1");
-      char* a_sof=object_property(bcs, "a-colour:2");
-      if(a_col){
-        object_property_set(bcs, "colour",   a_col);
-        object_property_set(bcs, "softness", a_sof);
-      }
-      object_property_set(bcs, "a-or-b", "b");
+    char* abxy_colour=object_property(bcs, "abxy-colour");
+    char* col=object_property_get_n(bcs, abxy_colour, 1);
+    char* sof=object_property_get_n(bcs, abxy_colour, 2);
+    if(col){
+      object_property_set(bcs, "colour",   col);
+      object_property_set(bcs, "softness", sof);
     }
-    else
-    if(object_property_is(bcs, "a-or-b", "b")){
-      char* b_col=object_property(bcs, "b-colour:1");
-      char* b_sof=object_property(bcs, "b-colour:2");
-      if(b_col){
-        object_property_set(bcs, "colour",   b_col);
-        object_property_set(bcs, "softness", b_sof);
-      }
-      object_property_set(bcs, "a-or-b", "a");
-    }
-    object_property_set(bcs, "Timer", "1000");
+    if(!strcmp(abxy_colour, "a-colour")) object_property_set(bcs, "abxy-colour", "b-colour");
+    if(!strcmp(abxy_colour, "b-colour")) object_property_set(bcs, "abxy-colour", "x-colour");
+    if(!strcmp(abxy_colour, "x-colour")) object_property_set(bcs, "abxy-colour", "y-colour");
+    if(!strcmp(abxy_colour, "y-colour")) object_property_set(bcs, "abxy-colour", "a-colour");
+
+    object_property_set(bcs, "Timer", "750");
     return true;
   }
-  if(!object_property(  bcs, "a-or-b")){
-    object_property_set(bcs, "a-or-b", "a");
-    object_property_set(bcs, "Timer", "1000");
+  if(!object_property(  bcs, "abxy-colour")){
+    object_property_set(bcs, "abxy-colour", "a-colour");
+    object_property_set(bcs, "Timer", "750");
   }
 
   return true;
