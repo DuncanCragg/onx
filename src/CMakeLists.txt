@@ -32,7 +32,7 @@ add_library(lib_onx STATIC
 
     onn/onn.c
     onp/onp.c
-    onp/behaviours.c
+    onp/logic-evaluators.c
     onr/edit-rules.c
 )
 

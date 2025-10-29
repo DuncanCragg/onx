@@ -3,14 +3,14 @@
 
 #include <onn.h>
 
-/* Default, hard-coded behaviour evaluators */
+/* Default, hard-coded behaviour or logic evaluators */
 
 bool evaluate_light_logic(object* o, void* d);
 
 bool evaluate_bcs_logic(object* o, void* d);
 
-bool evaluate_clock_sync(object* o, void* d);
+bool evaluate_clock_sync_logic(object* o, void* d);
 
-bool evaluate_clock(object* o, void* d);
+bool evaluate_clock_logic(object* o, void* d);
 
 #endif

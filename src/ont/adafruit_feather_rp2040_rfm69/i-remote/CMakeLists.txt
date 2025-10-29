@@ -1,7 +1,7 @@
 
 add_executable(onx-i-remote
     ${PROJECT_SOURCE_DIR}/src/onl/seesaw.c
-    ${PROJECT_SOURCE_DIR}/src/ont/behaviours.c
+    ${PROJECT_SOURCE_DIR}/src/ont/logic-evaluators.c
     ${PROJECT_SOURCE_DIR}/src/ont/io-evaluators.c
     onx.c
 )

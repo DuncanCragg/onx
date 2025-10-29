@@ -119,7 +119,7 @@ bool evaluate_bcs_logic(object* bcs, void* d){
   return true;
 }
 
-bool evaluate_clock_sync(object* o, void* d) {
+bool evaluate_clock_sync_logic(object* o, void* d) {
 
   if(!discover_io_peer(o, "sync-clock", "clock")) return true;
 
@@ -140,7 +140,7 @@ bool evaluate_clock_sync(object* o, void* d) {
 
 extern char __BUILD_TIMEZONE_OFFSET;
 
-bool evaluate_clock(object* o, void* d) {
+bool evaluate_clock_logic(object* o, void* d) {
 
   uint64_t es=time_es();
 
