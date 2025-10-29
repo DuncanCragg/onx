@@ -69,7 +69,10 @@ bool properties_set(properties* op, char* key, void* i) {
     lisp=&(*lisp)->next;
   }
   if(!(*lisp)){
-    if(op->size==op->max_size){ log_write("properties hit max_size %d\n", op->size); return false; }
+    if(op->size==op->max_size){
+      log_write("properties hit max_size %s:%d{%s:%d/%d}\n", op->func, op->line, key, op->size, op->max_size);
+      return false;
+    }
     (*lisp)=mem_alloc(sizeof(hash_item));
     if(!(*lisp)) return false;
     (*lisp)->key=mem_strdup(key);
