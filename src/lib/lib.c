@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
+#include <math.h>
 
 #include <onx/mem.h>
 #include <onx/lib.h>
@@ -75,6 +76,17 @@ bool decent_string(char* u){
 ;   if(u[i] < ' ' || u[i] > '~') return false;
   }
   return false;
+}
+
+polar_t cartesian_to_polar(int16_t x, int16_t y) {
+  polar_t p;
+  float fx = (float)x, fy = (float)y;
+  float r = sqrtf(fx*fx + fy*fy);
+  if(r > 512.0f) r = 512.0f;
+  p.radius = (uint8_t)(r * 255.0f / 512.0f);
+  float a = atan2f(fy, fx) + M_PI;
+  p.angle = (uint8_t)(a * 255.0f / (2.0f * M_PI));
+  return p;
 }
 
 

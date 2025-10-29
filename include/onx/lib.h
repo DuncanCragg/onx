@@ -31,4 +31,7 @@ int32_t strto_int32(char* val);
 bool string_is_blank(char* s);
 bool decent_string(char* u);
 
+typedef struct { uint8_t angle, radius; } polar_t;
+polar_t cartesian_to_polar(int16_t x, int16_t y);
+
 #endif
