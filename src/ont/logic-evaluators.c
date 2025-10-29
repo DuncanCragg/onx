@@ -124,12 +124,12 @@ bool evaluate_light_logic(object* o, void* d){
 }
 
 bool evaluate_bcs_logic(object* bcs, void* d){
-  uint8_t brightness = (uint8_t)((object_property_int32(bcs, "gamepad:joystick-x")+512)/5);
-  uint8_t colour     = (uint8_t)((object_property_int32(bcs, "gamepad:joystick-y")+512)/5);
-  uint8_t softness   = (uint8_t)0;
+  uint8_t brightness = (uint8_t)255;
+  polar_t p=cartesian_to_polar((int16_t)object_property_int32(bcs, "gamepad:joystick-x"),
+                               (int16_t)object_property_int32(bcs, "gamepad:joystick-y"));
   object_property_set_fmt(bcs, "brightness", "%d", brightness);
-  object_property_set_fmt(bcs, "colour",     "%d", colour);
-  object_property_set_fmt(bcs, "softness",   "%d", softness);
+  object_property_set_fmt(bcs, "colour",     "%d", p.angle);
+  object_property_set_fmt(bcs, "softness",   "%d", 255-p.radius);
 
   return true;
 }
