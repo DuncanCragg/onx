@@ -75,11 +75,7 @@ bool radio_init(channel_recv_cb cb){
 static volatile uint64_t send_another_chunk_req=0;
 static          void     send_another_chunk();
 
-#if defined(PICO_RP2040)
-#define RADIO_RFM69_DELAY_BETWEEN_CHUNK_SENDS_US 100
-#elif defined(PICO_RP2350)
-#define RADIO_RFM69_DELAY_BETWEEN_CHUNK_SENDS_US 500
-#endif
+#define RADIO_RFM69_DELAY_BETWEEN_CHUNK_SENDS_US 800
 
 uint16_t radio_available(){
   if(!initialised) return 0;

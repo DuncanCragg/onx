@@ -141,7 +141,9 @@ bool handle_all_recv(){
         if(strlen(recv_buff) < 48) log_write("**/%s/\n",           recv_buff);
         else                       log_write("**/%.16s//%.32s/\n", recv_buff, isp? isp: "");
 #else
-        log_write("\n******** radio read error: %d { %s }\n\n", size, bytes_to_chars_or_hex(recv_buff));
+        static uint32_t radio_read_errors=0; radio_read_errors++;
+        log_write("\n*** radio_read error: %d %d { %s }\n\n", size, radio_read_errors,
+                                                    bytes_to_chars_or_hex(recv_buff));
 #endif
         continue;
       }
