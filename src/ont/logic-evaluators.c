@@ -11,21 +11,36 @@
 #include <onn.h>
 #include <ont.h>
 
-static bool discover_io_peer(object* o, char* property, char* is) {
+static bool discover_io_peer(object* o, char* property, char* is, uint8_t max_num) {
 
-  char ispath[32]; snprintf(ispath, 32, "%s:is", property);
+  if(!max_num) return false;
+  uint8_t num_io_peers = object_property_length(o, property);
+  if(num_io_peers >= max_num) return true;
 
-  if(object_property_contains(o, ispath, is)) return true;
+  // device peers: list is prepended with new arrivals so #1 is newest
+  int ln=object_property_length(o, "device:peers:1:io");
+  // REVISIT: device:peers:-1:io like Python for oldest if needed
+  // REVISIT: but actually many peers * many io as single list
 
-  int ln=object_property_length(o, "device:peers:io");
   for(int i=1; i<=ln; i++){
-    char* uid=object_property_get_n(o, "device:peers:io", i);
-    if(!is_uid(uid)) continue;
-    object_property_set(o, property, uid);
-    if(object_property_contains(o, ispath, is)) return true;
+
+    char* uid=object_property_get_n(o, "device:peers:1:io", i);
+  ; if(!is_uid(uid)) continue;
+  ; if(object_property_contains(o, property, uid)) continue;
+
+    // REVISIT: don't want to observe yet, just fetch once
+    object_property_set(o, "test-io-peer", uid);
+    bool found = object_property_contains(o, "test-io-peer:is", is);
+    object_property_set(o, "test-io-peer", 0);
+
+    if(found){
+      log_write("found io peer for %s: %s\n", property, uid);
+      object_property_insert(o, property, uid);
+      object_log(o);
+;     return true;
+    }
   }
-  if(ln) object_property_set(o, property, 0);
-  return false;
+  return num_io_peers;
 }
 
 bool evaluate_light_logic(object* o, void* d){
@@ -95,10 +110,10 @@ bool evaluate_light_logic(object* o, void* d){
   if(object_property(o, "touch:is") ||
      object_property(o, "motion:is")   ) return true;
 
-  discover_io_peer(o, "button", "button");
-  discover_io_peer(o, "bcs", "bcs");
+  discover_io_peer(o, "button", "button", 4);
+  discover_io_peer(o, "bcs", "bcs", 4);
 #ifdef DO_TOUCH_LINK
-  discover_io_peer(o, "touch", "touch");
+  discover_io_peer(o, "touch", "touch", 4);
 #endif
 
   if(light_on && object_property_is(o, "button:state", "up")){
@@ -121,7 +136,7 @@ bool evaluate_bcs_logic(object* bcs, void* d){
 
 bool evaluate_clock_sync_logic(object* o, void* d) {
 
-  if(!discover_io_peer(o, "sync-clock", "clock")) return true;
+  if(!discover_io_peer(o, "sync-clock", "clock", 1)) return true;
 
   char* sync_ts=object_property(o, "sync-clock:ts");
 

@@ -104,7 +104,7 @@ void startup_core0_init(){
 
     object_property_set(ledmx, "light", "on");
     object_property_set(ledmx, "colour", "%0300ff");
-//  object_property_set(ledmx, "bcs", bcsuid);
+    object_property_set(ledmx, "bcs", bcsuid);
     object_property_set(ledmx, "device", deviceuid);
 
     object_property_set(onn_device_object, "name", "Moon");
