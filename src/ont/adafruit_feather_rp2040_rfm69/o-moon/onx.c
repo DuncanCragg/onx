@@ -145,7 +145,7 @@ void startup_core0_loop(){
     if(was_usb_powered!=usb_powered){
       was_usb_powered=usb_powered;
 
-      uint8_t scale=usb_powered? 3: 5;
+      uint8_t scale=usb_powered? 3: 3;
       log_write("setting brightness scale: %d\n", scale);
 
       led_matrix_set_scale(scale);

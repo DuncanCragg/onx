@@ -499,6 +499,9 @@ static bool rh_init() {
   rh_set_sync_words(syncwords, sizeof(syncwords));
 
   rh_set_modem_config(GFSK_Rb250Fd250); // 2 CRC CCITT octets computed on the length and data
+  // REVISIT: setting kb/s rate - to 300 max per datasheet; this is 250 so not too bad
+  // BITRATEMSB 0x00
+  // BITRATELSB 0x6B
 
   rh_set_preamble(4); // REVISIT
   rh_set_frequency(915.0); // REVISIT: config

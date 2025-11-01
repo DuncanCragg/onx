@@ -26,10 +26,6 @@ static volatile list* saved_messages = 0;
 
 static volatile bool initialised=false;
 
-bool stdio_connected(){
-  return tud_cdc_connected();
-}
-
 void log_init() {
 
   if(initialised) return;
@@ -79,10 +75,10 @@ static bool already_in_log_write = false;
 
 // no logging in here obvs
 static char* get_reason_to_save_logs(){
-  if(already_in_log_write)             return "LOG ";
-  if(time_ms() < LOG_EARLY_MS)         return "ERL ";
-  if(in_interrupt_context())           return "INT ";
-  if(log_to_std && !stdio_connected()) return "CON ";
+  if(already_in_log_write)                 return "LOG ";
+  if(time_ms() < LOG_EARLY_MS)             return "ERL ";
+  if(in_interrupt_context())               return "INT ";
+  if(log_to_std && !stdio_usb_connected()) return "CON ";
   return 0;
 }
 

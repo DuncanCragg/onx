@@ -134,6 +134,8 @@ void set_bcs_from_gamepad(object* bcs, char* abxy_colour){
   object_property_set(bcs, "abxy-colour", abxy_colour);
 }
 
+#define STEP_TIME "250"
+
 bool evaluate_bcs_logic(object* bcs, void* d){
 
   bool a=object_property_is(bcs, "gamepad:a", "down");
@@ -165,12 +167,12 @@ bool evaluate_bcs_logic(object* bcs, void* d){
     if(!strcmp(abxy_colour, "x-colour")) object_property_set(bcs, "abxy-colour", "y-colour");
     if(!strcmp(abxy_colour, "y-colour")) object_property_set(bcs, "abxy-colour", "a-colour");
 
-    object_property_set(bcs, "Timer", "750");
+    object_property_set(bcs, "Timer", STEP_TIME);
     return true;
   }
   if(!object_property(  bcs, "abxy-colour")){
     object_property_set(bcs, "abxy-colour", "a-colour");
-    object_property_set(bcs, "Timer", "750");
+    object_property_set(bcs, "Timer", STEP_TIME);
   }
 
   return true;
