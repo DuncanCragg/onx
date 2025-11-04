@@ -19,15 +19,13 @@ add_executable(onx-t-tests
 
 target_include_directories(onx-t-tests PUBLIC
     ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/src/onl
     ${PROJECT_SOURCE_DIR}/src/onn
 )
 
 target_link_libraries(onx-t-tests PUBLIC
     lib_onx
 )
-
-pico_enable_stdio_usb(onx-t-tests 1)
-pico_enable_stdio_uart(onx-t-tests 0)
 
 pico_add_extra_outputs(onx-t-tests)
 

@@ -6,6 +6,7 @@
 #include <pico-support.h>
 #include <m-class-support.h>
 
+#include <pico/stdio_usb.h>
 #include <tusb.h>
 
 #include <onx/lib.h>
@@ -41,7 +42,12 @@ void log_init() {
 #endif
 
   if(log_to_std){
-    stdio_init_all();
+    tud_init(0);
+    stdio_usb_init();
+    for(int i=0; i<500 && !stdio_usb_connected(); i++){
+      time_delay_ms(1);
+      tud_task();
+    }
   }
 
   if(log_to_led){

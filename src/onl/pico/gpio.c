@@ -9,6 +9,7 @@
 #include <hardware/gpio.h>
 #include <hardware/adc.h>
 
+#include <pico/stdio_usb.h>
 #include <tusb.h>
 
 #include <onx/log.h>

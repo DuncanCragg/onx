@@ -15,6 +15,8 @@
 
 #include <pico-support.h>
 
+#include <tusb.h>
+
 #include <onx/boot.h>
 #include <onx/random.h>
 #include <onx/log.h>
@@ -87,6 +89,8 @@ void __not_in_flash_func(core0_main)() {
       time_delay_ms(5); // REVISIT
     }
     startup_core0_loop();
+    tud_task();
+    tud_cdc_write_flush();
     tight_loop_contents();
   }
 }

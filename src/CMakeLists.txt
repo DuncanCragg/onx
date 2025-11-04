@@ -17,6 +17,9 @@ add_library(lib_onx STATIC
     onl/mem.c
     onl/persistence.c
 
+    ${PROJECT_SOURCE_DIR}/sdk-diffs/src/rp2_common/pico_stdio_usb/stdio_usb.c
+    ${PROJECT_SOURCE_DIR}/sdk-diffs/src/rp2_common/pico_stdio_usb/stdio_usb_descriptors.c
+
     lib/lib.c
     lib/chunkbuf.c
     lib/colours.c
@@ -44,9 +47,15 @@ pico_generate_pio_header(lib_onx
 
 target_include_directories(lib_onx PUBLIC
     ${PROJECT_SOURCE_DIR}/include
+    onl
     onl/pico
     onn
     onp
+    ${PICO_SDK_PATH}/src/rp2_common/pico_stdio_usb/include
+)
+
+target_compile_definitions(lib_onx PRIVATE
+  PICO_STDIO_USB_USE_DEFAULT_DESCRIPTORS=1
 )
 
 target_link_libraries(lib_onx PUBLIC
@@ -55,6 +64,7 @@ target_link_libraries(lib_onx PUBLIC
     pico_flash
     pico_sync
     pico_rand
+    pico_unique_id
     hardware_sync
     hardware_dma
     hardware_i2c
@@ -65,8 +75,7 @@ target_link_libraries(lib_onx PUBLIC
     hardware_sync
     hardware_adc
     cmsis_core
+    tinyusb_device
 )
 
-pico_enable_stdio_usb(lib_onx 1)
-pico_enable_stdio_uart(lib_onx 0)
 
