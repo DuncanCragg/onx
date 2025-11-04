@@ -40,8 +40,8 @@ const char* onp_radio_bands = 0;
 
 const char* onn_test_uid_prefix = 0;
 
-const uint8_t led_matrix_dotstar_sck_pin = 2;
-const uint8_t led_matrix_dotstar_tx_pin  = 3;
+const int8_t led_matrix_dotstar_sck_pin = 2;
+const int8_t led_matrix_dotstar_tx_pin  = 3;
 
 // -----------------------------------------------------
 
@@ -62,7 +62,7 @@ extern void run_properties_tests();
 
 extern void run_database_tests();
 extern void run_colour_tests();
-extern void run_actual_leds();
+extern void run_actual_leds(bool run_matrix);
 extern void run_chunkbuf_tests();
 extern void run_evaluate_edit_rule_tests();
 
@@ -200,7 +200,7 @@ void startup_core0_loop(){
   if(stage_c== 1) log_flash(1,1,1);
   if(stage_c== 2) run_tests();
   if(stage_c== 3) run_colour_tests();
-  if(stage_c== 3) run_actual_leds();
+  if(stage_c== 3) run_actual_leds(true);
   if(stage_c== 4) onn_show_cache();
   if(stage_c== 5) onn_show_notify();
   if(stage_c== 6) value_dump_small();

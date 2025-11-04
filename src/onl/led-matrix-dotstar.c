@@ -6,8 +6,8 @@ static const uint16_t num_leds=LED_MATRIX_WIDTH*LED_MATRIX_HEIGHT;
 
 static uint8_t led_matrix_array[LED_MATRIX_WIDTH*LED_MATRIX_HEIGHT][3];
 
-extern const uint8_t led_matrix_dotstar_sck_pin;
-extern const uint8_t led_matrix_dotstar_tx_pin;
+extern const int8_t led_matrix_dotstar_sck_pin;
+extern const int8_t led_matrix_dotstar_tx_pin;
 
 void led_matrix_init(){
   // it's not proper SPI, plus no CS, so need to avoid main SPI bus
