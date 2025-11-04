@@ -86,7 +86,7 @@ void __not_in_flash_func(core0_main)() {
 
   while(1){
     if(!onn_loop()){
-      time_delay_ms(5); // REVISIT
+      // time_delay_ms(5); // REVISIT
     }
     startup_core0_loop();
     tud_task();
