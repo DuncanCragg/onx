@@ -27,6 +27,12 @@ static volatile list* saved_messages = 0;
 
 static volatile bool initialised=false;
 
+static volatile char char_recvd=0;
+
+void tud_cdc_rx_cb(uint8_t itf) {
+  tud_cdc_read(&char_recvd, 1);
+}
+
 void log_init() {
 
   if(initialised) return;
@@ -135,6 +141,23 @@ static void flush_saved_messages(uint8_t to){
 bool log_loop() {
 
   if(!initialised) return true;
+
+  if(char_recvd){
+    log_write(">%c<----------\n", char_recvd);
+    if(char_recvd=='c') onn_show_cache();
+    if(char_recvd=='n') onn_show_notify();
+    if(char_recvd=='v') value_dump_small();
+    if(char_recvd=='V') value_dump();
+    if(char_recvd=='f') persistence_dump();
+    if(char_recvd=='F') persistence_wipe();
+    if(char_recvd=='m') mem_show_allocated(true);
+    if(char_recvd=='p') gpio_show_power_status();
+    if(char_recvd=='r') boot_reset(false);
+    if(char_recvd=='b') boot_reset(true);
+    if(char_recvd=='*') log_flash(1,1,1);
+    if(char_recvd=='h') log_write("c.ache n.otifies Vv.alues f.lash F.ormat m.em p.ower r.eset b.ootloader\n");
+    char_recvd=0;
+  }
 
   if(log_to_std){
     flush_saved_messages(FLUSH_TO_STDIO);

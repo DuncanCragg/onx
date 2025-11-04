@@ -1,4 +1,6 @@
 
+#include "pico/bootrom.h"
+
 #include <onx/log.h>
 #include <onx/boot.h>
 
@@ -8,7 +10,7 @@ void boot_init() {
 }
 
 void boot_reset(bool enter_bootloader) {
-// PORT reset or reset to bootloader
+  if(enter_bootloader) rom_reset_usb_boot_extra(-1, 0, false);
 }
 
 void boot_feed_watchdog() {
