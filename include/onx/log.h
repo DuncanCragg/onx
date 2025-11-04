@@ -19,6 +19,10 @@ extern volatile list* gfx_log_buffer;
 void log_init();
 bool log_loop();
 
+typedef void (*log_usb_cb)(char);
+
+void log_set_usb_cb(log_usb_cb cb);
+
 // mode 0 is current simple one
 // mode 1 is current with prefixes
 // mode 2 is new simple one

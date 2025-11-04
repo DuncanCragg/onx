@@ -27,10 +27,20 @@ static volatile list* saved_messages = 0;
 
 static volatile bool initialised=false;
 
+static log_usb_cb the_log_usb_cb=0;
+
+void log_set_usb_cb(log_usb_cb cb){
+  the_log_usb_cb = cb;
+}
+
 static volatile char char_recvd=0;
 
 void tud_cdc_rx_cb(uint8_t itf) {
   tud_cdc_read(&char_recvd, 1);
+  if(the_log_usb_cb){
+    the_log_usb_cb(char_recvd);
+    char_recvd=0;
+  }
 }
 
 void log_init() {

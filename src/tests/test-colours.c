@@ -113,8 +113,12 @@ void run_colour_tests(){
 #define DELAY_BETWEEN 150
 void run_actual_leds(bool run_matrix){
 
-  led_strip_init();
-  if(run_matrix) led_matrix_init();
+  static bool initialised=false;
+  if(!initialised){
+    led_strip_init();
+    if(run_matrix) led_matrix_init();
+    initialised=true;
+  }
 
   led_strip_fill_col( "#ff0");
   if(run_matrix) led_matrix_fill_col("#ff0");
