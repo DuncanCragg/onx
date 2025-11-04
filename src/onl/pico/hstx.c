@@ -313,7 +313,7 @@ void startup_core0_init(){
 
 void __not_in_flash_func(startup_core0_loop)(){
 
-  while(do_flip) tight_loop_contents();  // REVISIT: expose do_flip and move core0 up to ont hx
+  if(do_flip) return;  // REVISIT: expose do_flip and move core0 up to ont hx
 
   ont_hx_frame();
 
