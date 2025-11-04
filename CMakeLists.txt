@@ -55,6 +55,8 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} \
     "
 )
 
+add_subdirectory(external/pico-pio-usb pico_pio_usb)
+
 add_subdirectory(src) # lib_onx
 
 include(board/${PICO_BOARD}_targets.cmake) # per-board executables

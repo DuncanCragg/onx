@@ -26,8 +26,12 @@
 // -----------------------------------------------------
 
 const uint8_t  startup_vreg_v      = VREG_VOLTAGE_DEFAULT;
-const uint32_t startup_clockspeed  = SYS_CLK_KHZ;
+const uint32_t startup_clockspeed  = 120000;
 const uint8_t  startup_hstxdivisor = 2;
+
+const int8_t startup_pio_usb_data_plus_pin = 1;
+const int8_t startup_pio_usb_dma_channel   = 9;
+const int8_t startup_pio_usb_enable_pin    = 11;
 
 const uint8_t radio_rfm69_cs_pin  = 43;
 const uint8_t radio_rfm69_rst_pin = 44;

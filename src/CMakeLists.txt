@@ -18,8 +18,11 @@ add_library(lib_onx STATIC
     onl/persistence.c
 
     onl/tinyusb-device.c
+    onl/tinyusb-host.c
     ${PROJECT_SOURCE_DIR}/sdk-diffs/src/rp2_common/pico_stdio_usb/stdio_usb.c
     ${PROJECT_SOURCE_DIR}/sdk-diffs/src/rp2_common/pico_stdio_usb/stdio_usb_descriptors.c
+    ${PICO_TINYUSB_PATH}/src/portable/raspberrypi/pio_usb/dcd_pio_usb.c
+    ${PICO_TINYUSB_PATH}/src/portable/raspberrypi/pio_usb/hcd_pio_usb.c
 
     lib/lib.c
     lib/chunkbuf.c
@@ -56,6 +59,7 @@ target_include_directories(lib_onx PUBLIC
 )
 
 target_compile_definitions(lib_onx PRIVATE
+  PIO_USB_USE_TINYUSB
   PICO_STDIO_USB_USE_DEFAULT_DESCRIPTORS=1
 )
 
@@ -65,6 +69,7 @@ target_link_libraries(lib_onx PUBLIC
     pico_flash
     pico_sync
     pico_rand
+    pico_pio_usb
     pico_unique_id
     hardware_sync
     hardware_dma
@@ -77,6 +82,7 @@ target_link_libraries(lib_onx PUBLIC
     hardware_adc
     cmsis_core
     tinyusb_device
+    tinyusb_host
 )
 
 
