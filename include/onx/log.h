@@ -35,4 +35,8 @@ void log_flash_current_file_line(char* file, uint32_t line, uint8_t r, uint8_t g
 
 void log_flush();
 
+// weak linkage fix
+void tud_cdc_rx_cb(uint8_t itf);
+static __attribute__((used)) void* __tud_cdc_rx_cb__ = tud_cdc_rx_cb;
+
 #endif

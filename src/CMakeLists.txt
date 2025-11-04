@@ -17,6 +17,7 @@ add_library(lib_onx STATIC
     onl/mem.c
     onl/persistence.c
 
+    onl/tinyusb-device.c
     ${PROJECT_SOURCE_DIR}/sdk-diffs/src/rp2_common/pico_stdio_usb/stdio_usb.c
     ${PROJECT_SOURCE_DIR}/sdk-diffs/src/rp2_common/pico_stdio_usb/stdio_usb_descriptors.c
 
