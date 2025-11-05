@@ -8,6 +8,7 @@
 #include <onx/dma-mem.h>
 #include <onx/hstx.h>
 #include <onx/items.h>
+#include <onx/io.h>
 
 // -----------------------------------------------------
 
@@ -106,7 +107,12 @@ void copy_mountain_to_psram(){
   }
 }
 
+void io_cb(){
+}
+
 void ont_hx_init(){
+
+  io_init(io_cb);
 
   copy_mountain_to_psram();
 }
@@ -120,7 +126,11 @@ void ont_hx_frame(){
   yoff+=6;
 
   for(int s=0; s<NUM_SPRITES; s++){
-  ; if(scenegraph[scenegraph_read][s].c==0b1000000000000000) continue;
+    if(scenegraph[scenegraph_read][s].c==0b1000000000000000){
+      scenegraph[scenegraph_write][s].x = io.touch_x;
+      scenegraph[scenegraph_write][s].y = io.touch_y;
+  ;   continue;
+    }
     scenegraph[scenegraph_write][s].x=scenegraph[scenegraph_read][s].x+1+(NUM_SPRITES-s)/4;
     scenegraph[scenegraph_write][s].y=scenegraph[scenegraph_read][s].y+1+(NUM_SPRITES-s)/4;
     scenegraph[scenegraph_write][s].w=scenegraph[scenegraph_read][s].w+1+(NUM_SPRITES-s)/4;
