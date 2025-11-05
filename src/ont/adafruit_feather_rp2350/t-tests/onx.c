@@ -15,6 +15,7 @@
 #include <onx/mem.h>
 #include <onx/gpio.h>
 #include <onx/radio.h>
+#include <onx/io.h>
 
 #include <onx/chunkbuf.h>
 #include <onx/colours.h>
@@ -183,9 +184,15 @@ void char_recieved(char ch){
   char_recvd = ch;
 }
 
+void io_cb(){
+  io_state_show();
+}
+
 void startup_core0_init(){
 
   log_set_usb_cb(char_recieved);
+
+  io_init(io_cb);
 
   time_tick(tick_cb, "banana",  250);
   time_once(once_cb, "mango!", 2500);
