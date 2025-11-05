@@ -34,7 +34,7 @@ const char* onn_test_uid_prefix = 0;
 
 // -----------------------------------------------------
 
-#include "mountains_800x480_rgb565.h"
+#include <mountains_800x480_rgb565.h>
 
 #define NO_MOUNTAINS     // DO_MOUNTAINS
 

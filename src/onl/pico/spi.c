@@ -2,12 +2,12 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "pico/stdlib.h"
-#include "pico/binary_info.h"
+#include <pico/stdlib.h>
+#include <pico/binary_info.h>
 
-#include "hardware/spi.h"
+#include <hardware/spi.h>
 
-#include "onx/log.h"
+#include <onx/log.h>
 #include <onx/spi.h>
 #undef spi_init
 #include <onx/gpio.h>

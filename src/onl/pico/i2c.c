@@ -1,10 +1,10 @@
 
 #include <stdio.h>
 
-#include "pico/stdlib.h"
-#include "pico/binary_info.h"
+#include <pico/stdlib.h>
+#include <pico/binary_info.h>
 
-#include "hardware/i2c.h"
+#include <hardware/i2c.h>
 
 #include <onx/log.h>
 #include <onx/time.h>

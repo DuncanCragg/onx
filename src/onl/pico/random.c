@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "pico/rand.h"
+#include <pico/rand.h>
 
 #include <onx/random.h>
 #include <onx/log.h>

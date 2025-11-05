@@ -3,11 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "pico/stdlib.h"
-#include "pico/multicore.h"
-#include "pico/time.h"
+#include <pico/stdlib.h>
+#include <pico/multicore.h>
+#include <pico/time.h>
 
-#include "hardware/dma.h"
+#include <hardware/dma.h>
 
 #include <onx/dma-mem.h>
 

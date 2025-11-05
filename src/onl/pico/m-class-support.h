@@ -1,7 +1,7 @@
 
 #include <stdbool.h>
 
-#include "pico/stdlib.h"
+#include <pico/stdlib.h>
 
 #if defined(PICO_RP2040)
 #include <RP2040.h>

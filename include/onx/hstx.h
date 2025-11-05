@@ -4,9 +4,9 @@
 // ------------------------------------------------------------------------------
 // config for startup.c
 
-#define STARTUP_VREG_V      VREG_VOLTAGE_1_30
-#define STARTUP_CLOCKSPEED  (300*1000)
-#define STARTUP_HSTXDIVISOR 4 // 150MHz = 60Hz  100MHz = 40Hz   75MHz = 30Hz
+#define HSTX_VREG_V      VREG_VOLTAGE_1_30
+#define HSTX_CLOCKSPEED  (300*1000)
+#define HSTX_HSTXDIVISOR 4 // 150MHz = 60Hz  100MHz = 40Hz   75MHz = 30Hz
 
 // ------------------------------------------------------------------------------
 // some frame timings and defs

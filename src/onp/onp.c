@@ -9,7 +9,7 @@
 #include <onx/radio.h>
 #include <onx/ipv6.h>
 
-#include "onn.h"
+#include <onn.h>
 #include "onp.h"
 
 static void on_connect(char* channel);

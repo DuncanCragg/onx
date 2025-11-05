@@ -12,7 +12,7 @@
 #include <pico/stdlib.h>
 #include <pico/sync.h>
 
-#include "hardware/sync.h"
+#include <hardware/sync.h>
 
 #define X       __scratch_x("")
 #define ALIGNED __attribute__((aligned(4)))

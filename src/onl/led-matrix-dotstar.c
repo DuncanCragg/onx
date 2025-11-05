@@ -1,6 +1,6 @@
 
-#include "onx/spi.h"
-#include "onx/led-matrix.h"
+#include <onx/spi.h>
+#include <onx/led-matrix.h>
 
 static const uint16_t num_leds=LED_MATRIX_WIDTH*LED_MATRIX_HEIGHT;
 
