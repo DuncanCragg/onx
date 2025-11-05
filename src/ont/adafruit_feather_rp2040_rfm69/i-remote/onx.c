@@ -25,9 +25,9 @@
 const uint8_t  startup_vreg_v     = VREG_VOLTAGE_DEFAULT;
 const uint32_t startup_clockspeed = SYS_CLK_KHZ;
 
-const int8_t startup_pio_usb_data_plus_pin = -1;
-const int8_t startup_pio_usb_dma_channel   = -1;
-const int8_t startup_pio_usb_enable_pin    = -1;
+const int8_t usb_host_pio_data_plus_pin = -1;
+const int8_t usb_host_pio_dma_channel   = -1;
+const int8_t usb_host_pio_enable_pin    = -1;
 
 const bool log_to_std = true;
 const bool log_to_gfx = false;

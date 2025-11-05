@@ -152,6 +152,9 @@ bool log_loop() {
 
   if(!initialised) return true;
 
+  tud_task();
+  tud_cdc_write_flush(); // REVISIT: needed?
+
   if(char_recvd){
     log_write(">%c<----------\n", char_recvd);
     if(char_recvd=='c') onn_show_cache();

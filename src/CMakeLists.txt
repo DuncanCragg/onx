@@ -13,6 +13,7 @@ add_library(lib_onx STATIC
     onl/pico/gpio.c
     onl/pico/i2c.c
     onl/pico/spi.c
+    onl/pico/usb-host.c
 
     onl/mem.c
     onl/persistence.c

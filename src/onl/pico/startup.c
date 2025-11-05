@@ -14,15 +14,14 @@
 
 #include <pico-support.h>
 
-#include <pio_usb.h>
-#include <tusb.h>
-
 #include <onx/boot.h>
 #include <onx/random.h>
 #include <onx/log.h>
 #include <onx/gpio.h>
 #include <onx/startup.h>
 #include <onx/psram.h>
+
+#include "usb-host.h"
 
 #include <onn.h>
 
@@ -53,18 +52,6 @@ static void set_up_clocks(){
 #endif
 }
 
-void set_up_usb_host(){
-  if(startup_pio_usb_enable_pin >= 0){
-    gpio_mode(startup_pio_usb_enable_pin, GPIO_MODE_OUTPUT);
-    gpio_set( startup_pio_usb_enable_pin, 1);
-  }
-  pio_usb_configuration_t pio_cfg = PIO_USB_DEFAULT_CONFIG;
-  pio_cfg.pin_dp = startup_pio_usb_data_plus_pin;
-  pio_cfg.tx_ch  = startup_pio_usb_dma_channel;
-  tuh_configure(1, TUH_CFGID_RPI_PIO_USB_CONFIGURATION, &pio_cfg);
-  tuh_init(1);
-}
-
 //-------------------------------------------
 
 static void __not_in_flash_func(core0_main)();
@@ -87,7 +74,7 @@ void __not_in_flash_func(core0_main)() {
   psram_init();
   psram_tests();
 
-  set_up_usb_host();
+  usb_host_init();
 
   onn_init();
 
@@ -104,9 +91,7 @@ void __not_in_flash_func(core0_main)() {
       // time_delay_ms(5); // REVISIT
     }
     startup_core0_loop();
-    tud_task();
-    tud_cdc_write_flush();
-    tuh_task_ext(0,0);
+    usb_host_loop();
     tight_loop_contents();
   }
 }
