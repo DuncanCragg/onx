@@ -30,20 +30,7 @@ void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance) {
 }
 
 void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report, uint16_t len) {
-
-  if(len==0){
-    static int x=0;
-    if(x < 5){
-      x++;
-      printf("zero len report\r\n");
-    }
-    if ( !tuh_hid_receive_report(dev_addr, instance) ) {
-      printf("Error: cannot request report\r\n");
-    }
-    return;
-  }
   uint8_t const itf_protocol = tuh_hid_interface_protocol(dev_addr, instance);
-
   if(itf_protocol==0) {
     printf("[%u] HID interface %u report, len=%d\r\n", dev_addr, instance, len);
     for(int i=0; i<len; i++) printf("%x.", report[i]);
