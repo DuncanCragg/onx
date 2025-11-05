@@ -19,7 +19,7 @@
 #include <hardware/vreg.h>
 #include <hardware/clocks.h>
 
-#include <pico-support.h>
+#include <sync-and-mem.h>
 
 #include <onx/startup.h>
 #include <onx/log.h>

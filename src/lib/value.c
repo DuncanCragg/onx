@@ -6,12 +6,13 @@
 #include <errno.h>
 #include <ctype.h>
 
+#include <sync-and-mem.h>
+
 #include <onx/items.h>
 
 #include <onx/mem.h>
 #include <onx/lib.h>
 #include <onx/log.h>
-#include <onx/sync.h>
 
 #define UNK_TO_TXT_CHK if(ln>=s){ *b = 0; return b; }
 

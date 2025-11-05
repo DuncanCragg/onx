@@ -7,7 +7,7 @@
 #include <ctype.h>
 #include <sys/stat.h>
 
-#include <onx/sync.h>
+#include <sync-and-mem.h>
 
 // if any of these linker-fixen actually gets called, we should find out soon enough when
 // it hangs there and I debug it...

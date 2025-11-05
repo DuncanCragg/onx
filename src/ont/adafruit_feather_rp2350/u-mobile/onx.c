@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <pico-support.h>
+#include <sync-and-mem.h>
 
 #include <onx/dma-mem.h>
 #include <onx/hstx.h>

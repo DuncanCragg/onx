@@ -1,7 +1,7 @@
 #ifndef DMA_MEM_H
 #define DMA_MEM_H
 
-#include <pico-support.h>
+#include <sync-and-mem.h>
 
 // REVISIT platform-independently way to indicate speed critical, i.e. "X", inline, etc
 

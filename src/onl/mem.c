@@ -1,7 +1,7 @@
 
 #include <string.h>
 
-#include <m-class-support.h>
+#include <sync-and-mem.h>
 
 #include <onx/mem.h>
 #include <onx/log.h>

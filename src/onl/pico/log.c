@@ -3,8 +3,7 @@
 #include <string.h>
 #include <stdarg.h>
 
-#include <pico-support.h>
-#include <m-class-support.h>
+#include <sync-and-mem.h>
 
 #include <pico/stdio_usb.h>
 #include <tusb.h>

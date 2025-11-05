@@ -42,8 +42,8 @@
 #endif
 
 // --- RFM69 -------------------
-#define PICO_DEFAULT_RADIO_RFM69_CS_PIN  16
-#define PICO_DEFAULT_RADIO_RFM69_RST_PIN 17
-#define PICO_DEFAULT_RADIO_RFM69_INT_PIN 21
+#define RADIO_RFM69_CS_PIN  16
+#define RADIO_RFM69_RST_PIN 17
+#define RADIO_RFM69_INT_PIN 21
 
 #endif
