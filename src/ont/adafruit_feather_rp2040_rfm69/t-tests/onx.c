@@ -10,14 +10,18 @@
 #include <hardware/vreg.h>
 
 #include <onx/time.h>
+#include <onx/boot.h>
 #include <onx/log.h>
 #include <onx/mem.h>
 #include <onx/gpio.h>
 #include <onx/radio.h>
+#include <onx/io.h>
 
 #include <onx/chunkbuf.h>
 #include <onx/colours.h>
 #include <onn.h>
+
+#include <persistence.h>
 
 #include <onx/items.h>
 
@@ -91,11 +95,12 @@ void run_tests() {
 
 // -----------------------------------------------------
 
-static volatile uint32_t stage_c=0;
-static volatile uint32_t stage_p=0;
-
 static void tick_cb(void* arg){
-  if(stage_c == stage_p) stage_c++;
+  static uint8_t numtix=0;
+  if(numtix<5){
+    numtix++;
+    log_write("tick %d\n", numtix);
+  }
 }
 
 static void once_cb(void* arg){
@@ -179,7 +184,21 @@ static void check_big_radio_data(){
 
 // -----------------------------------------------------
 
+static volatile char char_recvd = 0;
+
+void char_received(char ch){
+  char_recvd = ch;
+}
+
+void io_cb(){
+  io_state_show();
+}
+
 void startup_core0_init(){
+
+  log_set_usb_cb(char_received);
+
+  io_init(io_cb);
 
   time_tick(tick_cb, "banana",  250);
   time_once(once_cb, "mango!", 2500);
@@ -199,20 +218,26 @@ void startup_core0_loop(){
 
   check_big_radio_data();
 
-  if(stage_c == stage_p) return;
-  if(stage_c<=15) log_write("-----------------stage %d----------------------\n", stage_c);
-  if(stage_c== 1) log_flash(1,1,1);
-  if(stage_c== 2) run_tests();
-  if(stage_c== 3) run_colour_tests();
-  if(stage_c== 3) run_actual_leds(true);
-  if(stage_c== 4) onn_show_cache();
-  if(stage_c== 5) onn_show_notify();
-  if(stage_c== 6) value_dump_small();
-  if(stage_c== 7) value_dump();
-  if(stage_c== 8) mem_show_allocated(true);
-  if(stage_c== 9 && radio_starter) send_big_radio_data(true);
-  if(stage_c==10) log_flash(1,1,1);
-  stage_p = stage_c;
+  if(char_recvd){
+    log_write(">%c<----------\n", char_recvd);
+    if(char_recvd=='t') run_tests();
+    if(char_recvd=='l') run_colour_tests();
+    if(char_recvd=='l') run_actual_leds(true);
+    if(char_recvd=='s') send_big_radio_data(true); // && radio_starter
+    // ------ same as log.c ------------
+    if(char_recvd=='c') onn_show_cache();
+    if(char_recvd=='n') onn_show_notify();
+    if(char_recvd=='v') value_dump_small();
+    if(char_recvd=='V') value_dump();
+    if(char_recvd=='f') persistence_dump();
+    if(char_recvd=='m') mem_show_allocated(true);
+    if(char_recvd=='p') gpio_show_power_status();
+    if(char_recvd=='r') boot_reset(false);
+    if(char_recvd=='b') boot_reset(true);
+    if(char_recvd=='*') log_flash(1,1,1);
+    if(char_recvd=='h') log_write("t.ests co.l.our s.end-radio i.nputs | object c.ache n.otifies Vv.alues f.lash m.em p.ower r.eset b.ootloader\n");
+    char_recvd=0;
+  }
 }
 
 void startup_core1_init(){ } // REVISIT not used, so...
