@@ -180,7 +180,7 @@ static void check_big_radio_data(){
 
 static volatile char char_recvd = 0;
 
-void char_recieved(char ch){
+void char_received(char ch){
   char_recvd = ch;
 }
 
@@ -190,7 +190,7 @@ void io_cb(){
 
 void startup_core0_init(){
 
-  log_set_usb_cb(char_recieved);
+  log_set_usb_cb(char_received);
 
   io_init(io_cb);
 
