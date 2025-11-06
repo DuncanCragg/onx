@@ -21,6 +21,7 @@ typedef struct io_state {
   float    joy_2_lr;
   float    joy_2_ud;
 
+  bool     touched;
   uint16_t touch_x;
   uint16_t touch_y;
 

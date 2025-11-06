@@ -89,7 +89,7 @@ static sprite scenegraph[2][12] = {
   { 100, 100, 30, 30, 0b0111111111100111 },
   { 200, 200, 60, 60, 0b0001111111111111 },
   { 300, 300, 90, 90, 0b0111111111100000 },
-  {  50,  50,300,300, 0b1000000000000000 }
+  { 250,  50,300,300, 0b1000000000000000 }
  },{
   { 250, 200,300,200, 0b0111111111111111 },
   { 350, 300, 90, 90, 0b0111100111111111 },
@@ -102,7 +102,7 @@ static sprite scenegraph[2][12] = {
   { 100, 100, 30, 30, 0b0111111111100111 },
   { 200, 200, 60, 60, 0b0001111111111111 },
   { 300, 300, 90, 90, 0b0111111111100000 },
-  {  50,  50,300,300, 0b1000000000000000 }
+  { 250,  50,300,300, 0b1000000000000000 }
  }
 };
 
@@ -130,7 +130,18 @@ void copy_mountain_to_psram(){
 
 // ------------------------------------------------------------------------
 
-void io_cb(){
+static bool touch_down=false;
+
+static void io_cb() {
+  if(io.touched){
+    touch_down = true;
+    g2d_touch_event(true, io.touch_x, io.touch_y);
+  }
+  else
+  if(touch_down){ // you can get >1 touch up event so reduce to just one
+    touch_down=false;
+    g2d_touch_event(false, io.touch_x, io.touch_y);
+  }
 }
 
 static char note_text[] = "the fat cat sat on me";
@@ -285,11 +296,7 @@ void ont_hx_frame(){
   yoff+=6;
 
   for(int s=0; s<NUM_SPRITES; s++){
-    if(scenegraph[scenegraph_read][s].c==0b1000000000000000){
-      scenegraph[scenegraph_write][s].x = io.touch_x;
-      scenegraph[scenegraph_write][s].y = io.touch_y;
-  ;   continue;
-    }
+  ; if(scenegraph[scenegraph_read][s].c==0b1000000000000000) continue;
     scenegraph[scenegraph_write][s].x=scenegraph[scenegraph_read][s].x+1+(NUM_SPRITES-s)/4;
     scenegraph[scenegraph_write][s].y=scenegraph[scenegraph_read][s].y+1+(NUM_SPRITES-s)/4;
     scenegraph[scenegraph_write][s].w=scenegraph[scenegraph_read][s].w+1+(NUM_SPRITES-s)/4;
@@ -300,6 +307,11 @@ void ont_hx_frame(){
     if(scenegraph[scenegraph_write][s].h > 400)          scenegraph[scenegraph_write][s].h=100;
   }
 
+  // ------------------------------
+
+  if(g2d_pending()){
+    onn_run_evaluators(useruid, (void*)USER_EVENT_TOUCH);
+  }
 }
 
 // #define G2D_BUFFER_SIZE (240 * 320)

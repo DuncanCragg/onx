@@ -26,10 +26,9 @@ void touch_usb_event(uint8_t* buf, uint16_t len){
     case 1: {
       if(len<8) break;
       if(buf[2]!=0) break;
-      uint16_t xl=buf[3];
-      uint16_t xh=buf[4];
-      uint16_t yl=buf[5];
-      uint16_t yh=buf[6];
+      uint16_t xl=buf[3]; uint16_t xh=buf[4];
+      uint16_t yl=buf[5]; uint16_t yh=buf[6];
+      io.touched=buf[1];
       io.touch_x=(xh << 8) | xl;
       io.touch_y=(yh << 8) | yl;
       if(io_state_changed_cb) io_state_changed_cb();
