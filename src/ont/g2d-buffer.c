@@ -22,11 +22,8 @@ uint16_t g2d_buffer[G2D_BUFFER_SIZE + 4];
 void g2d_init() {
 }
 
-bool g2d_clear_screen(uint8_t colour) {
-
-  memset(g2d_buffer, colour, G2D_BUFFER_SIZE);
-
-  return true;
+void g2d_clear_screen() {
+  memset(g2d_buffer, 0x00, G2D_BUFFER_SIZE*2);
 }
 
 void g2d_render() {

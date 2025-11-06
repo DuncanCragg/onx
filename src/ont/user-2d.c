@@ -578,7 +578,7 @@ static bool do_evaluate_user_2d(object* usr, uint8_t user_event){
 
   uint8_t root_g2d_node = g2d_node_create(0, 0,0, SCREEN_WIDTH,SCREEN_HEIGHT, 0,0,0);
 
-  if(!g2d_clear_screen(0x00)) return true;
+  g2d_clear_screen();
 
   draw_by_type("viewing", root_g2d_node);
 
