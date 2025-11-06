@@ -14,7 +14,8 @@
 #define MAX_CCH_LEN  32
 
 #define MAX_LIST_SIZE  32
-#define MAX_TEXT_LEN 1024
+#define MAX_OBJ_TEXT_LEN 2048
+#define MAX_PATH_LEN 256
 #define MAX_OBJECTS 64
 #define MAX_DB_OBJECTS 1024
 #define MAX_TO_NOTIFY 64

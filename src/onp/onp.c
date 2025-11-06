@@ -97,8 +97,8 @@ void onp_init() {
   if(onp_channel_forward) log_write("ONP forwarding, PCR\n");
 }
 
-#define RECV_BUFF_SIZE 1024
-#define SEND_BUFF_SIZE 1024
+#define RECV_BUFF_SIZE 1024 // REVISIT
+#define SEND_BUFF_SIZE 1024 // REVISIT
 
 static char recv_buff[RECV_BUFF_SIZE];
 static char send_buff[SEND_BUFF_SIZE];

@@ -428,8 +428,8 @@ char* object_property(object* n, char* path) {
 }
 
 char* object_pathpair(object* n, char* path1, char* path2){
-  char pathbuf[MAX_TEXT_LEN];
-  snprintf(pathbuf, MAX_TEXT_LEN, "%s:%s", path1, path2);
+  char pathbuf[MAX_PATH_LEN];
+  snprintf(pathbuf, MAX_PATH_LEN, "%s:%s", path1, path2);
   return object_property_observe(n, pathbuf, true);
 }
 
@@ -437,6 +437,7 @@ char* object_property_peek(object* n, char* path) {
   return object_property_observe(n, path, false);
 }
 
+#define MAX_PROP_VAL_TEXT_LEN 256
 char* object_property_values(object* n, char* path) {
 
   // object_property_values deprecated!
@@ -449,7 +450,7 @@ char* object_property_values(object* n, char* path) {
     return v;
   }
   if(i->type==ITEM_LIST){
-    char b[MAX_TEXT_LEN]; *b=0;
+    char b[MAX_PROP_VAL_TEXT_LEN]; *b=0;
     int ln=0;
     int j; int sz=list_size((list*)i);
     for(j=1; j<=sz; j++){
@@ -459,10 +460,10 @@ char* object_property_values(object* n, char* path) {
       if(y->type==ITEM_VALUE){
         char* v=value_string((value*)y);
         if(is_uid(v)) continue;
-        ln+=strlen(value_to_text((value*)y, b+ln, MAX_TEXT_LEN-ln));
-        if(ln>=MAX_TEXT_LEN) return 0;
-        if(j!=sz) ln+=snprintf(b+ln, MAX_TEXT_LEN-ln, " ");
-        if(ln>=MAX_TEXT_LEN) return 0;
+        ln+=strlen(value_to_text((value*)y, b+ln, MAX_PROP_VAL_TEXT_LEN-ln));
+        if(ln>=MAX_PROP_VAL_TEXT_LEN) return 0;
+        if(j!=sz) ln+=snprintf(b+ln, MAX_PROP_VAL_TEXT_LEN-ln, " ");
+        if(ln>=MAX_PROP_VAL_TEXT_LEN) return 0;
       }
     }
     return strlen(b)? value_string(value_new(b)): 0; // not a single value!
@@ -544,8 +545,8 @@ int32_t object_property_int32(object* n, char* path){
 }
 
 int32_t object_pathpair_int32(object* n, char* path1, char* path2){
-  char pathbuf[MAX_TEXT_LEN];
-  snprintf(pathbuf, MAX_TEXT_LEN, "%s:%s", path1, path2);
+  char pathbuf[MAX_PATH_LEN];
+  snprintf(pathbuf, MAX_PATH_LEN, "%s:%s", path1, path2);
   return object_property_int32(n, pathbuf);
 }
 
@@ -561,8 +562,8 @@ uint16_t object_property_length(object* n, char* path) {
 }
 
 uint16_t object_pathpair_length(object* n, char* path1, char* path2){
-  char pathbuf[MAX_TEXT_LEN];
-  snprintf(pathbuf, MAX_TEXT_LEN, "%s:%s", path1, path2);
+  char pathbuf[MAX_PATH_LEN];
+  snprintf(pathbuf, MAX_PATH_LEN, "%s:%s", path1, path2);
   return object_property_length(n, pathbuf);
 }
 
@@ -580,8 +581,8 @@ char* object_property_get_n(object* n, char* path, uint16_t index) {
 }
 
 char* object_pathpair_get_n(object* n, char* path1, char* path2, uint16_t index){
-  char pathbuf[MAX_TEXT_LEN];
-  snprintf(pathbuf, MAX_TEXT_LEN, "%s:%s", path1, path2);
+  char pathbuf[MAX_PATH_LEN];
+  snprintf(pathbuf, MAX_PATH_LEN, "%s:%s", path1, path2);
   return object_property_get_n(n, pathbuf, index);
 }
 
@@ -672,8 +673,8 @@ bool object_property_is_peek(object* n, char* path, char* expected) {
 }
 
 bool object_pathpair_is(object* n, char* path1, char* path2, char* expected){
-  char pathbuf[MAX_TEXT_LEN];
-  snprintf(pathbuf, MAX_TEXT_LEN, "%s:%s", path1, path2);
+  char pathbuf[MAX_PATH_LEN];
+  snprintf(pathbuf, MAX_PATH_LEN, "%s:%s", path1, path2);
   return object_property_is_observe(n, pathbuf, expected, true);
 }
 
@@ -701,8 +702,8 @@ bool object_property_contains(object* n, char* path, char* expected) {
 }
 
 bool object_pathpair_contains(object* n, char* path1, char* path2, char* expected){
-  char pathbuf[MAX_TEXT_LEN];
-  snprintf(pathbuf, MAX_TEXT_LEN, "%s:%s", path1, path2);
+  char pathbuf[MAX_PATH_LEN];
+  snprintf(pathbuf, MAX_PATH_LEN, "%s:%s", path1, path2);
   return object_property_contains_observe(n, pathbuf, expected, true);
 }
 
@@ -1010,10 +1011,10 @@ bool object_property_add_list(object* n, char* path, ... /* char* val, ..., 0 */
 
 bool object_property_set_fmt(object* n, char* path, char* fmt, ... /* <any> val, ... */){
 
-  char valbuf[MAX_TEXT_LEN];
+  char valbuf[1024]; // REVISIT: big to cover no overflow check?
   va_list args;
   va_start(args, fmt);
-  vsnprintf(valbuf, MAX_TEXT_LEN, fmt, args);
+  vsnprintf(valbuf, 1024, fmt, args);
   va_end(args);
 
   return object_property_set(n, path, valbuf);
@@ -1291,8 +1292,8 @@ char* observe_uid_to_text(char* uid, char* b, uint16_t s){
 }
 
 void object_log(object* o) {
-  char buff[MAX_TEXT_LEN];
-  log_write("{ %s }\n", object_to_text(o,buff,MAX_TEXT_LEN,OBJECT_TO_TEXT_LOG));
+  char buff[MAX_OBJ_TEXT_LEN];
+  log_write("{ %s }\n", object_to_text(o,buff,MAX_OBJ_TEXT_LEN,OBJECT_TO_TEXT_LOG));
 }
 
 // -----------------------------------------------------------------------
@@ -1388,10 +1389,10 @@ bool add_to_cache_and_persist(object* n) {
 
 void onn_show_cache() {
   log_write("+-----------cache dump------------\n");
-  char buff[MAX_TEXT_LEN*8];
+  char buff[MAX_OBJ_TEXT_LEN * 8]; // REVISIT!!!
   for(int n=1; n<=properties_size(objects_cache); n++){
     object* o=properties_get_n(objects_cache,n);
-    log_write("| %s\n", object_to_text(o,buff,MAX_TEXT_LEN*8,OBJECT_TO_TEXT_LOG));
+    log_write("| %s\n", object_to_text(o,buff,MAX_OBJ_TEXT_LEN * 8,OBJECT_TO_TEXT_LOG));
   }
   log_write("+---------------------------------\n");
 }
@@ -1502,8 +1503,8 @@ void persist_flush() {
     char* uid=properties_get_n(objects_to_save, j);
     object* o=onn_get_from_cache(uid);
     int32_t ver = value_int32(o->version);
-    static char buff[MAX_TEXT_LEN];
-    char* text=object_to_text(o,buff,MAX_TEXT_LEN,OBJECT_TO_TEXT_PERSIST);
+    static char buff[MAX_OBJ_TEXT_LEN]; // REVISIT: why static
+    char* text=object_to_text(o,buff,MAX_OBJ_TEXT_LEN,OBJECT_TO_TEXT_PERSIST);
     persistence_put(uid, ver, text);
   }
   properties_clear(objects_to_save, false);

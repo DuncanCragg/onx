@@ -9,8 +9,6 @@
 
 // REVISIT: lists for M-class really - consider other data structures and algos
 
-#define MAX_TEXT_LEN 512
-
 typedef struct list {
   item_type type;
   uint16_t  max_size;
@@ -214,9 +212,11 @@ char* list_to_text(list* li, char* b, uint16_t s) {
   return b;
 }
 
+#define MAX_LIST_TEXT_LEN 512
+
 void list_log(list* li) {
   if(!li) return;
-  char buf[MAX_TEXT_LEN];
-  log_write("[%s]\n", list_to_text(li,buf,MAX_TEXT_LEN));
+  char buf[MAX_LIST_TEXT_LEN];
+  log_write("[%s]\n", list_to_text(li,buf,MAX_LIST_TEXT_LEN));
 }
 

@@ -39,7 +39,7 @@ typedef struct value {
 static properties* all_values=0;
 
 #define MAX_VALUES 1024
-#define MAX_TEXT_LEN 64
+#define MAX_VALUE_LEN 64
 
 static CRITICAL_SECTION cs;
 
@@ -94,10 +94,10 @@ value* value_new(char* val) {
 }
 
 value* value_new_fmt(char* fmt, ...){
-  char valbuf[MAX_TEXT_LEN];
+  char valbuf[MAX_VALUE_LEN];
   va_list args;
   va_start(args, fmt);
-  vsnprintf(valbuf, MAX_TEXT_LEN, fmt, args);
+  vsnprintf(valbuf, MAX_VALUE_LEN, fmt, args);
   va_end(args);
   return value_new(valbuf);
 }
@@ -166,8 +166,8 @@ char* value_to_text(value* v, char* b, uint16_t s) {
 }
 
 void value_log(value* v) {
-  char buf[MAX_TEXT_LEN];
-  log_write("%s\n", value_to_text(v,buf,MAX_TEXT_LEN));
+  char buf[MAX_VALUE_LEN];
+  log_write("%s\n", value_to_text(v,buf,MAX_VALUE_LEN));
 }
 
 void value_dump() {

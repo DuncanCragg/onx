@@ -19,7 +19,7 @@
 
 #include <onn.h>
 
-#define LOG_BUF_SIZE 1024
+#define LOG_BUF_SIZE 2048
 static volatile char log_buffer[LOG_BUF_SIZE];
 static volatile list* saved_messages = 0;
        volatile list* gfx_log_buffer = 0;
