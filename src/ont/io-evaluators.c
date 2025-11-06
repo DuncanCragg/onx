@@ -17,6 +17,8 @@
 
 #include <onn.h>
 
+bool display_on=true; // ready for evaluate_backlight_out();
+
 // ------------------- evaluators ----------------
 // REVISIT: lots of config in a shared (non-target/onx) ont file...
 

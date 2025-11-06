@@ -56,6 +56,8 @@ char* inventoryuid;
 object* user;
 object* responses;
 
+volatile bool     button_pressed=false;
+
 volatile uint8_t  pending_user_event;
 volatile uint32_t pending_user_event_time;
 
@@ -295,6 +297,8 @@ void ont_hx_init(){
   copy_mountain_to_psram();
 }
 
+uint32_t loop_time=0;
+
 static volatile int yoff=0;
 
 #define NO_ALL // DO_ALL
@@ -317,6 +321,11 @@ void ont_hx_frame(){ // REVISIT: only called on frame flip - do on each loop wit
     if(scenegraph[scenegraph_write][s].h > 400)          scenegraph[scenegraph_write][s].h=100;
   }
 #endif
+
+  uint64_t ct=time_ms();
+  static uint64_t lt=0;
+  if(lt) loop_time=(uint32_t)(ct-lt);
+  lt=ct;
 
   if(g2d_pending()){
     onn_run_evaluators(useruid, (void*)USER_EVENT_TOUCH);

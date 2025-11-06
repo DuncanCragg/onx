@@ -12,9 +12,9 @@
 #include <onx/lib.h>
 #include <onx/time.h>
 #include <onx/log.h>
+#include <onx/io.h>
 
 #include <onx/colours.h>
-//#include <onx/touch.h>
 
 #include <onn.h>
 
@@ -214,8 +214,8 @@ static void show_gfx_log(uint8_t root_g2d_node){
 #endif
 
 static void show_touch_point(uint8_t g2d_node){
-//g2d_node_rectangle(g2d_node, 0,touch_info.y, 240,1, G2D_MAGENTA);
-//g2d_node_rectangle(g2d_node, touch_info.x,0, 1,280, G2D_MAGENTA);
+  g2d_node_rectangle(g2d_node, 0,io.touch_y, 240,1, G2D_MAGENTA);
+  g2d_node_rectangle(g2d_node, io.touch_x,0, 1,280, G2D_MAGENTA);
 }
 
 static uint16_t inv_grab_control=0;
@@ -360,9 +360,8 @@ static bool do_evaluate_user_2d(object* usr, uint8_t user_event);
 
 bool evaluate_user_2d(object* usr, void* user_event_) {
   uint8_t user_event = (uint8_t)(uint32_t)user_event_;
-#ifdef ADSFADSF
 
-//if(!display_on) return true;
+  if(!display_on) return true;
 
 /*
   USER_EVENT_NONE_AL  rate limit 250ms
@@ -381,7 +380,7 @@ bool evaluate_user_2d(object* usr, void* user_event_) {
   static uint32_t time_of_last_user_eval=0;
   uint32_t time_since_last_user_eval = current_time - time_of_last_user_eval;
 
-  bool non_touch_event_while_touch_down = (user_event!=USER_EVENT_TOUCH   /* && touch_down*/);
+  bool non_touch_event_while_touch_down = (user_event!=USER_EVENT_TOUCH   && io.touched);
   bool alerts_too_fast                  = (user_event==USER_EVENT_NONE_AL && time_since_last_user_eval < 250);
   bool logs_too_fast                    = (user_event==USER_EVENT_LOG     && time_since_last_user_eval < 500);
   bool rate_limiting_this_one           = non_touch_event_while_touch_down || alerts_too_fast || logs_too_fast;
@@ -396,9 +395,7 @@ bool evaluate_user_2d(object* usr, void* user_event_) {
 #if defined(BOARD_MAGIC3)
   touch_disable();
 #endif
-#endif
   bool go_on = do_evaluate_user_2d(usr, user_event);
-#ifdef ADSFADSF
 #if defined(BOARD_MAGIC3)
   touch_enable();
 #endif
@@ -407,7 +404,6 @@ bool evaluate_user_2d(object* usr, void* user_event_) {
   log_write("%ld %ld\n", current_time, (uint32_t)time_ms()-current_time);
 #endif
 
-#endif
   return go_on;
 }
 
@@ -417,7 +413,6 @@ static bool do_evaluate_user_2d(object* usr, uint8_t user_event){
     reset_viewing_state_variables();
     first_time=false;
   }
-/*
   if(user_event==USER_EVENT_BUTTON){
     if(button_pressed){
       uint16_t histlen=object_property_length(user, "history");
@@ -434,7 +429,6 @@ static bool do_evaluate_user_2d(object* usr, uint8_t user_event){
       reset_viewing_state_variables();
     }
   }
-*/
   if(list_selected_control){
     char* viewing_uid=object_property(user, "viewing");
     char* upd_fmt=(list_selected_control==LIST_ADD_NEW_TOP? "=> %s @.": "=> @. %s");
@@ -1169,7 +1163,7 @@ static void draw_notes(char* path, uint8_t g2d_node) {
   if(container_g2d_node){
 
   g2d_node_text(container_g2d_node, 10,5, G2D_BLUE, 2,
-                "fps: %02d (%d,%d)", fps, 0,0/*touch_info.x, touch_info.y*/);
+                "fps: %02d (%d,%d)", fps, io.touch_x, io.touch_y);
 
   int16_t wd=g2d_node_width(g2d_node)-2*SIDE_MARGIN;
   int16_t ht=g2d_node_height(g2d_node)-2*TOP_MARGIN;
@@ -1257,7 +1251,7 @@ static void draw_about(char* path, uint8_t g2d_node) {
                        G2D_CYAN/6);
     uint8_t s=g2d_node_height(g2d_node) < 60? 2: 3;
     uint8_t m=(g2d_node_height(g2d_node)-8*s)/2;
-    // g2d_node_text(g2d_node, m,m, G2D_WHITE, s, "%dfps %ldms", fps, loop_time);
+    g2d_node_text(g2d_node, m,m, G2D_WHITE, s, "%dfps %ldms", fps, loop_time);
     return;
   }
 
@@ -1277,7 +1271,7 @@ static void draw_about(char* path, uint8_t g2d_node) {
                                                view_ev,0,0);
   if(container_g2d_node){
 
-  g2d_node_text(container_g2d_node, 20,  40, G2D_BLUE, 2, "fps: %d (%d,%d)", fps, 0,0/*touch_info.x, touch_info.y*/);
+  g2d_node_text(container_g2d_node, 20,  40, G2D_BLUE, 2, "fps: %d (%d,%d)", fps, io.touch_x, io.touch_y);
   g2d_node_text(container_g2d_node, 10, 110, G2D_BLUE, 3, "cpu: %s",   object_pathpair(user, path, "cpu"));
   g2d_node_text(container_g2d_node, 10, 140, G2D_BLUE, 2, "mem: %s",   object_pathpair(user, path, "mem"));
   g2d_node_text(container_g2d_node, 10, 190, G2D_BLUE, 1, "build: %s", object_pathpair(user, path, "build-info"));
