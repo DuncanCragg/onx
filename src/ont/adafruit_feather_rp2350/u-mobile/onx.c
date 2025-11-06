@@ -63,6 +63,8 @@ volatile uint32_t pending_user_event_time;
 
 #define RGB_BYTES_TO_RGB555(r,g,b) (((r)&0b11111000)<<7)|(((g)&0b11111000)<<2)|(((b)&0b11111000)>>3)
 
+// ------------------------------------------------------------------------
+
 volatile bool scenegraph_write=false;
 
 #define scenegraph_read (!scenegraph_write)
@@ -106,6 +108,8 @@ static sprite scenegraph[2][12] = {
  }
 };
 
+// ------------------------------------------------------------------------
+
 uint16_t* psram_buffer =  (uint16_t*)0x15000000;
 
 void copy_mountain_to_psram(){
@@ -143,6 +147,8 @@ static void io_cb() {
     g2d_touch_event(false, io.touch_x, io.touch_y);
   }
 }
+
+// ------------------------------------------------------------------------
 
 static char note_text[] = "the fat cat sat on me";
 
@@ -276,6 +282,8 @@ void init_onx(){
   onn_run_evaluators(useruid, (void*)USER_EVENT_INITIAL);
 }
 
+// ------------------------------------------------------------------------
+
 void ont_hx_init(){
 
   io_init(io_cb);
@@ -289,12 +297,14 @@ void ont_hx_init(){
 
 static volatile int yoff=0;
 
-void ont_hx_frame(){
+#define NO_ALL // DO_ALL
 
-  scenegraph_write = !scenegraph_write;
+void ont_hx_frame(){ // REVISIT: only called on frame flip - do on each loop with do_flip
 
   yoff+=6;
 
+#ifdef DO_ALL
+  scenegraph_write = !scenegraph_write;
   for(int s=0; s<NUM_SPRITES; s++){
   ; if(scenegraph[scenegraph_read][s].c==0b1000000000000000) continue;
     scenegraph[scenegraph_write][s].x=scenegraph[scenegraph_read][s].x+1+(NUM_SPRITES-s)/4;
@@ -306,8 +316,7 @@ void ont_hx_frame(){
     if(scenegraph[scenegraph_write][s].w > 400)          scenegraph[scenegraph_write][s].w=100;
     if(scenegraph[scenegraph_write][s].h > 400)          scenegraph[scenegraph_write][s].h=100;
   }
-
-  // ------------------------------
+#endif
 
   if(g2d_pending()){
     onn_run_evaluators(useruid, (void*)USER_EVENT_TOUCH);
@@ -349,8 +358,7 @@ void X fill_line_sprites(uint16_t* buf, uint32_t scan_y) {
         void* src_addr = (psram_buffer + (yo * H_RESOLUTION) + 350);
         dma_memcpy16(buf+sx, src_addr, sw, DMA_CH_READ, false);
       }else{
-#define DO_ONE
-#ifndef DO_ONE
+#ifdef DO_ALL
         dma_memset16(buf+sx, sc,       sw, DMA_CH_READ, false);
 #endif
       }
