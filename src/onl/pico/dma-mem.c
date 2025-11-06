@@ -11,7 +11,7 @@
 
 #include <onx/dma-mem.h>
 
-void X dma_memcpy16(void* to, void* from, size_t len, int chan, bool hi_pri){
+void __not_in_flash_func(dma_memcpy16)(void* to, void* from, size_t len, int chan, bool hi_pri){
 
   dma_channel_config c = dma_channel_get_default_config(chan);
   channel_config_set_transfer_data_size(&c, DMA_SIZE_16);
@@ -30,7 +30,7 @@ void X dma_memcpy16(void* to, void* from, size_t len, int chan, bool hi_pri){
   dma_channel_wait_for_finish_blocking(chan);
 }
 
-void X dma_memset16(void* to, uint16_t value, size_t len, int chan, bool hi_pri) {
+void __not_in_flash_func(dma_memset16)(void* to, uint16_t value, size_t len, int chan, bool hi_pri) {
 
   dma_channel_config c = dma_channel_get_default_config(chan);
   channel_config_set_transfer_data_size(&c, DMA_SIZE_16);

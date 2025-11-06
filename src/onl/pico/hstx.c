@@ -99,7 +99,7 @@ static volatile int64_t sign_time = 0;
 static bool dma_pong = false;
 static bool vactive_cmdlist_posted = false;
 
-void X dma_irq_handler() {
+void __not_in_flash_func(dma_irq_handler)() {
 
     uint ch_num = dma_pong ? DMA_CH_PONG : DMA_CH_PING;
     dma_channel_hw_t *ch = &dma_hw->ch[ch_num];
@@ -341,7 +341,7 @@ void startup_core1_init(){
   set_up_dma();
 }
 
-void X startup_core1_loop(){
+void __not_in_flash_func(startup_core1_loop)(){
 
   while(!fill_signal) tight_loop_contents();
 
