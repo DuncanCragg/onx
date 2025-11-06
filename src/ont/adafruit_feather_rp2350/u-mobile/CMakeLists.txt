@@ -1,5 +1,9 @@
 
 add_executable(onx-u-mobile
+    ${PROJECT_SOURCE_DIR}/src/ont/g2d.c
+    ${PROJECT_SOURCE_DIR}/src/ont/g2d-lcd.c
+    ${PROJECT_SOURCE_DIR}/src/ont/user-2d.c
+    ${PROJECT_SOURCE_DIR}/src/ont/keyboard.c
     ${PROJECT_SOURCE_DIR}/src/ont/io-evaluators.c
     ${PROJECT_SOURCE_DIR}/src/onl/radio-rfm69.c
     onx.c
