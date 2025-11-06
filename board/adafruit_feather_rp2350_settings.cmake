@@ -6,7 +6,6 @@ set(PICO_BOARD_SOURCES
     onl/radio-rfm69.c
     onl/pico/psram.c
     onl/ipv6-stub.c
-    onl/pico/hstx.c
 )
 set(PICO_PIO_TO_COMPILE
     src/onl/pico/led-strip-neopixel.pio

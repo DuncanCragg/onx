@@ -1,7 +1,8 @@
 
 add_executable(onx-u-mobile
-    ${PROJECT_SOURCE_DIR}/src/ont/io-evaluators.c
+    ${PROJECT_SOURCE_DIR}/src/onl/pico/hstx.c
     ${PROJECT_SOURCE_DIR}/src/onl/radio-rfm69.c
+    ${PROJECT_SOURCE_DIR}/src/ont/io-evaluators.c
     onx.c
 )
 
