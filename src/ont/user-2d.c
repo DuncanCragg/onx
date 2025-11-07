@@ -380,10 +380,12 @@ bool evaluate_user_2d(object* usr, void* user_event_) {
   static uint32_t time_of_last_user_eval=0;
   uint32_t time_since_last_user_eval = current_time - time_of_last_user_eval;
 
-  bool non_touch_event_while_touch_down = (user_event!=USER_EVENT_TOUCH   && io.touched);
-  bool alerts_too_fast                  = (user_event==USER_EVENT_NONE_AL && time_since_last_user_eval < 250);
-  bool logs_too_fast                    = (user_event==USER_EVENT_LOG     && time_since_last_user_eval < 500);
-  bool rate_limiting_this_one           = non_touch_event_while_touch_down || alerts_too_fast || logs_too_fast;
+  bool non_touch_event_other_than_back  = (user_event!=USER_EVENT_TOUCH    && user_event!=USER_EVENT_BUTTON);
+  bool non_touch_event_while_touch_down = (non_touch_event_other_than_back && io.touched);
+  bool alerts_too_fast                  = (user_event==USER_EVENT_NONE_AL  && time_since_last_user_eval < 250);
+  bool logs_too_fast                    = (user_event==USER_EVENT_LOG      && time_since_last_user_eval < 500);
+
+  bool rate_limiting_this_one = non_touch_event_while_touch_down || alerts_too_fast || logs_too_fast;
 
   if(rate_limiting_this_one){
     if(!pending_user_event_time) pending_user_event_time = current_time+130;

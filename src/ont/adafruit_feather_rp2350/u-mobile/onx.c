@@ -148,6 +148,18 @@ static void io_cb() {
     touch_down=false;
     g2d_touch_event(false, io.touch_x, io.touch_y);
   }
+  // simulate physical back button with bottom-left of screen
+  if(io.touched && !button_pressed){
+    if(io.touch_x < 240 && io.touch_y > 320){
+      button_pressed=true;
+      onn_run_evaluators(useruid, (void*)USER_EVENT_BUTTON);
+    }
+  }
+  else
+  if(!io.touched && button_pressed){
+    button_pressed = false;
+    onn_run_evaluators(useruid, (void*)USER_EVENT_BUTTON);
+  }
 }
 
 // ------------------------------------------------------------------------
