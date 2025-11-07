@@ -826,22 +826,34 @@ static void draw_links(char* path, uint8_t container_g2d_node){
 
 static void list_ev(bool down, int16_t dx, int16_t dy, uint16_t control, uint16_t index){
 
+  static uint32_t down_events=0;
+  static int16_t  dx_accum=0;
+  static int16_t  dy_accum=0;
   if(down){
-    bool vertical = abs(dy) > abs(dx);
-    if(!swipe_control && !swipe_index && dy && vertical){
+    down_events++;
+    if(down_events<4){
+      dx_accum+=dx;
+      dy_accum+=dy;
+;     return;
+    }
+    bool scrollee = abs(2*dy_accum) >= abs(dx_accum);
+    if(scrollee && !swipe_control && !swipe_index && dy){
       scrolling=true;
       bool stretching = (scroll_top && dy>0) ||
                         (scroll_bot && dy<0);
       scroll_offset+= stretching? dy/3: dy;
     }
     else
-    if(!scrolling && dx && !vertical && control!=LIST_BACKGROUND){
+    if(!scrollee && !scrolling && dx && control!=LIST_BACKGROUND){
       swipe_control=control;
       swipe_index=index;
       swipe_offset+=dx;
     }
-    return;
+;   return;
   }
+  down_events=0;
+  dx_accum=0;
+  dy_accum=0;
 
   if(scrolling){
     if(scroll_top) scroll_offset=0;
