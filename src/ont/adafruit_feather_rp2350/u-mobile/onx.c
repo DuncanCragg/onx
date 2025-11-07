@@ -339,16 +339,12 @@ void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint32_t scan_y) {
 
     // if no wallpaper, time=4us; else PSRAM time=35us
     #define DIVPOINT (H_RESOLUTION*8/8)
+    void* wll_addr = (psram_buffer + (scan_y * H_RESOLUTION));
+    dma_memcpy16(buf,          wll_addr, DIVPOINT,              DMA_CH_READ, false);
+    dma_memset16(buf+DIVPOINT, 0x672c,   H_RESOLUTION-DIVPOINT, DMA_CH_READ, false);
     if(scan_y<320){
-      void* g2d_addr = (g2d_buffer   + (scan_y * 240));
-      void* wll_addr = (psram_buffer + (scan_y * H_RESOLUTION)) + 240;
-      dma_memcpy16(buf,          g2d_addr, 240,                   DMA_CH_READ, false);
-      dma_memcpy16(buf+240,      wll_addr, DIVPOINT-240,          DMA_CH_READ, false);
-      dma_memset16(buf+DIVPOINT, 0x672c,   H_RESOLUTION-DIVPOINT, DMA_CH_READ, false);
-    }else{
-      void* wll_addr = (psram_buffer + (scan_y * H_RESOLUTION));
-      dma_memcpy16(buf,          wll_addr, DIVPOINT,              DMA_CH_READ, false);
-      dma_memset16(buf+DIVPOINT, 0x672c,   H_RESOLUTION-DIVPOINT, DMA_CH_READ, false);
+      void* g2d_addr = (g2d_buffer + (scan_y * 240));
+      dma_memcpy16(buf,        g2d_addr, 240,                   DMA_CH_READ, false);
     }
     for(int s=0; s < NUM_SPRITES; s++){
 
