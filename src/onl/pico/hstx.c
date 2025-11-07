@@ -271,7 +271,7 @@ void set_up_dma(){
     c = dma_channel_get_default_config(DMA_CH_PING);
     channel_config_set_chain_to(&c, DMA_CH_PONG);
     channel_config_set_dreq(&c, DREQ_HSTX);
-//  channel_config_set_high_priority(&c, true);
+    channel_config_set_high_priority(&c, true);
     dma_channel_configure(
         DMA_CH_PING,
         &c,
@@ -284,7 +284,7 @@ void set_up_dma(){
     c = dma_channel_get_default_config(DMA_CH_PONG);
     channel_config_set_chain_to(&c, DMA_CH_PING);
     channel_config_set_dreq(&c, DREQ_HSTX);
-//  channel_config_set_high_priority(&c, true);
+    channel_config_set_high_priority(&c, true);
     dma_channel_configure(
         DMA_CH_PONG,
         &c,
