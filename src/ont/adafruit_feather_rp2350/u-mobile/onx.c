@@ -47,6 +47,8 @@ const char* onn_test_uid_prefix = 0;
 
 #define NO_MOUNTAINS     // DO_MOUNTAINS
 
+extern volatile int64_t frame_time;
+
 // -----------------------------------------------------
 
 char* useruid;
@@ -333,6 +335,12 @@ void ont_hx_frame(){ // REVISIT: only called on frame flip - do on each loop wit
     if(scenegraph[scenegraph_write][s].h > 400)          scenegraph[scenegraph_write][s].h=100;
   }
 #endif
+
+  static int64_t ft=0;
+  if(abs((int32_t)(frame_time - ft)) > 1 && frame_time < 600000){
+    ft=frame_time;
+    log_write("%.1fHz\n", 1000000.0f/frame_time);
+  }
 
   uint64_t ct=time_ms();
   static uint64_t lt=0;

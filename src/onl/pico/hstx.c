@@ -99,6 +99,8 @@ static volatile int64_t sign_time = 0;
 static bool dma_pong = false;
 static bool vactive_cmdlist_posted = false; // h blank/sync period
 
+volatile int64_t frame_time;
+
 void __not_in_flash_func(dma_irq_handler)() {
 
     uint ch_num = dma_pong ? DMA_CH_PONG : DMA_CH_PING;
@@ -132,6 +134,12 @@ void __not_in_flash_func(dma_irq_handler)() {
         v_scanline = (v_scanline + 1) % MODE_V_TOTAL_LINES;
         in_frame = v_scanline >= MODE_V_INACTIVE_LINES;
         if(v_scanline==0){
+
+          static int64_t flip_time=0;
+          int64_t ct=time_us_64();
+          frame_time=ct-flip_time;
+          flip_time=ct;
+
           static int flip_count=0;
           flip_count++;
           if(do_flip){
