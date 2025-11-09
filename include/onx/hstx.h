@@ -6,7 +6,7 @@
 
 #define HSTX_VREG_V      VREG_VOLTAGE_1_30
 #define HSTX_CLOCKSPEED  (300*1000)
-#define HSTX_HSTXDIVISOR 4
+#define HSTX_HSTXDIVISOR 2
 /*
   240MHz = 90Hz or 60Hz @ 1024x600; 150MHz = 60Hz; 100MHz = 40Hz; 75MHz = 30Hz
   HSTX bit-rate per pin = 2 × 75 MHz = 150 Mbits/s

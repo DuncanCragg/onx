@@ -357,7 +357,7 @@ extern uint16_t g2d_buffer[];
 
 void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint32_t scan_y) {
 
-    // if no wallpaper, time=4us; else PSRAM time=35us
+    // if no wallpaper, time=4us; else PSRAM time=35us or 32us maybe
 #define DIVPOINT (H_RESOLUTION*0/8)
     void* wll_addr = (psram_buffer + (scan_y * H_RESOLUTION));
     dma_memcpy16(buf,          wll_addr, DIVPOINT,              DMA_CH_READ, false);
