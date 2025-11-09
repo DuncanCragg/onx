@@ -97,7 +97,7 @@ static volatile uint    v_scanline = 2;
 static volatile int64_t sign_time = 0;
 
 static bool dma_pong = false;
-static bool vactive_cmdlist_posted = false;
+static bool vactive_cmdlist_posted = false; // h blank/sync period
 
 void __not_in_flash_func(dma_irq_handler)() {
 
@@ -107,16 +107,20 @@ void __not_in_flash_func(dma_irq_handler)() {
     dma_pong = !dma_pong;
 
     if (v_scanline >= MODE_V_FRONT_PORCH && v_scanline < (MODE_V_FRONT_PORCH + MODE_V_SYNC_WIDTH)) {
+        // v-sync region, start (after front porch)
         ch->read_addr = (uintptr_t)vblank_line_vsync_on;
         ch->transfer_count = count_of(vblank_line_vsync_on);
     } else if (v_scanline < MODE_V_INACTIVE_LINES) {
+        // v-sync region, end (end of sync, back porch)
         ch->read_addr = (uintptr_t)vblank_line_vsync_off;
         ch->transfer_count = count_of(vblank_line_vsync_off);
     } else if (!vactive_cmdlist_posted) {
+        // active v, h-sync (blank) region, start (36 bytes)
         ch->read_addr = (uintptr_t)vactive_line;
         ch->transfer_count = count_of(vactive_line);
         vactive_cmdlist_posted = true;
     } else {
+        // active v, h-sync (blank) region, end; visible pixels start
         ch->read_addr = (uintptr_t)(linebuf_ab? linebuf_a: linebuf_b);
         ch->transfer_count = MODE_H_ACTIVE_PIXELS/2;
         linebuf_ab = !linebuf_ab;
@@ -124,7 +128,7 @@ void __not_in_flash_func(dma_irq_handler)() {
         sign_time = time_us();
         vactive_cmdlist_posted = false;
     }
-    if (!vactive_cmdlist_posted) {
+    if (!vactive_cmdlist_posted) { // i.e., not the partial-line h sync/blank bit
         v_scanline = (v_scanline + 1) % MODE_V_TOTAL_LINES;
         in_frame = v_scanline >= MODE_V_INACTIVE_LINES;
         if(v_scanline==0){
@@ -263,7 +267,7 @@ void set_up_dma(){
         }
     }
     for (int i = 12; i <= 19; ++i) {
-        gpio_set_function(i, 0);
+        gpio_set_function(i, 0); // REVISIT: use gpio api
     }
 
     dma_channel_config c;
@@ -327,7 +331,7 @@ void __not_in_flash_func(startup_core0_loop)(){
 #define SCANLINE_TIMER_END                      \
         static int f=0; f++;                    \
         if((f % (20 * 500) == 0)){              \
-          int64_t done_time_x = time_us();   \
+          int64_t done_time_x = time_us();      \
           log_write("done %.3lldus; signal %.3lldus; signal->done %.3lldus; %s\n", \
                   done_time_x,sign_time_x,      \
                   done_time_x-sign_time_x,      \

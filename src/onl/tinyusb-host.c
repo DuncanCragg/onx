@@ -1,4 +1,5 @@
 
+#include <onx/log.h>
 #include <tusb.h>
 
 extern void touch_usb_event(uint8_t* buf, uint16_t len);
@@ -11,7 +12,7 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* desc_re
 
   uint8_t itf_protocol = tuh_hid_interface_protocol(dev_addr, instance);
   uint16_t vid, pid; tuh_vid_pid_get(dev_addr, &vid, &pid);
-  printf("HID %u/%u mounted, id=%04x:%04x, protocol=%d\r\n", dev_addr, instance, vid, pid, itf_protocol);
+  log_write("HID %u/%u mounted, id=%04x:%04x, protocol=%d\n", dev_addr, instance, vid, pid, itf_protocol);
 
   if(!tuh_hid_receive_report(dev_addr, instance) ) {
   }
@@ -19,7 +20,7 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* desc_re
 
 // ------------ USB device unplugged
 void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance) {
-  printf("HID %u/%u unmounted\r\n", dev_addr, instance);
+  log_write("HID %u/%u unmounted\n", dev_addr, instance);
 }
 
 // ------------ USB device sends data

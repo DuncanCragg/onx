@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <onx/log.h>
 #include <onx/io.h>
 
 io_state_changed_cb_t io_state_changed_cb=0;
@@ -13,9 +14,9 @@ void touch_usb_init(io_state_changed_cb_t cb){
 
 void touch_usb_event(uint8_t* buf, uint16_t len){
 
-//printf("HID %u/%u len=%d\r\n", dev_addr, instance, len);
-//for(int i=0; i<len; i++) printf("%x.", buf[i]);
-//printf("\r\n");
+//log_write("touch_usb_event len=%d\n", len);
+//for(int i=0; i<len; i++) log_write("%.2x.", buf[i]);
+//log_write("\n");
 
   switch(buf[0]){
     case 0: {
