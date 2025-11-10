@@ -26,9 +26,9 @@
   |      20       |      6       |     165      |
        77MHz * 5 = 385MHz overclock (not 417 below)
 
-  800 pixels took 35us, so 56us for 1280, got 60us per line at 20Hz to be safe
+  800 pixels took 36us, so 60us for 1280, got 62us per line at 20Hz to be safe
   OR: just show 1024x768 images with a small border (128 l/r h; 16 lines t/b v)
-  45us per line of 1024 is 27Hz, which may put us more back into "film" framerates
+  46us per line of 1024 is 26Hz, which may put us more back into "film" framerates
 
                                60Hz   45Hz       30Hz   20Hz
   1280x800 = 1024000 2.667 417.0MHz  272MHz  209.0MHz

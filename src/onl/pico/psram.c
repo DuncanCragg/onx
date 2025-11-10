@@ -71,7 +71,7 @@ static bool psram_test_ram_bw(char* region, volatile uint8_t* start, size_t len)
       }
     }
 
-    int64_t t_start = time_us_64();
+    int64_t t_start = time_us();
     for(size_t i = 0; i < number_of_test_addresses; i++) {
       if(start[i * STRIDE] != (i & 0xFF)){
         log_write("RAM mismatch on read in %s at i=%zu %x!=%x %b!=%b\n", region, i, start[i * STRIDE], (i & 0xFF),
@@ -79,7 +79,7 @@ static bool psram_test_ram_bw(char* region, volatile uint8_t* start, size_t len)
 ;       return false;
       }
     }
-    int64_t t_end = time_us_64();
+    int64_t t_end = time_us();
 
     double millis  = ((double)(t_end - t_start)) / 1e3;
     double seconds = ((double)(t_end - t_start)) / 1e6;
@@ -95,12 +95,12 @@ void psram_tests(){
     volatile uint8_t* psram_raw_start = (uint8_t*)0x15000000;
     volatile uint8_t* psram_cch_start = (uint8_t*)0x11000000;
 
-    int64_t t_start = time_us_64();
+    int64_t t_start = time_us();
     uint full_screen = (800 * 480 * 2);
     for(size_t i = 0; i < full_screen; i++) {
       psram_raw_start[i] = i & 0xff;
     }
-    int64_t t_end = time_us_64();
+    int64_t t_end = time_us();
     double millis  = ((double)(t_end - t_start)) / 1e3;
     log_write("PRAM full buffer write %zu bytes: time=%.6fms\n", full_screen, millis);
 

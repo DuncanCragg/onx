@@ -337,7 +337,7 @@ void ont_hx_frame(){ // REVISIT: only called on frame flip - do on each loop wit
 #endif
 
   static int64_t ft=0;
-  if(abs((int32_t)(frame_time - ft)) > 1 && frame_time < 600000){
+  if(abs((int32_t)(frame_time - ft)) > 40 && frame_time < 600000){
     ft=frame_time;
     log_write("%.1fHz\n", 1000000.0f/frame_time);
   }
@@ -357,7 +357,7 @@ extern uint16_t g2d_buffer[];
 
 void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint32_t scan_y) {
 
-    // if no wallpaper, time=4us; else PSRAM time=35us or 32us maybe
+    // if no wallpaper, time=4us; else PSRAM time=34us/36us
 #define DIVPOINT (H_RESOLUTION*0/8)
     void* wll_addr = (psram_buffer + (scan_y * H_RESOLUTION));
     dma_memcpy16(buf,          wll_addr, DIVPOINT,              DMA_CH_READ, false);
