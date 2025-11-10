@@ -21,8 +21,8 @@
 
 // -----------------------------------------------------
 
-const int8_t usb_host_pio_data_plus_pin = 0;
-const int8_t usb_host_pio_dma_channel   = 9;
+const int8_t usb_host_pio_data_plus_pin = 24;
+const int8_t usb_host_pio_dma_channel   =  9;
 const int8_t usb_host_pio_enable_pin    = -1;
 
 const uint8_t radio_rfm69_cs_pin  = 6;
