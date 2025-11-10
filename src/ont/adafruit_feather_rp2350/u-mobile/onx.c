@@ -34,7 +34,7 @@ const bool log_to_gfx = false;
 const bool log_to_rtt = false;
 const bool log_to_led = true;
 
-const bool  onp_log         = false;
+const bool  onp_log         = true;
 const char* onp_channels    = "radio";
 const char* onp_ipv6_groups = 0;
 const char* onp_radio_bands = 0;
