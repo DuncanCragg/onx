@@ -11,6 +11,8 @@
 #include <hardware/irq.h>
 #include <hardware/vreg.h>
 #include <hardware/clocks.h>
+#include <hardware/pll.h>
+#include "hardware/structs/qmi.h"
 
 #include <sync-and-mem.h>
 
@@ -27,28 +29,115 @@
 
 //-------------------------------------------
 
+static void calc_and_show_clock_params(uint32_t freq_hz) {
+  uint reference_freq_hz = XOSC_HZ / PLL_SYS_REFDIV;
+  for (uint fbdiv = 320; fbdiv >= 16; fbdiv--) {
+    uint vco_hz = fbdiv * reference_freq_hz;
+  ; if (vco_hz < PICO_PLL_VCO_MIN_FREQ_HZ || vco_hz > PICO_PLL_VCO_MAX_FREQ_HZ) continue;
+    for (uint postdiv1 = 7; postdiv1 >= 1; postdiv1--) {
+      for (uint postdiv2 = postdiv1; postdiv2 >= 1; postdiv2--) {
+        uint out = vco_hz / (postdiv1 * postdiv2);
+        if(out == freq_hz && !(vco_hz % (postdiv1 * postdiv2))) {
+          log_write("clock params for %ld: vco=%ldMz div1=%ld div2=%ld\n", freq_hz/1000/1000, vco_hz/1000/1000, postdiv1, postdiv2);
+          return;
+        }
+      }
+    }
+  }
+  log_write("couldn't find clock params for %ld\n", freq_hz);
+}
+
 static void set_up_clocks(){
 
-    vreg_set_voltage(startup_vreg_v);
+  vreg_set_voltage(startup_vreg_v);
 
+  qmi_hw->m[0].timing = 0x40000204;
+             // 2 = RXDELAY: be careful, usually for QSPI>100MHz it works with RXDELAY=CLKDIV REVISIT, ok then
+             // 4 = CLKDIV: can be 1,2,3,4,... REVISIT: try 3 so 400/3 = 133
 
-  set_sys_clock_khz(startup_clockspeed_khz, false);
+  clock_configure_undivided(
+      clk_sys,
+      CLOCKS_CLK_SYS_CTRL_SRC_VALUE_CLKSRC_CLK_SYS_AUX,
+      CLOCKS_CLK_SYS_CTRL_AUXSRC_VALUE_CLKSRC_PLL_USB,
+      USB_CLK_HZ
+  );
 
-  clock_configure(
+  uint vco_freq =0;
+  uint post_div1=0;
+  uint post_div2=0;
+
+  switch(startup_clockspeed_khz){
+    case(400*1000):{
+      vco_freq=1200 * MHZ;
+      post_div1=3;
+      post_div2=1;
+      break;
+    }
+    case(380*1000):{
+      vco_freq=1140 * MHZ;
+      post_div1=3;
+      post_div2=1;
+      break;
+    }
+    case(360*1000):{
+      vco_freq=1440 * MHZ;
+      post_div1=4;
+      post_div2=1;
+      break;
+    }
+    case(340*1000):{
+      vco_freq=1020 * MHZ;
+      post_div1=3;
+      post_div2=1;
+      break;
+    }
+    case(324*1000):{
+      vco_freq=1296 * MHZ;
+      post_div1=4;
+      post_div2=1;
+      break;
+    }
+    case(300*1000):{
+      vco_freq=1500 * MHZ;
+      post_div1=5;
+      post_div2=1;
+      break;
+    }
+  }
+  if(vco_freq==0){
+    return; // can't log things yet
+  }
+
+  pll_init(pll_sys, PLL_SYS_REFDIV, vco_freq, post_div1, post_div2);
+
+  uint32_t cpu_clock = vco_freq / (post_div1 * post_div2);
+
+  clock_configure_undivided(
+      clk_ref,
+      CLOCKS_CLK_REF_CTRL_SRC_VALUE_XOSC_CLKSRC,
+      0, // No aux mux
+      XOSC_HZ
+  );
+  clock_configure_undivided(
+      clk_sys,
+      CLOCKS_CLK_SYS_CTRL_SRC_VALUE_CLKSRC_CLK_SYS_AUX,
+      CLOCKS_CLK_SYS_CTRL_AUXSRC_VALUE_CLKSRC_PLL_SYS,
+      cpu_clock
+  );
+  clock_configure_undivided(
       clk_peri,
       0,
       CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLKSRC_PLL_SYS,
-      startup_clockspeed_khz * 1000,
-      startup_clockspeed_khz * 1000
+      cpu_clock
   );
 #if defined(PICO_RP2350)
-    clock_configure(
-        clk_hstx,
-        0,
-        CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLKSRC_PLL_SYS,
-        startup_clockspeed_khz * 1000,
-        startup_clockspeed_khz / startup_hstxdivisor  * 1000
-    );
+  clock_configure(
+      clk_hstx,
+      0,
+      CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLKSRC_PLL_SYS,
+      cpu_clock,
+      cpu_clock / startup_hstxdivisor
+  );
 #endif
 }
 
@@ -68,6 +157,13 @@ void __not_in_flash_func(core0_main)() {
   log_init();
 
   log_write("\n=============================== core 0 start ===============================\n");
+
+  uint32_t syst = clock_get_hz(clk_sys);
+  uint32_t peri = clock_get_hz(clk_peri);
+  uint32_t hstx = clock_get_hz(clk_hstx);
+  log_write("CPU clock:         %luMHz\n", syst/1000000);
+  log_write("peripherals clock: %luMHz\n", peri/1000000);
+  log_write("HSTX clock:        %luMHz\n", hstx/1000000);
 
   random_init();
 
