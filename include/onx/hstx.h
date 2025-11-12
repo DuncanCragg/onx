@@ -6,7 +6,7 @@
 
 #define HSTX_VREG_V         VREG_VOLTAGE_1_30
 #define HSTX_CLOCKSPEED_KHZ (380*1000)
-#define HSTX_HSTXDIVISOR    4
+#define HSTX_HSTXDIVISOR    1
 /*
   240MHz = 90Hz or 60Hz @ 1024x600; 150MHz = 60Hz; 100MHz = 40Hz; 75MHz = 30Hz
   HSTX bit-rate per pin = 2 × 75 MHz = 150 Mbits/s
@@ -89,17 +89,33 @@ Modeline "800x480_30.00"   14.50  800 824 896 992  480 483 493 496 -hsync +vsync
                                        24  72  96        3  10   3
 */
 
-#define MODE_H_SYNC_POLARITY   0
-#define MODE_H_FRONT_PORCH    24
-#define MODE_H_SYNC_WIDTH     72
-#define MODE_H_BACK_PORCH     96
-#define MODE_H_ACTIVE_PIXELS 800
+#define WS
+#ifdef WS
+#define MODE_H_SYNC_POLARITY    1
+#define MODE_H_FRONT_PORCH    160
+#define MODE_H_SYNC_WIDTH      32
+#define MODE_H_BACK_PORCH      40
+#define MODE_H_ACTIVE_PIXELS 1280
 
-#define MODE_V_SYNC_POLARITY  0
-#define MODE_V_FRONT_PORCH    3
-#define MODE_V_SYNC_WIDTH    10
-#define MODE_V_BACK_PORCH     7
-#define MODE_V_ACTIVE_LINES 480
+#define MODE_V_SYNC_POLARITY    1
+#define MODE_V_FRONT_PORCH     20
+#define MODE_V_SYNC_WIDTH       6
+#define MODE_V_BACK_PORCH      30
+#define MODE_V_ACTIVE_LINES   800
+#endif
+#ifdef TOSH
+#define MODE_H_SYNC_POLARITY    1
+#define MODE_H_FRONT_PORCH     48 // 24  //  440
+#define MODE_H_SYNC_WIDTH      32 // 72  //   40
+#define MODE_H_BACK_PORCH      80 // 96  //  220
+#define MODE_H_ACTIVE_PIXELS 1280 // 800 // 1280
+
+#define MODE_V_SYNC_POLARITY    1
+#define MODE_V_FRONT_PORCH      3 //  3 //  5
+#define MODE_V_SYNC_WIDTH       6 // 10 //  5
+#define MODE_V_BACK_PORCH      14 //  3 // 20
+#define MODE_V_ACTIVE_LINES   800 // 480 // 720
+#endif
 
 #define MODE_H_TOTAL_PIXELS ( \
     MODE_H_FRONT_PORCH + MODE_H_SYNC_WIDTH + \

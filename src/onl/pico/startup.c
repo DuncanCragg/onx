@@ -74,7 +74,7 @@ static void set_up_clocks(){
       break;
     }
     case(380*1000):{
-      vco_freq=1140 * MHZ;
+      vco_freq=1155 * MHZ; // 385 = 1155 ws  356=1068 tosh
       post_div1=3;
       post_div2=1;
       break;
