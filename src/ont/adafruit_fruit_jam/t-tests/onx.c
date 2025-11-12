@@ -29,9 +29,9 @@
 
 // -----------------------------------------------------
 
-const uint8_t  startup_vreg_v      = VREG_VOLTAGE_DEFAULT;
-const uint32_t startup_clockspeed  = 120000;
-const uint8_t  startup_hstxdivisor = 2;
+const uint8_t  startup_vreg_v         = VREG_VOLTAGE_DEFAULT;
+const uint32_t startup_clockspeed_khz = 120000;
+const uint8_t  startup_hstxdivisor    = 2;
 
 const int8_t usb_host_pio_data_plus_pin = 1;
 const int8_t usb_host_pio_dma_channel   = 9;

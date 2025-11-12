@@ -8,7 +8,7 @@
 
 // references to external config consts
 extern const uint8_t  startup_vreg_v;
-extern const uint32_t startup_clockspeed;
+extern const uint32_t startup_clockspeed_khz;
 extern const uint8_t  startup_hstxdivisor;
 
 // calls to external functions

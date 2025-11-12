@@ -31,23 +31,23 @@ static void set_up_clocks(){
 
     vreg_set_voltage(startup_vreg_v);
 
-    set_sys_clock_khz(startup_clockspeed, false);
 
-    clock_configure(
-        clk_peri,
-        0,
-        CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLKSRC_PLL_SYS,
-        startup_clockspeed * 1000,
-        startup_clockspeed * 1000
-    );
+  set_sys_clock_khz(startup_clockspeed_khz, false);
 
+  clock_configure(
+      clk_peri,
+      0,
+      CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLKSRC_PLL_SYS,
+      startup_clockspeed_khz * 1000,
+      startup_clockspeed_khz * 1000
+  );
 #if defined(PICO_RP2350)
     clock_configure(
         clk_hstx,
         0,
         CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLKSRC_PLL_SYS,
-        startup_clockspeed * 1000,
-        startup_clockspeed / startup_hstxdivisor  * 1000
+        startup_clockspeed_khz * 1000,
+        startup_clockspeed_khz / startup_hstxdivisor  * 1000
     );
 #endif
 }
