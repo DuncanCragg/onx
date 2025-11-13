@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------------------
 
 #define HSTX_VREG_V         VREG_VOLTAGE_1_30
-#define HSTX_CLOCKSPEED_KHZ (380*1000)
+#define HSTX_CLOCKSPEED_KHZ (385*1000)
 #define HSTX_HSTXDIVISOR    1
 
 

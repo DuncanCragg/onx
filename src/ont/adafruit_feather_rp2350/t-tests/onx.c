@@ -30,7 +30,7 @@
 // -----------------------------------------------------
 
 const uint8_t  startup_vreg_v         = VREG_VOLTAGE_1_30;
-const uint32_t startup_clockspeed_khz = 380*1000;
+const uint32_t startup_clockspeed_khz = 385*1000;
 const uint8_t  startup_hstxdivisor    = 2;
 
 const int8_t usb_host_pio_data_plus_pin = 24;
