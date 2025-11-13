@@ -14,9 +14,20 @@ void touch_usb_init(io_state_changed_cb_t cb){
 
 void touch_usb_event(uint8_t* buf, uint16_t len){
 
-//log_write("touch_usb_event len=%d\n", len);
-//for(int i=0; i<len; i++) log_write("%.2x.", buf[i]);
-//log_write("\n");
+#define NO_LOG_TOUCH_EVENTS
+#ifdef LOG_TOUCH_EVENTS
+  if(len==0){
+    static uint8_t num_len_0=0;
+    if(num_len_0 < 10){
+      num_len_0++;
+      log_write("len==0!\n");
+    }
+;   return;
+  }
+  log_write("touch_usb_event len=%d\n", len);
+  for(int i=0; i<len; i++) log_write("%.2x.", buf[i]);
+  log_write("\n");
+#endif
 
   switch(buf[0]){
     case 0: {
