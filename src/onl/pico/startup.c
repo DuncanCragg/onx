@@ -47,12 +47,24 @@ static void calc_and_show_clock_params(uint32_t freq_hz) {
   log_write("couldn't find clock params for %ld\n", freq_hz);
 }
 
+/*
+How to overclock:
+ - set the clock from xtal
+ - integer increments around PLL settings
+ - set regulator voltage higher - 1.3V
+ - set flash clock divider for 133MHz max
+ - USB or UART: USB requires a precise 48 MHz clock: ensure correct PLL config
+ - peripheral timing: PWM, I²C, and SPI (and HSTX!)
+ - stability: flash r/w and peripheral i/o
+ - thermal: package temperature
+*/
+
 static void set_up_clocks(){
 
   vreg_set_voltage(startup_vreg_v);
 
   qmi_hw->m[0].timing = 0x40000204;
-             // 2 = RXDELAY: be careful, usually for QSPI>100MHz it works with RXDELAY=CLKDIV REVISIT, ok then
+             // 2 = RXDELAY: QSPI>100MHz RXDELAY=CLKDIV? - REVISIT
              // 4 = CLKDIV: can be 1,2,3,4,... REVISIT: try 3 so 400/3 = 133
 
   clock_configure_undivided(
@@ -66,6 +78,8 @@ static void set_up_clocks(){
   uint post_div1=0;
   uint post_div2=0;
 
+  // REVISIT: now try the sdk function again, but find nearest, don't bail
+
   switch(startup_clockspeed_khz){
     case(400*1000):{
       vco_freq=1200 * MHZ;
@@ -74,7 +88,7 @@ static void set_up_clocks(){
       break;
     }
     case(380*1000):{
-      vco_freq=1155 * MHZ; // 385 = 1155 ws  356=1068 tosh
+      vco_freq=1155 * MHZ; // 380 = 1140
       post_div1=3;
       post_div2=1;
       break;
@@ -161,6 +175,7 @@ void __not_in_flash_func(core0_main)() {
   uint32_t syst = clock_get_hz(clk_sys);
   uint32_t peri = clock_get_hz(clk_peri);
   uint32_t hstx = clock_get_hz(clk_hstx);
+  calc_and_show_clock_params(startup_clockspeed_khz*1000);
   log_write("CPU clock:         %luMHz\n", syst/1000000);
   log_write("peripherals clock: %luMHz\n", peri/1000000);
   log_write("HSTX clock:        %luMHz\n", hstx/1000000);

@@ -173,7 +173,7 @@ void X fill_line_sprites(uint16_t* buf, uint32_t scan_y) {
     }
 }
 
-void X ont_hx_scanline(uint16_t* buf, uint32_t scan_y){
+void __not_in_flash_func(ont_hx_scanline)(uint16_t* buf, uint32_t scan_y){
   fill_line_sprites(buf, scan_y);
 }
 
