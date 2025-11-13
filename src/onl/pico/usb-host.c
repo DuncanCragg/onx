@@ -9,6 +9,8 @@
 
 #include "usb-host.h"
 
+static bool initialised=false;
+
 void usb_host_init(){
 
   if(usb_host_pio_enable_pin >= 0){
@@ -21,10 +23,12 @@ void usb_host_init(){
     pio_cfg.tx_ch  = usb_host_pio_dma_channel;
     tuh_configure(1, TUH_CFGID_RPI_PIO_USB_CONFIGURATION, &pio_cfg);
     tuh_init(1);
+    initialised=true;
   }
 }
 
 void usb_host_loop(){
+  if(!initialised) return;
   tuh_task_ext(0,0);
 }
 

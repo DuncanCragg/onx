@@ -3,7 +3,7 @@
 
 // ------------------------------------------------------------------------------
 
-#define WS5
+#define ELECROW5
 
 #ifdef WS10
 #define HSTX_VREG_V         VREG_VOLTAGE_1_30
@@ -21,6 +21,13 @@
 // 385/4=96.25 /5=19.25MHz pxclk *800x480 = 39.4Hz
 #endif
 
+#ifdef ELECROW5
+#define HSTX_VREG_V         VREG_VOLTAGE_1_30
+#define HSTX_CLOCKSPEED_KHZ (300*1000)
+#define HSTX_HSTXDIVISOR    2
+#define H_MINUS_V_PLUS
+// 300/2=150 /5=30MHz pxclk *800x480 = 60Hz
+#endif
 
 #ifdef WS10
 #define MODE_H_SYNC_POLARITY    1
@@ -47,6 +54,20 @@
 #define MODE_V_FRONT_PORCH     13
 #define MODE_V_SYNC_WIDTH       3
 #define MODE_V_BACK_PORCH      29
+#define MODE_V_ACTIVE_LINES   480
+#endif
+
+#ifdef ELECROW5
+#define MODE_H_SYNC_POLARITY    0
+#define MODE_H_FRONT_PORCH     16
+#define MODE_H_SYNC_WIDTH      80
+#define MODE_H_BACK_PORCH      96
+#define MODE_H_ACTIVE_PIXELS  800
+
+#define MODE_V_SYNC_POLARITY    1
+#define MODE_V_FRONT_PORCH      1
+#define MODE_V_SYNC_WIDTH       3
+#define MODE_V_BACK_PORCH      13
 #define MODE_V_ACTIVE_LINES   480
 #endif
 

@@ -47,6 +47,13 @@ const uint8_t  startup_hstxdivisor    = HSTX_HSTXDIVISOR;
 #define SYNC_V1_H1 (TMDS_CTRL_11 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
 #endif
 
+#ifdef H_MINUS_V_PLUS
+#define SYNC_V0_H0 (TMDS_CTRL_11 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
+#define SYNC_V0_H1 (TMDS_CTRL_10 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
+#define SYNC_V1_H0 (TMDS_CTRL_01 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
+#define SYNC_V1_H1 (TMDS_CTRL_00 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
+#endif
+
 #ifdef H_PLUS_V_PLUS
 #define SYNC_V0_H0 (TMDS_CTRL_11 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
 #define SYNC_V0_H1 (TMDS_CTRL_01 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
