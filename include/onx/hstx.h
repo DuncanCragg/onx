@@ -3,14 +3,19 @@
 
 // ------------------------------------------------------------------------------
 
+#define WS10
+
+#ifdef WS10
 #define HSTX_VREG_V         VREG_VOLTAGE_1_30
 #define HSTX_CLOCKSPEED_KHZ (385*1000)
 #define HSTX_HSTXDIVISOR    1
+#define H_PLUS_V_PLUS
+// 385/1=385 /5=77MHz pxclk *1280x800 = 60Hz
+#endif
 
 
 
-#define WS
-#ifdef WS
+#ifdef WS10
 #define MODE_H_SYNC_POLARITY    1
 #define MODE_H_FRONT_PORCH    160
 #define MODE_H_SYNC_WIDTH      32
