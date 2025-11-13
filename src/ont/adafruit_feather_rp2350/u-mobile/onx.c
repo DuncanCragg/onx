@@ -315,7 +315,7 @@ uint32_t loop_time=0;
 
 static volatile int yoff=0;
 
-#define DO_ALL_SPRITES // DO_ALL_SPRITES
+#define NO_ALL_SPRITES // DO_ALL_SPRITES
 
 void ont_hx_frame(){ // REVISIT: only called on frame flip - do on each loop with do_flip
 
