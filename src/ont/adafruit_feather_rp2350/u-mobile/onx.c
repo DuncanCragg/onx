@@ -316,6 +316,7 @@ uint32_t loop_time=0;
 static volatile int yoff=0;
 
 #define NO_ALL_SPRITES // DO_ALL_SPRITES
+#define NO_TIME_PSRAM  // DO_TIME_PSRAM
 
 #define SCROLL_SPEED -1
 
@@ -390,8 +391,22 @@ void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint32_t scan_y) {
 #ifdef IMAGE_PANEL
         int yo = (scan_y - sy + yoff) % 480;
         void* src_addr = (psram_buffer + (yo * H_RESOLUTION) + 350);
+#ifdef DO_TIME_PSRAM
+        static uint64_t lc=0;
+        uint64_t s=0;
+        lc++;
+        if(lc % 6000 == 0){
+          s=time_us_64();
+        }
+#endif
      // dma_memcpy16(buf+sx, src_addr, sw, DMA_CH_READ, false);
         memcpy(buf+sx, src_addr, sw*2);
+#ifdef DO_TIME_PSRAM
+        if(lc % 6000 == 0){
+          uint64_t e=time_us_64();
+          log_write("d=%lld w=%d t/pix=%.1fns\n", e-s, sw, (e-s)*1000.0f/sw);
+        }
+#endif
 #endif
       }else{
 #ifdef DO_ALL_SPRITES
