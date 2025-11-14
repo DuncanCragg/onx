@@ -17,7 +17,7 @@ void __not_in_flash_func(dma_memcpy16)(void* to, void* from, size_t len, int cha
   channel_config_set_transfer_data_size(&c, DMA_SIZE_16);
   channel_config_set_read_increment(&c, true);
   channel_config_set_write_increment(&c, true);
-//channel_config_set_high_priority(&c, hi_pri);
+  channel_config_set_high_priority(&c, hi_pri);
 
   dma_channel_configure(
       chan,
@@ -36,7 +36,7 @@ void __not_in_flash_func(dma_memset16)(void* to, uint16_t value, size_t len, int
   channel_config_set_transfer_data_size(&c, DMA_SIZE_16);
   channel_config_set_read_increment(&c, false);
   channel_config_set_write_increment(&c, true);
-//channel_config_set_high_priority(&c, hi_pri);
+  channel_config_set_high_priority(&c, hi_pri);
 
   dma_channel_configure(
       chan,
