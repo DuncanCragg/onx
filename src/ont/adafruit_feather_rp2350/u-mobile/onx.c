@@ -95,7 +95,7 @@ static sprite scenegraph[2][NUM_SPRITES] = {
   { 100, 100, 30, 30, 0b0111111111100111 },
   { 200, 200, 60, 60, 0b0001111111111111 },
   { 300, 300, 90, 90, 0b0111111111100000 },
-  { 250,  50,300,300, 0b1000000000000000 }
+  { 400,  10,320,420, 0b1000000000000000 }
  },{
   { 250, 200,300,200, 0b0111111111111111 },
   { 350, 300, 90, 90, 0b0111100111111111 },
@@ -108,7 +108,7 @@ static sprite scenegraph[2][NUM_SPRITES] = {
   { 100, 100, 30, 30, 0b0111111111100111 },
   { 200, 200, 60, 60, 0b0001111111111111 },
   { 300, 300, 90, 90, 0b0111111111100000 },
-  { 250,  50,300,300, 0b1000000000000000 }
+  { 400,  10,320,420, 0b1000000000000000 }
  }
 };
 
@@ -317,9 +317,11 @@ static volatile int yoff=0;
 
 #define NO_ALL_SPRITES // DO_ALL_SPRITES
 
+#define SCROLL_SPEED -1
+
 void ont_hx_frame(){ // REVISIT: only called on frame flip - do on each loop with do_flip
 
-  yoff+=6;
+  yoff+=SCROLL_SPEED;
 
 #ifdef DO_ALL_SPRITES
   scenegraph_write = !scenegraph_write;
@@ -352,8 +354,11 @@ void ont_hx_frame(){ // REVISIT: only called on frame flip - do on each loop wit
   }
 }
 
+#define NO_G2D
+#ifdef  DO_G2D
 // #define G2D_BUFFER_SIZE (240 * 320)
 extern uint16_t g2d_buffer[];
+#endif
 
 void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint32_t scan_y) {
 
@@ -361,11 +366,13 @@ void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint32_t scan_y) {
 #define DIVPOINT (H_RESOLUTION*0/8)
     void* wll_addr = (psram_buffer + (scan_y * H_RESOLUTION));
     dma_memcpy16(buf,          wll_addr, DIVPOINT,              DMA_CH_READ, false);
-    dma_memset16(buf+DIVPOINT, 0x672c,   H_RESOLUTION-DIVPOINT, DMA_CH_READ, false);
+    dma_memset16(buf+DIVPOINT, 0x262c,   H_RESOLUTION-DIVPOINT, DMA_CH_READ, false);
+#ifdef  DO_G2D
     if(scan_y<320){
       void* g2d_addr = (g2d_buffer + (scan_y * 240));
       dma_memcpy16(buf,        g2d_addr, 240,                   DMA_CH_READ, false);
     }
+#endif
     for(int s=0; s < NUM_SPRITES; s++){
 
       sprite sp = scenegraph[scenegraph_read][s];
@@ -379,7 +386,8 @@ void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint32_t scan_y) {
       if(sx+sw >= H_RESOLUTION) sw=H_RESOLUTION-sx-1;
 
       if(sc & 0b1000000000000000){
-#if DIVPOINT
+#define IMAGE_PANEL
+#ifdef IMAGE_PANEL
         int yo = (scan_y - sy + yoff) % 480;
         void* src_addr = (psram_buffer + (yo * H_RESOLUTION) + 350);
         dma_memcpy16(buf+sx, src_addr, sw, DMA_CH_READ, false);
