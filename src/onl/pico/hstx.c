@@ -349,19 +349,20 @@ void __not_in_flash_func(startup_core0_loop)(){
 }
 
 #define SCANLINE_TIMER_BEGIN                    \
+        static uint32_t v_scanline_skips=0;     \
         int64_t sign_time_x = sign_time;        \
-        bool    linebuf_abx = linebuf_ab;
+        uint    v_scanline_at_entry=v_scanline;
 
-#define SCANLINE_TIMER_END                      \
-        static int f=0; f++;                    \
-        if((f % (20 * 500) == 0)){              \
-          int64_t done_time_x = time_us();      \
-          log_write("done %.3lldus; signal %.3lldus; signal->done %.3lldus; %s\n", \
-                  done_time_x,sign_time_x,      \
-                  done_time_x-sign_time_x,      \
-                  linebuf_abx==linebuf_ab?      \
-                     "same line": "diff line"   \
-          );                                    \
+#define SCANLINE_TIMER_END                                                   \
+        if(v_scanline != v_scanline_at_entry) v_scanline_skips++;            \
+        static int f=0; f++;                                                 \
+        if(f % 100000 == 0){                                                  \
+          int64_t done_time_x = time_us();                                   \
+          log_write("signal->done %.3lldus; %s; skips: %d\n",                \
+                  (done_time_x - sign_time_x),                               \
+                  v_scanline==v_scanline_at_entry? "same line": "diff line", \
+                  v_scanline_skips                                           \
+          );                                                                 \
         }
 
 void startup_core1_init(){
