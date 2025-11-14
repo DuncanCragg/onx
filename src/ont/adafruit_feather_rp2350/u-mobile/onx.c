@@ -317,6 +317,7 @@ static volatile int yoff=0;
 
 #define NO_ALL_SPRITES // DO_ALL_SPRITES
 #define DO_IMAGE_PANEL // DO_IMAGE_PANEL
+#define DO_WALLPAPER   // DO_WALLPAPER
 #define NO_G2D         // DO_G2D
 #define NO_TIME_PSRAM  // DO_TIME_PSRAM
 
@@ -363,12 +364,16 @@ extern uint16_t g2d_buffer[];
 #endif
 
 void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint32_t scan_y) {
-
-    // if no wallpaper, time=4us; else PSRAM time=34us/36us
-#define DIVPOINT (H_RESOLUTION*0/8)
-    void* wll_addr = (psram_buffer + (scan_y * H_RESOLUTION));
-    dma_memcpy16(buf,          wll_addr, DIVPOINT,              DMA_CH_READ, false);
-    dma_memset16(buf+DIVPOINT, 0x262c,   H_RESOLUTION-DIVPOINT, DMA_CH_READ, false);
+#ifdef DO_WALLPAPER
+    static uint64_t num_calls=0; num_calls++;
+    if(num_calls < 2000){
+      uint16_t c=RGB_BYTES_TO_RGB555(scan_y*255/V_RESOLUTION,scan_y%255,0);
+      dma_memset16(buf, c, H_RESOLUTION, DMA_CH_READ, true);
+    }else{
+      if(num_calls==2000) log_write("2000 using memset now ----------\n");
+      memset(buf, (uint8_t)(scan_y%255), H_RESOLUTION*2);
+    }
+#endif
 #ifdef DO_G2D
     if(scan_y<320){
       void* g2d_addr = (g2d_buffer + (scan_y * 240));
