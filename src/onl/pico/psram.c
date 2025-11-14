@@ -208,10 +208,10 @@ static void __no_inline_not_in_flash_func(set_psram_timing)(void) {
     qmi_hw->m[1].timing = QMI_M1_TIMING_PAGEBREAK_VALUE_1024 << QMI_M1_TIMING_PAGEBREAK_LSB |
                           3 /* 0..3 */                       << QMI_M1_TIMING_SELECT_HOLD_LSB |
                           3 /* 1..3 */                       << QMI_M1_TIMING_COOLDOWN_LSB |
-                          3 /* 2..5 */                       << QMI_M1_TIMING_RXDELAY_LSB |
+                          7 /* 2..5 */                       << QMI_M1_TIMING_RXDELAY_LSB |
        /* maxSelect */    0x23                               << QMI_M1_TIMING_MAX_SELECT_LSB |
        /* minDeselect */  0x00                               << QMI_M1_TIMING_MIN_DESELECT_LSB |
-       /* clockDivider */ 2                                  << QMI_M1_TIMING_CLKDIV_LSB;
+       /* clockDivider */ 3                                  << QMI_M1_TIMING_CLKDIV_LSB;
 #endif
 
     restore_interrupts(intr_stash);

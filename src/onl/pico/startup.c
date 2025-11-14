@@ -63,9 +63,10 @@ static void set_up_clocks(){
 
   vreg_set_voltage(startup_vreg_v);
 
-  qmi_hw->m[0].timing = 0x40000204;
-             // 2 = RXDELAY: QSPI>100MHz RXDELAY=CLKDIV? - REVISIT
-             // 4 = CLKDIV: can be 1,2,3,4,... REVISIT: try 3 so 400/3 = 133
+  qmi_hw->m[0].timing = 0x40000303;
+       // found on web: 0x40000204
+       // 2 = RXDELAY: QSPI>100MHz RXDELAY=CLKDIV?
+       // 4 = CLKDIV: can be 1,2,3,4,... 400/3 = 133
 
   clock_configure_undivided(
       clk_sys,
