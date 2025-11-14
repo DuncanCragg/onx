@@ -390,7 +390,8 @@ void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint32_t scan_y) {
 #ifdef IMAGE_PANEL
         int yo = (scan_y - sy + yoff) % 480;
         void* src_addr = (psram_buffer + (yo * H_RESOLUTION) + 350);
-        dma_memcpy16(buf+sx, src_addr, sw, DMA_CH_READ, false);
+     // dma_memcpy16(buf+sx, src_addr, sw, DMA_CH_READ, false);
+        memcpy(buf+sx, src_addr, sw*2);
 #endif
       }else{
 #ifdef DO_ALL_SPRITES
