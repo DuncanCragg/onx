@@ -316,6 +316,8 @@ uint32_t loop_time=0;
 static volatile int yoff=0;
 
 #define NO_ALL_SPRITES // DO_ALL_SPRITES
+#define DO_IMAGE_PANEL // DO_IMAGE_PANEL
+#define NO_G2D         // DO_G2D
 #define NO_TIME_PSRAM  // DO_TIME_PSRAM
 
 #define SCROLL_SPEED -1
@@ -355,7 +357,6 @@ void ont_hx_frame(){ // REVISIT: only called on frame flip - do on each loop wit
   }
 }
 
-#define NO_G2D
 #ifdef  DO_G2D
 // #define G2D_BUFFER_SIZE (240 * 320)
 extern uint16_t g2d_buffer[];
@@ -368,10 +369,10 @@ void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint32_t scan_y) {
     void* wll_addr = (psram_buffer + (scan_y * H_RESOLUTION));
     dma_memcpy16(buf,          wll_addr, DIVPOINT,              DMA_CH_READ, false);
     dma_memset16(buf+DIVPOINT, 0x262c,   H_RESOLUTION-DIVPOINT, DMA_CH_READ, false);
-#ifdef  DO_G2D
+#ifdef DO_G2D
     if(scan_y<320){
       void* g2d_addr = (g2d_buffer + (scan_y * 240));
-      dma_memcpy16(buf,        g2d_addr, 240,                   DMA_CH_READ, false);
+      dma_memcpy16(buf, g2d_addr, 240, DMA_CH_READ, false);
     }
 #endif
     for(int s=0; s < NUM_SPRITES; s++){
@@ -387,8 +388,7 @@ void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint32_t scan_y) {
       if(sx+sw >= H_RESOLUTION) sw=H_RESOLUTION-sx-1;
 
       if(sc & 0b1000000000000000){
-#define IMAGE_PANEL
-#ifdef IMAGE_PANEL
+#ifdef DO_IMAGE_PANEL
         int yo = (scan_y - sy + yoff) % 480;
         void* src_addr = (psram_buffer + (yo * H_RESOLUTION) + 350);
 #ifdef DO_TIME_PSRAM
@@ -410,7 +410,7 @@ void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint32_t scan_y) {
 #endif
       }else{
 #ifdef DO_ALL_SPRITES
-        dma_memset16(buf+sx, sc,       sw, DMA_CH_READ, false);
+        dma_memset16(buf+sx, sc, sw, DMA_CH_READ, false);
 #endif
       }
     }
