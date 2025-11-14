@@ -363,7 +363,7 @@ void ont_hx_frame(){ // REVISIT: only called on frame flip - do on each loop wit
 extern uint16_t g2d_buffer[];
 #endif
 
-void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint32_t scan_y) {
+void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint16_t scan_y) {
 #ifdef DO_WALLPAPER
     static uint64_t num_calls=0; num_calls++;
     if(num_calls < 2000){
@@ -394,7 +394,7 @@ void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint32_t scan_y) {
 
       if(sc & 0b1000000000000000){
 #ifdef DO_IMAGE_PANEL
-        int yo = (scan_y - sy + yoff) % 480;
+        int32_t yo = ((uint32_t)scan_y - sy + yoff) % 480;
         void* src_addr = (psram_buffer + (yo * H_RESOLUTION) + 350);
 #ifdef DO_TIME_PSRAM
         static uint64_t lc=0;
@@ -421,7 +421,7 @@ void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint32_t scan_y) {
     }
 }
 
-void __not_in_flash_func(ont_hx_scanline)(uint16_t* buf, uint32_t scan_y){
+void __not_in_flash_func(ont_hx_scanline)(uint16_t* buf, uint16_t scan_y){
   fill_line_sprites(buf, scan_y);
 }
 

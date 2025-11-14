@@ -355,7 +355,7 @@ void ont_hx_frame(){ // REVISIT: only called on frame flip - do on each loop wit
 // #define G2D_BUFFER_SIZE (240 * 320)
 extern uint16_t g2d_buffer[];
 
-void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint32_t scan_y) {
+void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint16_t scan_y) {
 
     // if no wallpaper, time=4us; else PSRAM time=34us/36us
 #define DIVPOINT (H_RESOLUTION*0/8)
@@ -392,7 +392,7 @@ void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint32_t scan_y) {
     }
 }
 
-void __not_in_flash_func(ont_hx_scanline)(uint16_t* buf, uint32_t scan_y){
+void __not_in_flash_func(ont_hx_scanline)(uint16_t* buf, uint16_t scan_y){
   fill_line_sprites(buf, scan_y);
 }
 

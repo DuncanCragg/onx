@@ -117,6 +117,6 @@
 
 void ont_hx_init();
 void ont_hx_frame();
-void ont_hx_scanline(uint16_t* buf, uint32_t scan_y);
+void ont_hx_scanline(uint16_t* buf, uint16_t scan_y);
 
 #endif
