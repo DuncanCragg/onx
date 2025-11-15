@@ -70,11 +70,12 @@ volatile uint32_t pending_user_event_time;
 #define NO_MOUNTAINS   // DO_MOUNTAINS
 #define NO_ALL_SPRITES // DO_ALL_SPRITES
 #define DO_IMAGE_PANEL // DO_IMAGE_PANEL
-#define DO_WALLPAPER   // DO_WALLPAPER
+#define DO_WALLPAPER   // DO_WALLPAPER   - note you need /some/ signal to gain sync
 #define DO_G2D         // DO_G2D
 #define NO_TIME_PSRAM  // DO_TIME_PSRAM
+#define DO_INTERLACING 1
 
-#define SCROLL_SPEED 1
+#define SCROLL_SPEED 0
 
 volatile bool scenegraph_write=false;
 
@@ -102,7 +103,7 @@ static sprite scenegraph[2][NUM_SPRITES] = {
   { 100, 100, 30, 30, 0b0111111111100111 },
   { 200, 200, 60, 60, 0b0001111111111111 },
   { 300, 300, 90, 90, 0b0111111111100000 },
-  { 400,  80,300,300, 0b1000000000000000 }
+  { 400,  80,580,580, 0b1000000000000000 }
  },{
   { 250, 200,300,200, 0b0111111111111111 },
   { 350, 300, 90, 90, 0b0111100111111111 },
@@ -115,7 +116,7 @@ static sprite scenegraph[2][NUM_SPRITES] = {
   { 100, 100, 30, 30, 0b0111111111100111 },
   { 200, 200, 60, 60, 0b0001111111111111 },
   { 300, 300, 90, 90, 0b0111111111100000 },
-  { 400,  80,300,300, 0b1000000000000000 }
+  { 400,  80,580,580, 0b1000000000000000 }
  }
 };
 
@@ -328,7 +329,11 @@ uint32_t loop_time=0;
 
 static volatile int yoff=0;
 
+static bool even_lines=true;
+
 void ont_hx_frame(){ // REVISIT: only called on frame flip - do on each loop with do_flip
+
+  even_lines = !even_lines;
 
   yoff+=SCROLL_SPEED;
 
@@ -376,7 +381,7 @@ void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint16_t scan_y) {
     }else{
       if(num_calls==2000) log_write("2000 using memset now ----------\n");
 #ifdef DO_WALLPAPER
-      memset(buf, (uint8_t)(scan_y%255), H_RESOLUTION*2);
+      memset(buf, (uint8_t)0x11, H_RESOLUTION*2);
 #else
       if(num_calls < 200000) memset(buf, (uint8_t)(scan_y%255), H_RESOLUTION*2);
       if(num_calls== 200000) log_write("no more ugly wallpaper ----------\n");
@@ -402,24 +407,30 @@ void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint16_t scan_y) {
 
       if(sc & 0b1000000000000000){
 #ifdef DO_IMAGE_PANEL
-        int32_t image_line = ((uint32_t)scan_y - sy + yoff) % 480;
-        void* src_addr = (psram_buffer + (image_line * 800));
+        bool is_even = !(scan_y % 2);
+        if(!DO_INTERLACING || even_lines == is_even){
+
+          int32_t image_line = ((uint32_t)scan_y - sy + yoff) % 480;
+          void* src_addr = (psram_buffer + (image_line * 800));
 #ifdef DO_TIME_PSRAM
-        static uint64_t lc=0;
-        uint64_t s=0;
-        lc++;
-        if(lc % 6000 == 0){
-          s=time_us_64();
-        }
+          static uint64_t lc=0;
+          uint64_t s=0;
+          lc++;
+          if(lc % 6000 == 0){
+            s=time_us_64();
+          }
 #endif
-     // dma_memcpy16(buf+sx, src_addr, sw, DMA_CH_READ, false);
-        memcpy(buf+sx, src_addr, sw*2);
+       // dma_memcpy16(buf+sx, src_addr, sw, DMA_CH_READ, false);
+          memcpy(      buf+sx, src_addr, sw*2);
 #ifdef DO_TIME_PSRAM
-        if(lc % 6000 == 0){
-          uint64_t e=time_us_64();
-          log_write("d=%lld w=%d t/pix=%.1fns\n", e-s, sw, (e-s)*1000.0f/sw);
-        }
+          if(lc % 6000 == 0){
+            uint64_t e=time_us_64();
+            log_write("d=%lld w=%d t/pix=%.1fns\n", e-s, sw, (e-s)*1000.0f/sw);
+          }
 #endif
+        }else{
+          memset(buf+sx, 0x0, sw*2);
+        }
 #endif
       }else{
 #ifdef DO_ALL_SPRITES
