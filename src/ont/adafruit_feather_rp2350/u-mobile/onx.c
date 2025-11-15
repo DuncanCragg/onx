@@ -67,11 +67,11 @@ volatile uint32_t pending_user_event_time;
 
 // -----------------------------------------------------
 
-#define DO_MOUNTAINS   // DO_MOUNTAINS
+#define NO_MOUNTAINS   // DO_MOUNTAINS
 #define NO_ALL_SPRITES // DO_ALL_SPRITES
-#define DO_IMAGE_PANEL // DO_IMAGE_PANEL
-#define NO_WALLPAPER   // DO_WALLPAPER
-#define NO_G2D         // DO_G2D
+#define NO_IMAGE_PANEL // DO_IMAGE_PANEL
+#define DO_WALLPAPER   // DO_WALLPAPER
+#define DO_G2D         // DO_G2D
 #define NO_TIME_PSRAM  // DO_TIME_PSRAM
 
 #define SCROLL_SPEED 1
