@@ -11,6 +11,7 @@
 #define HSTX_HSTXDIVISOR    1
 #define H_PLUS_V_PLUS
 // 385/1=385 /5=77MHz pxclk *1280x800 = 60Hz
+//    371.25 /5=74.25MHz
 #endif
 
 #ifdef WS5

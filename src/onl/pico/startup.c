@@ -95,6 +95,12 @@ static void set_up_clocks(){
       post_div2=1;
       break;
     }
+    case(371*1000):{
+      vco_freq=1485 * MHZ;
+      post_div1=4;
+      post_div2=1;
+      break;
+    }
     case(356*1000):{
       vco_freq=1068 * MHZ; // 360=1440/4
       post_div1=3;

@@ -101,7 +101,7 @@ static uint32_t vactive_line[] = {
 
 // ----------------------------------------------------------------------------
 
-#define LINEBUF_LINES 32
+#define LINEBUF_LINES 16
 static uint16_t r_linebuf_line=0;
 static uint16_t ALIGNED  linebuf_a[LINEBUF_LINES][H_RESOLUTION];
 static uint16_t ALIGNED  linebuf_b[LINEBUF_LINES][H_RESOLUTION];

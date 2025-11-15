@@ -67,7 +67,7 @@ volatile uint32_t pending_user_event_time;
 
 // -----------------------------------------------------
 
-#define DO_MOUNTAINS   // DO_MOUNTAINS
+#define NO_MOUNTAINS   // DO_MOUNTAINS
 #define NO_ALL_SPRITES // DO_ALL_SPRITES
 #define DO_IMAGE_PANEL // DO_IMAGE_PANEL
 #define DO_WALLPAPER   // DO_WALLPAPER
@@ -348,7 +348,7 @@ void ont_hx_frame(){ // REVISIT: only called on frame flip - do on each loop wit
 #endif
 
   static int64_t ft=0;
-  if(abs((int32_t)(frame_time - ft)) > 40 && frame_time < 600000){
+  if(abs((int32_t)(frame_time - ft)) > 50 && frame_time < 600000){
     ft=frame_time;
     log_write("%.1fHz\n", 1000000.0f/frame_time);
   }
@@ -395,7 +395,7 @@ void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint16_t scan_y) {
     ; if(scan_y < sy || scan_y >= sy + sh) continue;
     ; if(sx >= H_RESOLUTION) continue;
 
-      if(sx+sw >= H_RESOLUTION) sw=H_RESOLUTION-sx-1;
+      if(sx+sw >= H_RESOLUTION) sw=H_RESOLUTION-sx;
 
       if(sc & 0b1000000000000000){
 #ifdef DO_IMAGE_PANEL
