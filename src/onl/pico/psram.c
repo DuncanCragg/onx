@@ -210,7 +210,7 @@ static void __no_inline_not_in_flash_func(set_psram_timing)(void) {
                           3 /* 1..3 */                       << QMI_M1_TIMING_COOLDOWN_LSB |
                           7 /* 2..5 */                       << QMI_M1_TIMING_RXDELAY_LSB |
        /* maxSelect */    0x23                               << QMI_M1_TIMING_MAX_SELECT_LSB |
-       /* minDeselect */  0x00                               << QMI_M1_TIMING_MIN_DESELECT_LSB |
+       /* minDeselect */  0x10                               << QMI_M1_TIMING_MIN_DESELECT_LSB |
        /* clockDivider */ 3                                  << QMI_M1_TIMING_CLKDIV_LSB;
        // REVISIT: set that "3" in startup_psram_clock_div
 #endif
