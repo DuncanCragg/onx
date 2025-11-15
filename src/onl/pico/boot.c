@@ -1,4 +1,6 @@
 
+#include <hardware/watchdog.h>
+
 #include <pico/bootrom.h>
 
 #include <onx/log.h>
@@ -11,6 +13,7 @@ void boot_init() {
 
 void boot_reset(bool enter_bootloader) {
   if(enter_bootloader) rom_reset_usb_boot_extra(-1, 0, false);
+  else                 watchdog_reboot(0, 0, 0);
 }
 
 void boot_feed_watchdog() {
