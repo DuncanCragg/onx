@@ -3,7 +3,7 @@
 
 // ------------------------------------------------------------------------------
 
-#define WS5
+#define WS10
 
 #ifdef WS10
 #define HSTX_VREG_V         VREG_VOLTAGE_1_30
