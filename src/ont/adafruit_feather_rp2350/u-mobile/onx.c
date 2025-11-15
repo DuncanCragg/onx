@@ -45,8 +45,6 @@ const char* onn_test_uid_prefix = 0;
 
 #include <mountains_800x480_rgb565.h>
 
-#define NO_MOUNTAINS     // DO_MOUNTAINS
-
 extern volatile int64_t frame_time;
 
 // -----------------------------------------------------
@@ -68,6 +66,15 @@ volatile uint32_t pending_user_event_time;
 #define RGB_BYTES_TO_RGB555(r,g,b) (((r)&0b11111000)<<7)|(((g)&0b11111000)<<2)|(((b)&0b11111000)>>3)
 
 // -----------------------------------------------------
+
+#define DO_MOUNTAINS   // DO_MOUNTAINS
+#define NO_ALL_SPRITES // DO_ALL_SPRITES
+#define DO_IMAGE_PANEL // DO_IMAGE_PANEL
+#define DO_WALLPAPER   // DO_WALLPAPER
+#define NO_G2D         // DO_G2D
+#define NO_TIME_PSRAM  // DO_TIME_PSRAM
+
+#define SCROLL_SPEED 1
 
 volatile bool scenegraph_write=false;
 
@@ -95,7 +102,7 @@ static sprite scenegraph[2][NUM_SPRITES] = {
   { 100, 100, 30, 30, 0b0111111111100111 },
   { 200, 200, 60, 60, 0b0001111111111111 },
   { 300, 300, 90, 90, 0b0111111111100000 },
-  { 400,  10,320,420, 0b1000000000000000 }
+  { 400,  10,320,480, 0b1000000000000000 }
  },{
   { 250, 200,300,200, 0b0111111111111111 },
   { 350, 300, 90, 90, 0b0111100111111111 },
@@ -108,7 +115,7 @@ static sprite scenegraph[2][NUM_SPRITES] = {
   { 100, 100, 30, 30, 0b0111111111100111 },
   { 200, 200, 60, 60, 0b0001111111111111 },
   { 300, 300, 90, 90, 0b0111111111100000 },
-  { 400,  10,320,420, 0b1000000000000000 }
+  { 400,  10,320,480, 0b1000000000000000 }
  }
 };
 
@@ -116,21 +123,23 @@ static sprite scenegraph[2][NUM_SPRITES] = {
 
 uint16_t* psram_buffer =  (uint16_t*)0x15000000;
 
-void copy_mountain_to_psram(){
+void copy_mountains_to_psram(){
+  for(uint32_t i=0; i< 800*480; i++){
+    uint16_t pixel = mountains_800x480[i];
+    psram_buffer[i] = ((pixel >> 1) & 0x7fe0) | (pixel & 0x001f);
+  }
+}
+
+void copy_an_image_to_psram(){
   for(int y=0; y < V_RESOLUTION; y++){
     int line_offset  = (y * H_RESOLUTION);
     for(int x=0; x < H_RESOLUTION; x++){
       uint16_t pixel;
-#ifdef DO_MOUNTAINS
-      pixel = mountains_800x480[x + line_offset];
-      pixel = ((pixel >> 1) & 0x7fe0) | (pixel & 0x001f);
-#else
       if(y<V_RESOLUTION/4) pixel = (x+line_offset) & 0x7c00;
       else
       if(y<V_RESOLUTION/2) pixel = (x+line_offset) & 0x03e0;
       else
                            pixel = (x+line_offset) & 0x001f;
-#endif
       psram_buffer[x + line_offset] = pixel;
     }
   }
@@ -308,20 +317,16 @@ void ont_hx_init(){
 
   init_onx();
 
-  copy_mountain_to_psram();
+#ifdef DO_MOUNTAINS
+  copy_mountains_to_psram();
+#else
+  copy_an_image_to_psram();
+#endif
 }
 
 uint32_t loop_time=0;
 
 static volatile int yoff=0;
-
-#define NO_ALL_SPRITES // DO_ALL_SPRITES
-#define DO_IMAGE_PANEL // DO_IMAGE_PANEL
-#define DO_WALLPAPER   // DO_WALLPAPER
-#define NO_G2D         // DO_G2D
-#define NO_TIME_PSRAM  // DO_TIME_PSRAM
-
-#define SCROLL_SPEED -1
 
 void ont_hx_frame(){ // REVISIT: only called on frame flip - do on each loop with do_flip
 
@@ -394,8 +399,8 @@ void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint16_t scan_y) {
 
       if(sc & 0b1000000000000000){
 #ifdef DO_IMAGE_PANEL
-        int32_t yo = ((uint32_t)scan_y - sy + yoff) % 480;
-        void* src_addr = (psram_buffer + (yo * H_RESOLUTION) + 350);
+        int32_t image_line = ((uint32_t)scan_y - sy + yoff) % 480;
+        void* src_addr = (psram_buffer + (image_line * 800));
 #ifdef DO_TIME_PSRAM
         static uint64_t lc=0;
         uint64_t s=0;
