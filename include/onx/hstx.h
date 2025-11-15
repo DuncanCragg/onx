@@ -10,7 +10,13 @@
 #define HSTX_CLOCKSPEED_KHZ (385*1000)
 #define HSTX_HSTXDIVISOR    1
 // 385/1=385 /5=77MHz pxclk *1280x800 = 60Hz
-//    371.25 /5=74.25MHz
+#endif
+
+#ifdef TOSH
+#define HSTX_VREG_V         VREG_VOLTAGE_1_30
+#define HSTX_CLOCKSPEED_KHZ (371*1000)
+#define HSTX_HSTXDIVISOR    1
+//    371.25 /5=74.25MHz *1920x1080 = 24Hz
 #endif
 
 #ifdef WS5
@@ -76,15 +82,15 @@
 
 #define H_PLUS_V_PLUS
 
-#define MODE_H_FRONT_PORCH     48
-#define MODE_H_SYNC_WIDTH      32
-#define MODE_H_BACK_PORCH      80
-#define MODE_H_ACTIVE_PIXELS 1280
+#define MODE_H_FRONT_PORCH    638 //   48
+#define MODE_H_SYNC_WIDTH      44 //   32
+#define MODE_H_BACK_PORCH     148 //   80
+#define MODE_H_ACTIVE_PIXELS 1920 // 1280
 
-#define MODE_V_FRONT_PORCH      3
-#define MODE_V_SYNC_WIDTH       6
-#define MODE_V_BACK_PORCH      14
-#define MODE_V_ACTIVE_LINES   800
+#define MODE_V_FRONT_PORCH      4 //   3
+#define MODE_V_SYNC_WIDTH       5 //   6
+#define MODE_V_BACK_PORCH      36 //  14
+#define MODE_V_ACTIVE_LINES  1080 // 800
 #endif
 
 // ------------------------------------------------------------------------------
