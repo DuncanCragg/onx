@@ -29,9 +29,11 @@
 
 // -----------------------------------------------------
 
-const uint8_t  startup_vreg_v         = VREG_VOLTAGE_1_30;
-const uint32_t startup_clockspeed_khz = 385*1000;
-const uint8_t  startup_hstxdivisor    = 2;
+const uint8_t  startup_vreg_v              = VREG_VOLTAGE_1_30;
+const uint32_t startup_clockspeed_khz      = 384*1000;
+const uint8_t  startup_hstx_clock_divider  = 3;
+const uint8_t  startup_flash_clock_divider = 3;
+const uint8_t  psram_clock_divider         = 3;
 
 const int8_t usb_host_pio_data_plus_pin = 1;
 const int8_t usb_host_pio_dma_channel   = 9;

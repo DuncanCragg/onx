@@ -29,9 +29,11 @@
 // --------------------------------------
 // config for startup.c
 
-const uint8_t  startup_vreg_v         = HSTX_VREG_V;
-const uint32_t startup_clockspeed_khz = HSTX_CLOCKSPEED_KHZ;
-const uint8_t  startup_hstxdivisor    = HSTX_HSTXDIVISOR;
+const uint8_t  startup_vreg_v              = HSTX_VREG_V;
+const uint32_t startup_clockspeed_khz      = HSTX_CLOCKSPEED_KHZ;
+const uint8_t  startup_hstx_clock_divider  = HSTX_CLOCK_DIVIDER;
+const uint8_t  startup_flash_clock_divider = HSTX_FLASH_CLOCK_DIVIDER;
+const uint8_t  psram_clock_divider         = HSTX_PSRAM_CLOCK_DIVIDER;
 
 // ----------------------------------------------------------------------------
 

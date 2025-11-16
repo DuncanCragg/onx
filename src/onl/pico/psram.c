@@ -206,20 +206,19 @@ static void __no_inline_not_in_flash_func(set_psram_timing)(void) {
        /* clockDivider */ 5                                  << QMI_M1_TIMING_CLKDIV_LSB;
 #else
     qmi_hw->m[1].timing = QMI_M1_TIMING_PAGEBREAK_VALUE_1024 << QMI_M1_TIMING_PAGEBREAK_LSB |
-                          3 /* 0..3 */                       << QMI_M1_TIMING_SELECT_HOLD_LSB |
-                          3 /* 1..3 */                       << QMI_M1_TIMING_COOLDOWN_LSB |
-                          7 /* 2..5 */                       << QMI_M1_TIMING_RXDELAY_LSB |
+              /* 0..3 */  3                                  << QMI_M1_TIMING_SELECT_HOLD_LSB |
+              /* 1..3 */  3                                  << QMI_M1_TIMING_COOLDOWN_LSB |
+              /* 2..5 */ (psram_clock_divider==3? 7: 5)      << QMI_M1_TIMING_RXDELAY_LSB |
        /* maxSelect */    0x23                               << QMI_M1_TIMING_MAX_SELECT_LSB |
        /* minDeselect */  0x10                               << QMI_M1_TIMING_MIN_DESELECT_LSB |
-       /* clockDivider */ 3                                  << QMI_M1_TIMING_CLKDIV_LSB;
-       // REVISIT: set that "3" in startup_psram_clock_div
+       /* clockDivider */ psram_clock_divider                << QMI_M1_TIMING_CLKDIV_LSB;
 #endif
 
     restore_interrupts(intr_stash);
 
-    log_write("qmi_hw %x\n", qmi_hw->m[1].timing);
-    log_write("qmi_hw %b\n", qmi_hw->m[1].timing);
-    log_write("maxSelect=%x minDeselect=%x clockDivider=%x\n", maxSelect, minDeselect, clockDivider);
+    log_write("calc maxSelect=%x minDeselect=%x clockDivider=%x\n", maxSelect, minDeselect, clockDivider);
+    log_write("psram timing set to %#x\n", qmi_hw->m[1].timing);
+    log_write("psram timing set to %b\n",  qmi_hw->m[1].timing);
 
 /*
         +- cooldown
@@ -232,12 +231,20 @@ static void __no_inline_not_in_flash_func(set_psram_timing)(void) {
        ++ ++ +++ ++ ++++++ +++++ + +++ ++++++++
        fe dc ba9 87 654321 0fedc b a98 76543210
        01 10 000 11 100101 10000 0 001 00000011  0x61cb0103
+       -- -- === =- ---=== =---- = === ----====
         1  2      3  2---5 1---0     1        3
        01 10 000 11 010010 01000 0 001 00000010  0x61a48102
+       -- -- === =- ---=== =---- = === ----====
         1  2      3  2---2 0---8     1        2
        01 10 000 00 100011 00000 0 010 00000001  0x60460201
         1  2      0  2---3     0     2        1
-
+       -- -- === =- ---=== =---- = === ----====
+        1  2   0  0      0     7 0   2        3
+       01 10 000 00 000000 00111 0 010 00000011  0x60007203
+       -- -- === =- ---=== =---- = === ----====
+        1  0   0  0      0     0 0   3        3
+       01 00 000 00 000000 00000 0 011 00000011  0x40000303
+       -- -- === =- ---=== =---- = === ----====
 */
 }
 

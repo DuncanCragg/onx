@@ -29,22 +29,24 @@
 
 //-------------------------------------------
 
-static void calc_and_show_clock_params(uint32_t freq_hz) {
+static void calc_and_show_clock_params(uint32_t cpu_clock_hz_required) {
   uint reference_freq_hz = XOSC_HZ / PLL_SYS_REFDIV;
   for (uint fbdiv = 320; fbdiv >= 16; fbdiv--) {
-    uint vco_hz = fbdiv * reference_freq_hz;
-  ; if (vco_hz < PICO_PLL_VCO_MIN_FREQ_HZ || vco_hz > PICO_PLL_VCO_MAX_FREQ_HZ) continue;
+    uint vco_freq = fbdiv * reference_freq_hz;
+  ; if (vco_freq < PICO_PLL_VCO_MIN_FREQ_HZ || vco_freq > PICO_PLL_VCO_MAX_FREQ_HZ) continue;
     for (uint postdiv1 = 7; postdiv1 >= 1; postdiv1--) {
       for (uint postdiv2 = postdiv1; postdiv2 >= 1; postdiv2--) {
-        uint out = vco_hz / (postdiv1 * postdiv2);
-        if(out == freq_hz && !(vco_hz % (postdiv1 * postdiv2))) {
-          log_write("clock params for %ld: vco=%ldMz div1=%ld div2=%ld\n", freq_hz/1000/1000, vco_hz/1000/1000, postdiv1, postdiv2);
-          return;
+        uint32_t cpu_clock_hz = vco_freq / (postdiv1 * postdiv2);
+        if(abs((int32_t)cpu_clock_hz - (int32_t)cpu_clock_hz_required) < 5*1000*1000 && !(vco_freq % (postdiv1 * postdiv2))) {
+          log_write("clock params for %ld=>%ld: vco=%ldMz div1=%ld div2=%ld\n",
+                                      cpu_clock_hz_required/1000/1000,
+                                      cpu_clock_hz/1000/1000,
+                                      vco_freq/1000/1000,
+                                      postdiv1, postdiv2);
         }
       }
     }
   }
-  log_write("couldn't find clock params for %ld\n", freq_hz);
 }
 
 /*
@@ -59,15 +61,18 @@ How to overclock:
  - thermal: package temperature
 */
 
+uint32_t prev_flash_timing;
+
 static void set_up_clocks(){
 
   vreg_set_voltage(startup_vreg_v);
 
-  qmi_hw->m[0].timing = 0x40000303;
+  prev_flash_timing = qmi_hw->m[0].timing; // 0x60007203
+
+  qmi_hw->m[0].timing = startup_flash_clock_divider==3? 0x60007303: 0x60007202;
        // found on web: 0x40000204
        // 2 = RXDELAY: QSPI>100MHz RXDELAY=CLKDIV?
        // 4 = CLKDIV: can be 1,2,3,4,... 400/3 = 133
-       // REVISIT: set that "3" in startup_flash_clock_div
 
   clock_configure_undivided(
       clk_sys,
@@ -77,52 +82,52 @@ static void set_up_clocks(){
   );
 
   uint vco_freq =0;
-  uint post_div1=0;
-  uint post_div2=0;
+  uint postdiv1=0;
+  uint postdiv2=0;
 
   // REVISIT: now try the sdk function again, but find nearest, don't bail
 
   switch(startup_clockspeed_khz){
     case(400*1000):{
       vco_freq=1200 * MHZ;
-      post_div1=3;
-      post_div2=1;
+      postdiv1=3;
+      postdiv2=1;
       break;
     }
-    case(385*1000):{
-      vco_freq=1155 * MHZ; // 380 = 1140
-      post_div1=3;
-      post_div2=1;
+    case(384*1000):{
+      vco_freq=1152 * MHZ; // 380 = 1140
+      postdiv1=3;
+      postdiv2=1;
       break;
     }
-    case(371*1000):{
-      vco_freq=1485 * MHZ;
-      post_div1=4;
-      post_div2=1;
+    case(372*1000):{
+      vco_freq=1116 * MHZ;
+      postdiv1=3;
+      postdiv2=1;
       break;
     }
     case(356*1000):{
       vco_freq=1068 * MHZ; // 360=1440/4
-      post_div1=3;
-      post_div2=1;
+      postdiv1=3;
+      postdiv2=1;
       break;
     }
     case(340*1000):{
       vco_freq=1020 * MHZ;
-      post_div1=3;
-      post_div2=1;
+      postdiv1=3;
+      postdiv2=1;
       break;
     }
     case(324*1000):{
       vco_freq=1296 * MHZ;
-      post_div1=4;
-      post_div2=1;
+      postdiv1=4;
+      postdiv2=1;
       break;
     }
     case(300*1000):{
       vco_freq=1500 * MHZ;
-      post_div1=5;
-      post_div2=1;
+      postdiv1=5;
+      postdiv2=1;
       break;
     }
   }
@@ -130,9 +135,9 @@ static void set_up_clocks(){
     return; // can't log things yet
   }
 
-  pll_init(pll_sys, PLL_SYS_REFDIV, vco_freq, post_div1, post_div2);
+  pll_init(pll_sys, PLL_SYS_REFDIV, vco_freq, postdiv1, postdiv2);
 
-  uint32_t cpu_clock = vco_freq / (post_div1 * post_div2);
+  uint32_t cpu_clock_hz = vco_freq / (postdiv1 * postdiv2);
 
   clock_configure_undivided(
       clk_ref,
@@ -144,21 +149,21 @@ static void set_up_clocks(){
       clk_sys,
       CLOCKS_CLK_SYS_CTRL_SRC_VALUE_CLKSRC_CLK_SYS_AUX,
       CLOCKS_CLK_SYS_CTRL_AUXSRC_VALUE_CLKSRC_PLL_SYS,
-      cpu_clock
+      cpu_clock_hz
   );
   clock_configure_undivided(
       clk_peri,
       0,
       CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLKSRC_PLL_SYS,
-      cpu_clock
+      cpu_clock_hz
   );
 #if defined(PICO_RP2350)
   clock_configure(
       clk_hstx,
       0,
       CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLKSRC_PLL_SYS,
-      cpu_clock,
-      cpu_clock / startup_hstxdivisor
+      cpu_clock_hz,
+      cpu_clock_hz / startup_hstx_clock_divider
   );
 #endif
 }
@@ -187,6 +192,13 @@ void __not_in_flash_func(core0_main)() {
   log_write("CPU clock:         %luMHz\n", syst/1000000);
   log_write("peripherals clock: %luMHz\n", peri/1000000);
   log_write("HSTX clock:        %luMHz\n", hstx/1000000);
+  log_write("Pixel clock:       %luMHz\n", hstx/1000000/5);
+  log_write("fr.rate  800x480:  %.1fHz\n", hstx        /5/( 800* 480*1.15));
+  log_write("fr.rate 1280x800:  %.1fHz\n", hstx        /5/(1280* 800*1.15));
+  log_write("fr.rate 1920x1080: %.1fHz\n", hstx        /5/(1920*1080*1.15));
+  log_write("previous flash timing: %#x\n", prev_flash_timing); // 0x60007203
+  log_write("flash clock:       %luMHz\n", syst/1000000/startup_flash_clock_divider);
+  log_write("PSRAM clock:       %luMHz\n", syst/1000000/psram_clock_divider);
 
   random_init();
 

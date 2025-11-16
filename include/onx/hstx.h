@@ -6,30 +6,38 @@
 #define WS10
 
 #ifdef WS10
-#define HSTX_VREG_V         VREG_VOLTAGE_1_30
-#define HSTX_CLOCKSPEED_KHZ (385*1000)
-#define HSTX_HSTXDIVISOR    1
-// 385/1=385 /5=77MHz pxclk *1280x800 = 60Hz
+#define HSTX_VREG_V                VREG_VOLTAGE_1_30
+#define HSTX_CLOCKSPEED_KHZ       (384*1000)
+#define HSTX_CLOCK_DIVIDER         1
+#define HSTX_FLASH_CLOCK_DIVIDER   3
+#define HSTX_PSRAM_CLOCK_DIVIDER   3
+// 384/1=384 /5=77MHz pxclk *1280x800 = 60Hz
 #endif
 
 #ifdef TOSH
-#define HSTX_VREG_V         VREG_VOLTAGE_1_30
-#define HSTX_CLOCKSPEED_KHZ (371*1000)
-#define HSTX_HSTXDIVISOR    1
-//    371.25 /5=74.25MHz *1920x1080 = 24Hz
+#define HSTX_VREG_V                VREG_VOLTAGE_1_30
+#define HSTX_CLOCKSPEED_KHZ       (372*1000)
+#define HSTX_CLOCK_DIVIDER         1
+#define HSTX_FLASH_CLOCK_DIVIDER   3
+#define HSTX_PSRAM_CLOCK_DIVIDER   3
+//    372 /5=74.4MHz *1920x1080 = 24Hz
 #endif
 
 #ifdef WS5
-#define HSTX_VREG_V         VREG_VOLTAGE_1_30
-#define HSTX_CLOCKSPEED_KHZ (385*1000)
-#define HSTX_HSTXDIVISOR    4
-// 385/4=96.25 /5=19.25MHz pxclk *800x480 = 39.4Hz
+#define HSTX_VREG_V                VREG_VOLTAGE_1_30
+#define HSTX_CLOCKSPEED_KHZ       (384*1000)
+#define HSTX_CLOCK_DIVIDER         4
+#define HSTX_FLASH_CLOCK_DIVIDER   3
+#define HSTX_PSRAM_CLOCK_DIVIDER   3
+// 384/4=96 /5=19.2MHz pxclk *800x480 = 39.4Hz
 #endif
 
 #ifdef ELECROW5
-#define HSTX_VREG_V         VREG_VOLTAGE_1_30
-#define HSTX_CLOCKSPEED_KHZ (300*1000)
-#define HSTX_HSTXDIVISOR    2
+#define HSTX_VREG_V                VREG_VOLTAGE_1_30
+#define HSTX_CLOCKSPEED_KHZ       (300*1000)
+#define HSTX_CLOCK_DIVIDER         2
+#define HSTX_FLASH_CLOCK_DIVIDER   3
+#define HSTX_PSRAM_CLOCK_DIVIDER   2
 // 300/2=150 /5=30MHz pxclk *800x480 = 60Hz
 #endif
 
