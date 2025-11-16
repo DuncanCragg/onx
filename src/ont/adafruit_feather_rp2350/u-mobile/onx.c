@@ -374,19 +374,9 @@ extern uint16_t g2d_buffer[];
 #endif
 
 void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint16_t scan_y) {
-    static uint64_t num_calls=0; num_calls++;
-    if(num_calls < 2000){
-      uint16_t c=RGB_BYTES_TO_RGB555(scan_y*255/V_RESOLUTION,scan_y%255,0);
-      dma_memset16(buf, c, H_RESOLUTION, DMA_CH_READ, true);
-    }else{
-      if(num_calls==2000) log_write("2000 using memset now ----------\n");
 #ifdef DO_WALLPAPER
-      memset(buf, (uint8_t)0x11, H_RESOLUTION*2);
-#else
-      if(num_calls < 200000) memset(buf, (uint8_t)(scan_y%255), H_RESOLUTION*2);
-      if(num_calls== 200000) log_write("no more ugly wallpaper ----------\n");
+    memset(buf, (uint8_t)0x11, H_RESOLUTION*2);
 #endif // DO_WALLPAPER
-    }
 #ifdef DO_G2D
     if(scan_y<320){
       void* g2d_addr = (g2d_buffer + (scan_y * 240));
