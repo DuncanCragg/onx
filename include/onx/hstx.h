@@ -25,12 +25,21 @@
 #endif
 
 #ifdef TOSH
+#ifdef TOSH_24HZ
 #define HSTX_VREG_V                VREG_VOLTAGE_1_30
 #define HSTX_CLOCKSPEED_KHZ       (372*1000)
 #define HSTX_CLOCK_DIVIDER         1
 #define HSTX_FLASH_CLOCK_DIVIDER   3
 #define HSTX_PSRAM_CLOCK_DIVIDER   3
 //    372 /5=74.4MHz *1920x1080 = 24Hz
+#else
+#define HSTX_VREG_V                VREG_VOLTAGE_1_30
+#define HSTX_CLOCKSPEED_KHZ       (356*1000)
+#define HSTX_CLOCK_DIVIDER         1
+#define HSTX_FLASH_CLOCK_DIVIDER   3
+#define HSTX_PSRAM_CLOCK_DIVIDER   2 // 178MHz !!
+// 356/1=356 /5=71MHz pxclk *1280x800 = 60Hz
+#endif
 #endif
 
 #ifdef WS5
@@ -122,15 +131,32 @@
 
 #define V_PLUS_H_PLUS
 
-#define MODE_H_FRONT_PORCH    638 //   48
-#define MODE_H_SYNC_WIDTH      44 //   32
-#define MODE_H_BACK_PORCH     148 //   80
-#define MODE_H_ACTIVE_PIXELS 1920 // 1280
+#ifdef TOSH_24HZ
 
-#define MODE_V_FRONT_PORCH      4 //   3
-#define MODE_V_SYNC_WIDTH       5 //   6
-#define MODE_V_BACK_PORCH      36 //  14
-#define MODE_V_ACTIVE_LINES  1080 // 800
+#define MODE_H_FRONT_PORCH    638
+#define MODE_H_SYNC_WIDTH      44
+#define MODE_H_BACK_PORCH     148
+#define MODE_H_ACTIVE_PIXELS 1920
+
+#define MODE_V_FRONT_PORCH      4
+#define MODE_V_SYNC_WIDTH       5
+#define MODE_V_BACK_PORCH      36
+#define MODE_V_ACTIVE_LINES  1080
+
+#else
+
+#define MODE_H_FRONT_PORCH     48
+#define MODE_H_SYNC_WIDTH      32
+#define MODE_H_BACK_PORCH      80
+#define MODE_H_ACTIVE_PIXELS 1280
+
+#define MODE_V_FRONT_PORCH      3
+#define MODE_V_SYNC_WIDTH       6
+#define MODE_V_BACK_PORCH      14
+#define MODE_V_ACTIVE_LINES   800
+
+#endif
+
 #endif
 
 // ------------------------------------------------------------------------------

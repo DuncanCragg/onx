@@ -42,16 +42,16 @@ DVI spec:
 
       C1|C0=V|H
        0|0 0010101011 0x00ab
-       0|1 1101010100 0x0354
-       1|0 0010101010 0x00aa
+       0|1 1101010100 0x0354 \__ what order? C0|C1?
+       1|0 0010101010 0x00aa /
        1|1 1101010101 0x0355
 
- CTL0 CTL1 CTL2 CTL3 Data Period Type
-   1    0    0    0  Video Data Period
+ ctl0 ctl1 ctl2 ctl3 Data Period Type
+   1    0    0    0  Video Data Period - what code for 0/1?
 */
-#define DVI_00 0x00ab // 0x0354
-#define DVI_01 0x00aa // 0x0154
-#define DVI_10 0x0354 // 0x00ab
+#define DVI_00 0x00ab // 0x0354 <---these are from pico-examples
+#define DVI_01 0x00aa // 0x0154 \__ what order?
+#define DVI_10 0x0354 // 0x00ab /
 #define DVI_11 0x0355 // 0x02ab
 
 #ifdef V_MINUS_H_MINUS
