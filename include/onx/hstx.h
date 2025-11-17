@@ -3,7 +3,7 @@
 
 // ------------------------------------------------------------------------------
 
-#define WS10
+#define WS5
 
 #ifdef WS10
 #define WS10_PUSH_PSRAM
@@ -51,7 +51,7 @@
 #endif
 
 #ifdef WS5
-#define WS5_40HZ
+// #define WS5_40HZ
 #ifdef WS5_40HZ
 #define HSTX_VREG_V                VREG_VOLTAGE_1_30
 #define HSTX_CLOCKSPEED_KHZ       (384*1000)
