@@ -55,12 +55,12 @@ DVI spec:
 
 */
 #define DVI_00 0x0354 // 0x00ab <---these are from pico-examples
-#define DVI_01 0x00ab // 0x00aa \__ what order?
-#define DVI_10 0x0154 // 0x0354 /
+#define DVI_01 0x0154 // 0x00aa \__ what order?
+#define DVI_10 0x00ab // 0x0354 /
 #define DVI_11 0x02ab // 0x0355
 
 #define CTLB DVI_00 // 0x02cc - what should be here?
-#define CTLG DVI_01 // 0x0133
+#define CTLG DVI_10 // 0x0133
 #define CTLR DVI_00 // 0x02cc
 
 #ifdef V_MINUS_H_MINUS
@@ -71,12 +71,12 @@ DVI spec:
 #define SYNC_V_Y_H_Y (DVI_00 | (CTLG << 10) | (CTLR << 20))
 #endif
 
-#ifdef V_MINUS_H_PLUS
+#ifdef V_MINUS_H_PLUS // I know it makes no sense but I don't understand enough
 //                  B (sync)  G (ctl0/1)       R (ctl2/3)
-#define SYNC_V_N_H_N (DVI_10 | (CTLG << 10) | (CTLR << 20))
+#define SYNC_V_N_H_N (DVI_01 | (CTLG << 10) | (CTLR << 20))
 #define SYNC_V_N_H_Y (DVI_11 | (CTLG << 10) | (CTLR << 20))
 #define SYNC_V_Y_H_N (DVI_00 | (CTLG << 10) | (CTLR << 20))
-#define SYNC_V_Y_H_Y (DVI_01 | (CTLG << 10) | (CTLR << 20))
+#define SYNC_V_Y_H_Y (DVI_10 | (CTLG << 10) | (CTLR << 20))
 #endif
 
 #ifdef V_PLUS_H_MINUS
