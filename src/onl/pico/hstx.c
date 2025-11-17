@@ -54,13 +54,13 @@ DVI spec:
  R: 0x02cc (10 1100 1100)
 
 */
-#define DVI_00 0x00ab // 0x0354 <---these are from pico-examples
-#define DVI_01 0x00aa // 0x0154 \__ what order?
-#define DVI_10 0x0354 // 0x00ab /
-#define DVI_11 0x0355 // 0x02ab
+#define DVI_00 0x0354 // 0x00ab <---these are from pico-examples
+#define DVI_01 0x00ab // 0x00aa \__ what order?
+#define DVI_10 0x0154 // 0x0354 /
+#define DVI_11 0x02ab // 0x0355
 
 #define CTLB DVI_00 // 0x02cc - what should be here?
-#define CTLG DVI_00 // 0x0133
+#define CTLG DVI_01 // 0x0133
 #define CTLR DVI_00 // 0x02cc
 
 #ifdef V_MINUS_H_MINUS
