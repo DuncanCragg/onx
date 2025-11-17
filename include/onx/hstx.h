@@ -129,9 +129,9 @@
 
 #ifdef TOSH
 
-#define V_PLUS_H_PLUS
-
 #ifdef TOSH_24HZ
+
+#define V_PLUS_H_PLUS
 
 #define MODE_H_FRONT_PORCH    638
 #define MODE_H_SYNC_WIDTH      44
@@ -144,6 +144,8 @@
 #define MODE_V_ACTIVE_LINES  1080
 
 #else
+
+#define V_MINUS_H_PLUS
 
 #define MODE_H_FRONT_PORCH     48
 #define MODE_H_SYNC_WIDTH      32
