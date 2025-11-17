@@ -37,30 +37,53 @@ const uint8_t  psram_clock_divider         = HSTX_PSRAM_CLOCK_DIVIDER;
 
 // ----------------------------------------------------------------------------
 
-#define TMDS_CTRL_00 0x354u
-#define TMDS_CTRL_01 0x0abu
-#define TMDS_CTRL_10 0x154u
-#define TMDS_CTRL_11 0x2abu
+/*
+DVI spec:
+
+      C1|C0=V|H
+       0|0 0010101011 0x00ab
+       0|1 1101010100 0x0354
+       1|0 0010101010 0x00aa
+       1|1 1101010101 0x0355
+
+ CTL0 CTL1 CTL2 CTL3 Data Period Type
+   1    0    0    0  Video Data Period
+*/
+#define DVI_00 0x00ab // 0x0354
+#define DVI_01 0x00aa // 0x0154
+#define DVI_10 0x0354 // 0x00ab
+#define DVI_11 0x0355 // 0x02ab
 
 #ifdef V_MINUS_H_MINUS
-#define SYNC_V0_H0 (TMDS_CTRL_00 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
-#define SYNC_V0_H1 (TMDS_CTRL_01 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
-#define SYNC_V1_H0 (TMDS_CTRL_10 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
-#define SYNC_V1_H1 (TMDS_CTRL_11 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
+//                  B (sync)  G (ctl0/1)       R (ctl2/3)
+#define SYNC_V_N_H_N (DVI_11 | (DVI_00 << 10) | (DVI_00 << 20))
+#define SYNC_V_N_H_Y (DVI_10 | (DVI_00 << 10) | (DVI_00 << 20))
+#define SYNC_V_Y_H_N (DVI_01 | (DVI_00 << 10) | (DVI_00 << 20))
+#define SYNC_V_Y_H_Y (DVI_00 | (DVI_00 << 10) | (DVI_00 << 20))
+#endif
+
+#ifdef V_MINUS_H_PLUS
+//                  B (sync)  G (ctl0/1)       R (ctl2/3)
+#define SYNC_V_N_H_N (DVI_10 | (DVI_00 << 10) | (DVI_00 << 20))
+#define SYNC_V_N_H_Y (DVI_11 | (DVI_00 << 10) | (DVI_00 << 20))
+#define SYNC_V_Y_H_N (DVI_00 | (DVI_00 << 10) | (DVI_00 << 20))
+#define SYNC_V_Y_H_Y (DVI_01 | (DVI_00 << 10) | (DVI_00 << 20))
 #endif
 
 #ifdef V_PLUS_H_MINUS
-#define SYNC_V0_H0 (TMDS_CTRL_11 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
-#define SYNC_V0_H1 (TMDS_CTRL_10 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
-#define SYNC_V1_H0 (TMDS_CTRL_01 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
-#define SYNC_V1_H1 (TMDS_CTRL_00 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
+//                  B (sync)  G (ctl0/1)       R (ctl2/3)
+#define SYNC_V_N_H_N (DVI_01 | (DVI_00 << 10) | (DVI_00 << 20))
+#define SYNC_V_N_H_Y (DVI_00 | (DVI_00 << 10) | (DVI_00 << 20))
+#define SYNC_V_Y_H_N (DVI_11 | (DVI_00 << 10) | (DVI_00 << 20))
+#define SYNC_V_Y_H_Y (DVI_10 | (DVI_00 << 10) | (DVI_00 << 20))
 #endif
 
 #ifdef V_PLUS_H_PLUS
-#define SYNC_V0_H0 (TMDS_CTRL_11 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
-#define SYNC_V0_H1 (TMDS_CTRL_01 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
-#define SYNC_V1_H0 (TMDS_CTRL_10 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
-#define SYNC_V1_H1 (TMDS_CTRL_00 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
+//                  B (sync)  G (ctl0/1)       R (ctl2/3)
+#define SYNC_V_N_H_N (DVI_00 | (DVI_00 << 10) | (DVI_00 << 20))
+#define SYNC_V_N_H_Y (DVI_01 | (DVI_00 << 10) | (DVI_00 << 20))
+#define SYNC_V_Y_H_N (DVI_10 | (DVI_00 << 10) | (DVI_00 << 20))
+#define SYNC_V_Y_H_Y (DVI_11 | (DVI_00 << 10) | (DVI_00 << 20))
 #endif
 
 #define HSTX_CMD_RAW         (0x0u << 12)
@@ -71,33 +94,33 @@ const uint8_t  psram_clock_divider         = HSTX_PSRAM_CLOCK_DIVIDER;
 
 static uint32_t vblank_line_vsync_off[] = {
     HSTX_CMD_RAW_REPEAT | MODE_H_FRONT_PORCH,
-    SYNC_V1_H1,
+    SYNC_V_N_H_N,
     HSTX_CMD_RAW_REPEAT | MODE_H_SYNC_WIDTH,
-    SYNC_V1_H0,
+    SYNC_V_N_H_Y,
     HSTX_CMD_RAW_REPEAT | (MODE_H_BACK_PORCH + MODE_H_ACTIVE_PIXELS),
-    SYNC_V1_H1,
+    SYNC_V_N_H_N,
     HSTX_CMD_NOP
 };
 
 static uint32_t vblank_line_vsync_on[] = {
     HSTX_CMD_RAW_REPEAT | MODE_H_FRONT_PORCH,
-    SYNC_V0_H1,
+    SYNC_V_Y_H_N,
     HSTX_CMD_RAW_REPEAT | MODE_H_SYNC_WIDTH,
-    SYNC_V0_H0,
+    SYNC_V_Y_H_Y,
     HSTX_CMD_RAW_REPEAT | (MODE_H_BACK_PORCH + MODE_H_ACTIVE_PIXELS),
-    SYNC_V0_H1,
+    SYNC_V_Y_H_N,
     HSTX_CMD_NOP
 };
 
 static uint32_t vactive_line[] = {
     HSTX_CMD_RAW_REPEAT | MODE_H_FRONT_PORCH,
-    SYNC_V1_H1,
+    SYNC_V_N_H_N,
     HSTX_CMD_NOP,
     HSTX_CMD_RAW_REPEAT | MODE_H_SYNC_WIDTH,
-    SYNC_V1_H0,
+    SYNC_V_N_H_Y,
     HSTX_CMD_NOP,
     HSTX_CMD_RAW_REPEAT | MODE_H_BACK_PORCH,
-    SYNC_V1_H1,
+    SYNC_V_N_H_N,
     HSTX_CMD_TMDS       | MODE_H_ACTIVE_PIXELS
 };
 
