@@ -3,7 +3,7 @@
 
 // ------------------------------------------------------------------------------
 
-#define WS10
+#define PCMON
 
 #ifdef WS10
 #define WS10_PUSH_PSRAM
@@ -22,6 +22,14 @@
 #define HSTX_PSRAM_CLOCK_DIVIDER   3
 // 384/1=384 /5=77MHz pxclk *1280x800 = 60Hz
 #endif
+#endif
+
+#ifdef PCMON
+#define HSTX_VREG_V                VREG_VOLTAGE_1_30
+#define HSTX_CLOCKSPEED_KHZ       (384*1000)
+#define HSTX_CLOCK_DIVIDER         1
+#define HSTX_FLASH_CLOCK_DIVIDER   3
+#define HSTX_PSRAM_CLOCK_DIVIDER   3
 #endif
 
 #ifdef TOSH
@@ -126,6 +134,23 @@
 #define MODE_V_BACK_PORCH      13
 #define MODE_V_ACTIVE_LINES   480
 #endif
+
+#ifdef PCMON
+
+#define V_PLUS_H_MINUS
+
+#define MODE_H_FRONT_PORCH     72
+#define MODE_H_SYNC_WIDTH     128
+#define MODE_H_BACK_PORCH     200
+#define MODE_H_ACTIVE_PIXELS 1280
+
+#define MODE_V_FRONT_PORCH      3
+#define MODE_V_SYNC_WIDTH       6
+#define MODE_V_BACK_PORCH      22
+#define MODE_V_ACTIVE_LINES   720
+
+#endif
+
 
 #ifdef TOSH
 
