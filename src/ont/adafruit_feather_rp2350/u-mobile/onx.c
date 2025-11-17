@@ -70,7 +70,7 @@ volatile uint32_t pending_user_event_time;
 #define DO_MOUNTAINS   // DO_MOUNTAINS
 #define NO_ALL_SPRITES // DO_ALL_SPRITES
 #define DO_IMAGE_PANEL // DO_IMAGE_PANEL
-#define DO_WALLPAPER   // DO_WALLPAPER
+#define NO_WALLPAPER   // DO_WALLPAPER
 #define NO_G2D         // DO_G2D
 #define NO_TIME_PSRAM  // DO_TIME_PSRAM
 #define DO_INTERLACING 1
@@ -103,7 +103,7 @@ static sprite scenegraph[2][NUM_SPRITES] = {
   { 100, 100, 30, 30, 0b0111111111100111 },
   { 200, 200, 60, 60, 0b0001111111111111 },
   { 300, 300, 90, 90, 0b0111111111100000 },
-  { 165, 130,700,550, 0b1000000000000000 }
+  { 165,  25,900,775, 0b1000000000000000 }
  },{
   { 250, 200,300,200, 0b0111111111111111 },
   { 350, 300, 90, 90, 0b0111100111111111 },
@@ -116,7 +116,7 @@ static sprite scenegraph[2][NUM_SPRITES] = {
   { 100, 100, 30, 30, 0b0111111111100111 },
   { 200, 200, 60, 60, 0b0001111111111111 },
   { 300, 300, 90, 90, 0b0111111111100000 },
-  { 165, 130,700,550, 0b1000000000000000 }
+  { 165,  25,900,775, 0b1000000000000000 }
  }
 };
 
@@ -424,7 +424,8 @@ void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint16_t scan_y) {
           }
 #endif
         }else{
-          memset(buf+sx, 0x0, sw*2);
+          if(scan_y>0) memcpy(buf+sx, buf+sx-H_RESOLUTION, sw*2);
+          // memset(buf+sx, 0x0, sw*2);
         }
 #endif
       }else{
