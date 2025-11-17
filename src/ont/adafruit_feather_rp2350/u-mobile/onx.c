@@ -400,8 +400,13 @@ void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint16_t scan_y) {
         bool is_even = !(scan_y % 2);
         if(!DO_INTERLACING || even_lines == is_even){
 
+#ifdef DO_MOUNTAINS
           int32_t image_line = ((uint32_t)scan_y - sy + yoff) % 480;
           void* src_addr = (psram_buffer + (image_line * 800));
+#else
+          int32_t image_line = ((uint32_t)scan_y - sy + yoff) % V_RESOLUTION;
+          void* src_addr = (psram_buffer + (image_line * H_RESOLUTION));
+#endif
 #ifdef DO_TIME_PSRAM
           static uint64_t lc=0;
           uint64_t s=0;
