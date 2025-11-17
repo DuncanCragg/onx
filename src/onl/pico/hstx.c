@@ -71,7 +71,7 @@ DVI spec:
 #define SYNC_V_Y_H_Y (DVI_00 | (CTLG << 10) | (CTLR << 20))
 #endif
 
-#ifdef V_MINUS_H_PLUS // I know it makes no sense but I don't understand enough
+#ifdef V_MINUS_H_PLUS // I know it makes no sense but I don't understand enough (Tosh)
 //                  B (sync)  G (ctl0/1)       R (ctl2/3)
 #define SYNC_V_N_H_N (DVI_01 | (CTLG << 10) | (CTLR << 20))
 #define SYNC_V_N_H_Y (DVI_11 | (CTLG << 10) | (CTLR << 20))

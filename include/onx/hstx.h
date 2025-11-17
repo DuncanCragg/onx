@@ -3,7 +3,7 @@
 
 // ------------------------------------------------------------------------------
 
-#define WS5
+#define TOSH
 
 #ifdef WS10
 #define WS10_PUSH_PSRAM
@@ -33,13 +33,14 @@
 #endif
 
 #ifdef TOSH
-#ifdef TOSH_24HZ
+#define TOSH_1024
+#ifdef  TOSH_1024
 #define HSTX_VREG_V                VREG_VOLTAGE_1_30
-#define HSTX_CLOCKSPEED_KHZ       (372*1000)
+#define HSTX_CLOCKSPEED_KHZ       (324*1000)
 #define HSTX_CLOCK_DIVIDER         1
 #define HSTX_FLASH_CLOCK_DIVIDER   3
-#define HSTX_PSRAM_CLOCK_DIVIDER   3
-//    372 /5=74.4MHz *1920x1080 = 24Hz
+#define HSTX_PSRAM_CLOCK_DIVIDER   2 // 162MHz
+//    324 /5=64.8MHz *1024x768
 #else
 #define HSTX_VREG_V                VREG_VOLTAGE_1_30
 #define HSTX_CLOCKSPEED_KHZ       (356*1000)
@@ -154,23 +155,21 @@
 
 #ifdef TOSH
 
-#ifdef TOSH_24HZ
+#define V_MINUS_H_PLUS // actually reports -/-: this is specially hacked for Tosh
 
-#define V_PLUS_H_PLUS
+#ifdef TOSH_1024
 
-#define MODE_H_FRONT_PORCH    638
-#define MODE_H_SYNC_WIDTH      44
-#define MODE_H_BACK_PORCH     148
-#define MODE_H_ACTIVE_PIXELS 1920
+#define MODE_H_FRONT_PORCH     24
+#define MODE_H_SYNC_WIDTH     136
+#define MODE_H_BACK_PORCH     160
+#define MODE_H_ACTIVE_PIXELS 1024
 
-#define MODE_V_FRONT_PORCH      4
-#define MODE_V_SYNC_WIDTH       5
-#define MODE_V_BACK_PORCH      36
-#define MODE_V_ACTIVE_LINES  1080
+#define MODE_V_FRONT_PORCH      3
+#define MODE_V_SYNC_WIDTH       6
+#define MODE_V_BACK_PORCH      29
+#define MODE_V_ACTIVE_LINES   768
 
 #else
-
-#define V_MINUS_H_PLUS
 
 #define MODE_H_FRONT_PORCH     48
 #define MODE_H_SYNC_WIDTH      32
