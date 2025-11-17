@@ -42,21 +42,21 @@ const uint8_t  psram_clock_divider         = HSTX_PSRAM_CLOCK_DIVIDER;
 #define TMDS_CTRL_10 0x154u
 #define TMDS_CTRL_11 0x2abu
 
-#ifdef H_MINUS_V_MINUS
+#ifdef V_MINUS_H_MINUS
 #define SYNC_V0_H0 (TMDS_CTRL_00 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
 #define SYNC_V0_H1 (TMDS_CTRL_01 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
 #define SYNC_V1_H0 (TMDS_CTRL_10 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
 #define SYNC_V1_H1 (TMDS_CTRL_11 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
 #endif
 
-#ifdef H_MINUS_V_PLUS
+#ifdef V_PLUS_H_MINUS
 #define SYNC_V0_H0 (TMDS_CTRL_11 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
 #define SYNC_V0_H1 (TMDS_CTRL_10 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
 #define SYNC_V1_H0 (TMDS_CTRL_01 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
 #define SYNC_V1_H1 (TMDS_CTRL_00 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
 #endif
 
-#ifdef H_PLUS_V_PLUS
+#ifdef V_PLUS_H_PLUS
 #define SYNC_V0_H0 (TMDS_CTRL_11 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
 #define SYNC_V0_H1 (TMDS_CTRL_01 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
 #define SYNC_V1_H0 (TMDS_CTRL_10 | (TMDS_CTRL_00 << 10) | (TMDS_CTRL_00 << 20))
@@ -103,7 +103,6 @@ static uint32_t vactive_line[] = {
 
 // ----------------------------------------------------------------------------
 
-#define LINEBUF_LINES 16
 static uint16_t r_linebuf_line=0;
 static uint16_t ALIGNED  linebuf_a[LINEBUF_LINES][H_RESOLUTION];
 static uint16_t ALIGNED  linebuf_b[LINEBUF_LINES][H_RESOLUTION];

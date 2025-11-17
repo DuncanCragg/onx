@@ -63,7 +63,7 @@
 
 #ifdef WS10
 
-#define H_PLUS_V_PLUS
+#define V_PLUS_H_PLUS
 
 #ifdef WS10_PUSH_PSRAM
 
@@ -85,11 +85,12 @@
 #define MODE_V_SYNC_WIDTH       6
 #define MODE_V_BACK_PORCH      30
 #define MODE_V_ACTIVE_LINES   800
+
 #endif
 
 #ifdef WS5
 
-#define H_MINUS_V_MINUS
+#define V_MINUS_H_MINUS
 
 #define MODE_H_FRONT_PORCH     40
 #define MODE_H_SYNC_WIDTH      48
@@ -104,7 +105,7 @@
 
 #ifdef ELECROW5
 
-#define H_MINUS_V_PLUS
+#define V_PLUS_H_MINUS
 
 #define MODE_H_FRONT_PORCH     16
 #define MODE_H_SYNC_WIDTH      80
@@ -119,7 +120,7 @@
 
 #ifdef TOSH
 
-#define H_PLUS_V_PLUS
+#define V_PLUS_H_PLUS
 
 #define MODE_H_FRONT_PORCH    638 //   48
 #define MODE_H_SYNC_WIDTH      44 //   32
@@ -151,6 +152,10 @@
 
 #define H_RESOLUTION  (MODE_H_ACTIVE_PIXELS)
 #define V_RESOLUTION  (MODE_V_ACTIVE_LINES)
+
+// ------------------------------------------------------------------------------
+
+#define LINEBUF_LINES 16
 
 // ------------------------------------------------------------------------------
 // DMA channel number allocations
