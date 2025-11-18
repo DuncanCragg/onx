@@ -44,6 +44,7 @@ uint64_t time_ms(){
   return t64/1000;
 }
 
+// REVISIT: this and many others shouldn't be in flash:
 uint64_t time_us(){
   if(!initialised) return 0;
   uint64_t t64 = time_us_64();

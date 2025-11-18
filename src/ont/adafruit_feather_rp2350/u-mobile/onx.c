@@ -45,8 +45,6 @@ const char* onn_test_uid_prefix = 0;
 
 #include <mountains_800x480_rgb565.h>
 
-extern volatile int64_t frame_time;
-
 // -----------------------------------------------------
 
 char* useruid;
@@ -136,9 +134,9 @@ void copy_an_image_to_psram(){
     int line_offset  = (y * H_RESOLUTION);
     for(int x=0; x < H_RESOLUTION; x++){
       uint16_t pixel;
-      if(y<V_RESOLUTION/4) pixel = (x+line_offset) & 0x7c00;
+      if(y<V_RESOLUTION*1/3) pixel = (x+line_offset) & 0x7c00;
       else
-      if(y<V_RESOLUTION/2) pixel = (x+line_offset) & 0x03e0;
+      if(y<V_RESOLUTION*2/3) pixel = (x+line_offset) & 0x03e0;
       else
                            pixel = (x+line_offset) & 0x001f;
       psram_buffer[x + line_offset] = pixel;
@@ -353,9 +351,9 @@ void ont_hx_frame(){ // REVISIT: only called on frame flip - do on each loop wit
 #endif
 
   static int64_t ft=0;
-  if(abs((int32_t)(frame_time - ft)) > 50 && frame_time < 600000){
-    ft=frame_time;
-    log_write("%.1fHz\n", 1000000.0f/frame_time);
+  if(abs((int32_t)(ont_hx_frame_time - ft)) > 50 && ont_hx_frame_time < 600000){
+    ft=ont_hx_frame_time;
+    log_write("%.1fHz (%.3lluus)\n", 1e6/ont_hx_frame_time, ont_hx_frame_time);
   }
 
   uint64_t ct=time_ms();
@@ -412,14 +410,14 @@ void __not_in_flash_func(ont_hx_scanline)(uint16_t* buf, uint16_t* puf, uint16_t
           uint64_t s=0;
           lc++;
           if(lc % 6000 == 0){
-            s=time_us_64();
+            s=time_us();
           }
 #endif
        // dma_memcpy16(buf+sx, src_addr, sw, DMA_CH_READ, false);
           memcpy(      buf+sx, src_addr, sw*2);
 #ifdef DO_TIME_PSRAM
           if(lc % 6000 == 0){
-            uint64_t e=time_us_64();
+            uint64_t e=time_us();
             log_write("d=%lld w=%d t/pix=%.1fns\n", e-s, sw, (e-s)*1000.0f/sw);
           }
 #endif

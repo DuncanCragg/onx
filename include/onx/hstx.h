@@ -219,6 +219,8 @@
 // ------------------------------------------------------------------------------
 // lifecycle calls up from onl to ont
 
+extern volatile int64_t ont_hx_frame_time;
+
 void ont_hx_init();
 void ont_hx_frame();
 void ont_hx_scanline(uint16_t* buf, uint16_t* puf, uint16_t scan_y);
