@@ -67,7 +67,7 @@ volatile uint32_t pending_user_event_time;
 
 // -----------------------------------------------------
 
-#define DO_MOUNTAINS   // DO_MOUNTAINS
+#define NO_MOUNTAINS   // DO_MOUNTAINS
 #define NO_ALL_SPRITES // DO_ALL_SPRITES
 #define DO_IMAGE_PANEL // DO_IMAGE_PANEL
 #define NO_WALLPAPER   // DO_WALLPAPER
@@ -75,7 +75,7 @@ volatile uint32_t pending_user_event_time;
 #define NO_TIME_PSRAM  // DO_TIME_PSRAM
 #define DO_INTERLACING 1
 
-#define SCROLL_SPEED 0
+#define SCROLL_SPEED 1
 
 volatile bool scenegraph_write=false;
 
@@ -103,7 +103,7 @@ static sprite scenegraph[2][NUM_SPRITES] = {
   { 100, 100, 30, 30, 0b0111111111100111 },
   { 200, 200, 60, 60, 0b0001111111111111 },
   { 300, 300, 90, 90, 0b0111111111100000 },
-  {  50,  20,924,748, 0b1000000000000000 }
+  { 178,  20,924,760, 0b1000000000000000 }
  },{
   { 250, 200,300,200, 0b0111111111111111 },
   { 350, 300, 90, 90, 0b0111100111111111 },
@@ -116,7 +116,7 @@ static sprite scenegraph[2][NUM_SPRITES] = {
   { 100, 100, 30, 30, 0b0111111111100111 },
   { 200, 200, 60, 60, 0b0001111111111111 },
   { 300, 300, 90, 90, 0b0111111111100000 },
-  {  50,  20,924,748, 0b1000000000000000 }
+  { 178,  20,924,760, 0b1000000000000000 }
  }
 };
 
@@ -373,7 +373,7 @@ void ont_hx_frame(){ // REVISIT: only called on frame flip - do on each loop wit
 extern uint16_t g2d_buffer[];
 #endif
 
-void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint16_t scan_y) {
+void __not_in_flash_func(ont_hx_scanline)(uint16_t* buf, uint16_t* puf, uint16_t scan_y){
 #ifdef DO_WALLPAPER
     memset(buf, (uint8_t)0x11, H_RESOLUTION*2);
 #endif // DO_WALLPAPER
@@ -424,7 +424,13 @@ void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint16_t scan_y) {
           }
 #endif
         }else{
-          if(scan_y>0) memcpy(buf+sx, buf+sx-H_RESOLUTION, sw*2);
+          uint16_t* prev_line;
+          if(puf){ // REVISIT: ugh
+            prev_line=puf+sx;
+          }else{
+            prev_line=buf+sx-H_RESOLUTION;
+          }
+          memcpy(buf+sx, prev_line, sw*2);
           // memset(buf+sx, 0x0, sw*2);
         }
 #endif
@@ -434,10 +440,6 @@ void __not_in_flash_func(fill_line_sprites)(uint16_t* buf, uint16_t scan_y) {
 #endif
       }
     }
-}
-
-void __not_in_flash_func(ont_hx_scanline)(uint16_t* buf, uint16_t scan_y){
-  fill_line_sprites(buf, scan_y);
 }
 
 // -----------------------------------------------------

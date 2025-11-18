@@ -438,13 +438,15 @@ void __not_in_flash_func(startup_core1_loop)(){
   if(!buffer_switched) return;
   buffer_switched = false;
 
+//REVISIT: we're going to have to move this loop into ont_hx
   SCANLINE_TIMER_BEGIN
   uint16_t buffer_scanline_at_entry=buffer_scanline;
   for(uint16_t line=0; line < LINEBUF_LINES; line++){
     uint16_t scan_y=buffer_scanline_at_entry+line;
-  ; if(scan_y >= V_RESOLUTION) break;
+  ; if(scan_y >= V_RESOLUTION) break; // REVISIT obvs hacky below
     uint16_t* buf = (linebuf_ab? linebuf_b[line]: linebuf_a[line]);
-    ont_hx_scanline(buf, scan_y);
+    uint16_t* puf = line==0? (linebuf_ab? linebuf_a[LINEBUF_LINES-1]: linebuf_b[LINEBUF_LINES-1]): 0;
+    ont_hx_scanline(buf, puf, scan_y);
     SCANLINE_TIMER_MID
   }
   SCANLINE_TIMER_END

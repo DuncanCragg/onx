@@ -3,7 +3,7 @@
 
 // ------------------------------------------------------------------------------
 
-#define TOSH
+#define WS10
 
 #ifdef WS10
 #define WS10_PUSH_PSRAM
@@ -221,6 +221,6 @@
 
 void ont_hx_init();
 void ont_hx_frame();
-void ont_hx_scanline(uint16_t* buf, uint16_t scan_y);
+void ont_hx_scanline(uint16_t* buf, uint16_t* puf, uint16_t scan_y);
 
 #endif
