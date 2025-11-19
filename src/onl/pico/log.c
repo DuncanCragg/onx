@@ -147,6 +147,12 @@ static void flush_saved_messages(uint8_t to){
 #endif
 }
 
+_Pragma(__STRING(weak log_user_key_cb))
+
+void log_user_key_cb() {
+  log_write("log_user_key_cb()\n");
+}
+
 bool log_loop() {
 
   if(!initialised) return true;
@@ -156,6 +162,7 @@ bool log_loop() {
 
   if(char_recvd){
     log_write(">%c<----------\n", char_recvd);
+    if(char_recvd=='u') log_user_key_cb();
     if(char_recvd=='c') onn_show_cache();
     if(char_recvd=='n') onn_show_notify();
     if(char_recvd=='v') value_dump_small();

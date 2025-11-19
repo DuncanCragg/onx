@@ -43,4 +43,7 @@ void log_flush();
 void tud_cdc_rx_cb(uint8_t itf);
 static __attribute__((used)) void* __tud_cdc_rx_cb__ = tud_cdc_rx_cb;
 
+/* implement to act on user typing 'u' */
+void log_user_key_cb();
+
 #endif
