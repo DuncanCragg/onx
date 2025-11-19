@@ -352,8 +352,10 @@ void ont_hx_frame(){ // REVISIT: only called on frame flip - do on each loop wit
 
   static int64_t ft=0;
   if(abs((int32_t)(ont_hx_frame_time - ft)) > 50 && ont_hx_frame_time < 600000){
-    ft=ont_hx_frame_time;
-    log_write("%.1fHz (%.3lluus)\n", 1e6/ont_hx_frame_time, ont_hx_frame_time);
+    if(ont_hx_frame_time){
+      ft=ont_hx_frame_time;
+      log_write("%.1fHz (%.3lluus)\n", 1e6/ont_hx_frame_time, ont_hx_frame_time);
+    } else log_write("ont_hx_frame_time==0\n");
   }
 
   uint64_t ct=time_ms();
