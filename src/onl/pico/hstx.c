@@ -138,21 +138,16 @@ static uint32_t vactive_line[] = {
 static uint16_t ALIGNED  linebuf_a[LINEBUF_LINES][H_RESOLUTION];
 static uint16_t ALIGNED  linebuf_b[LINEBUF_LINES][H_RESOLUTION];
 static volatile bool     linebuf_ab = true;
-static uint16_t          linebuf_line=0;
+static volatile uint16_t linebuf_line=0;
 static volatile bool     linebuf_switched = false;
-static volatile int64_t  linebuf_switch_time = 0;
 static volatile uint16_t linebuf_scanline = 0;
 
-static volatile bool     in_frame = false;
-static volatile bool     do_flip = false;
-
-volatile int64_t ont_hx_frame_time;
+static volatile bool     do_frame = false;
 
 static volatile uint16_t v_scanline = 2;
 
 static bool dma_pong = false;
 static bool vactive_cmdlist_posted = false; // h blank/sync period
-
 
 static void __not_in_flash_func(dma_irq_handler)() {
 
@@ -161,67 +156,52 @@ static void __not_in_flash_func(dma_irq_handler)() {
     dma_hw->intr = 1u << ch_num;
     dma_pong = !dma_pong;
 
-    if (v_scanline >= MODE_V_FRONT_PORCH && v_scanline < (MODE_V_FRONT_PORCH + MODE_V_SYNC_WIDTH)) {
-        // v-sync region after front porch
-        ch->read_addr = (uintptr_t)vblank_line_vsync_on;
-        ch->transfer_count = count_of(vblank_line_vsync_on);
-    } else if (v_scanline < MODE_V_INACTIVE_LINES) {
-        // front porch, back porch
-        ch->read_addr = (uintptr_t)vblank_line_vsync_off;
-        ch->transfer_count = count_of(vblank_line_vsync_off);
-    } else if (!vactive_cmdlist_posted) {
-        // active lines, h-sync (blank); visible pixels end
-        ch->read_addr = (uintptr_t)vactive_line;
-        ch->transfer_count = count_of(vactive_line);
-        vactive_cmdlist_posted = true;
-    } else {
-        // active lines, h-sync (blank) end; visible pixels start
-        if(v_scanline==MODE_V_INACTIVE_LINES){
-          linebuf_line=0;
-          linebuf_ab = false;
-          linebuf_switched=true;
-          linebuf_switch_time = time_us();
-          linebuf_scanline=LINEBUF_LINES;
-        }
-        else
-        if(linebuf_line == LINEBUF_LINES){
-          linebuf_line=0;
-          linebuf_ab = !linebuf_ab;
-          linebuf_switched=true;
-          linebuf_switch_time = time_us();
-          linebuf_scanline=v_scanline - MODE_V_INACTIVE_LINES + LINEBUF_LINES;
-        }
-        ch->read_addr = (uintptr_t)(linebuf_ab? linebuf_a[linebuf_line]: linebuf_b[linebuf_line]);
-        ch->transfer_count = MODE_H_ACTIVE_PIXELS/2;
-        linebuf_line++;
-        vactive_cmdlist_posted = false;
+    if (v_scanline >= MODE_V_FRONT_PORCH &&
+        v_scanline < (MODE_V_FRONT_PORCH + MODE_V_SYNC_WIDTH)) { // v-sync region after front porch
+
+      ch->read_addr = (uintptr_t)vblank_line_vsync_on;
+      ch->transfer_count = count_of(vblank_line_vsync_on);
+
+    } else if (v_scanline < MODE_V_INACTIVE_LINES) { // front porch, back porch
+
+      ch->read_addr = (uintptr_t)vblank_line_vsync_off;
+      ch->transfer_count = count_of(vblank_line_vsync_off);
+
+    } else if (!vactive_cmdlist_posted) { // active lines, h-sync (blank); visible pixels end
+
+      ch->read_addr = (uintptr_t)vactive_line;
+      ch->transfer_count = count_of(vactive_line);
+      vactive_cmdlist_posted = true;
+
+    } else { // active lines, h-sync (blank) end; visible pixels start
+
+      if(v_scanline==MODE_V_INACTIVE_LINES){
+        linebuf_line=0;
+        linebuf_ab = false;
+        linebuf_switched=true;
+        linebuf_scanline=LINEBUF_LINES;
+      }
+      else
+      if(linebuf_line == LINEBUF_LINES){
+        linebuf_line=0;
+        linebuf_ab = !linebuf_ab;
+        linebuf_switched=true;
+        linebuf_scanline=v_scanline - MODE_V_INACTIVE_LINES + LINEBUF_LINES;
+      }
+      ch->read_addr = (uintptr_t)(linebuf_ab? linebuf_a[linebuf_line]: linebuf_b[linebuf_line]);
+      ch->transfer_count = MODE_H_ACTIVE_PIXELS/2;
+      linebuf_line++;
+      vactive_cmdlist_posted = false;
     }
     if (!vactive_cmdlist_posted) { // i.e., not the partial-line h sync/blank bit
-        v_scanline = (v_scanline + 1) % MODE_V_TOTAL_LINES;
-        in_frame = v_scanline >= MODE_V_INACTIVE_LINES;
-
-        if(v_scanline==0){
-
-          int64_t time_us_now = time_us();
-
-          linebuf_line=0;
-          linebuf_ab = true;
-          linebuf_switched=true;
-          linebuf_switch_time = time_us_now;
-          linebuf_scanline=0;
-
-          static int64_t last_frame_flip_time=0;
-          ont_hx_frame_time=time_us_now-last_frame_flip_time;
-          last_frame_flip_time=time_us_now;
-
-          static int flip_count=0;
-          flip_count++;
-          if(do_flip){
-            do_flip=false;
-            if(flip_count>1) log_write("flips since last: %d\n", flip_count);
-            flip_count=0;
-          }
-        }
+      v_scanline = (v_scanline + 1) % MODE_V_TOTAL_LINES;
+      if(v_scanline==0){
+        linebuf_line=0;
+        linebuf_ab = true;
+        linebuf_switched=true;
+        linebuf_scanline=0;
+        do_frame=true;
+      }
     }
 }
 
@@ -402,18 +382,16 @@ void startup_core0_init(){
 }
 
 void __not_in_flash_func(startup_core0_loop)(){
-
-  if(do_flip) return;  // REVISIT: expose do_flip and move core0 up to ont hx
-
+  if(!do_frame) return;  // REVISIT: expose do_frame and move core0 up to ont hx
+  do_frame=false;
   ont_hx_frame();
-
-  do_flip=true;
 }
 
+#define NO_SCANLINE_TIMER
+#ifdef  DO_SCANLINE_TIMER
 #define SCANLINE_TIMER_BEGIN                                                 \
         static uint32_t scanline_skips=0;                                    \
         static uint16_t low_line_at_skip = 65535;                            \
-        int64_t linebuf_switch_time_at_entry = linebuf_switch_time;          \
 
 #define SCANLINE_TIMER_MID                                                   \
         if(linebuf_scanline != linebuf_scanline_at_entry){                   \
@@ -422,22 +400,17 @@ void __not_in_flash_func(startup_core0_loop)(){
           break;                                                             \
         }                                                                    \
 
-#define SCANLINE_TIMER_END                                                   \
-        static int f=0; f++;                                                 \
-        if(f % 3000 == 0){                                                   \
-          int64_t done_time_x = time_us();                                   \
-          log_write("sw->now %.3lluus/%.3lluus fr %.3lluus %.1fHz\n",        \
-                  (done_time_x - linebuf_switch_time_at_entry),              \
-                  (done_time_x - linebuf_switch_time_at_entry)/LINEBUF_LINES,\
-                  ont_hx_frame_time, 1e6/ont_hx_frame_time                   \
-          );                                                                 \
-          log_write("skips: %u low line %u\n",                               \
-                  scanline_skips,                                            \
-                  low_line_at_skip                                           \
-          );                                                                 \
-          scanline_skips=0;                                                  \
-          low_line_at_skip=65535;                                            \
+#define SCANLINE_TIMER_END                                                        \
+        static int f=0; f++;                                                      \
+        if(f % 3000 == 0){                                                        \
+          log_write("skips: %u low line %u\n", scanline_skips, low_line_at_skip); \
+          scanline_skips=0; low_line_at_skip=65535;                               \
         }
+#else
+#define SCANLINE_TIMER_BEGIN
+#define SCANLINE_TIMER_MID
+#define SCANLINE_TIMER_END
+#endif
 
 void startup_core1_init(){
   set_up_hstx();
@@ -452,7 +425,7 @@ void __not_in_flash_func(startup_core1_loop)(){
   linebuf_switched = false;
 
 //REVISIT: we're going to have to move this loop into ont_hx
-//SCANLINE_TIMER_BEGIN
+  SCANLINE_TIMER_BEGIN
   uint16_t linebuf_scanline_at_entry=linebuf_scanline;
   for(uint16_t line=0; line < LINEBUF_LINES; line++){
     uint16_t scan_y=linebuf_scanline_at_entry+line;
@@ -460,9 +433,9 @@ void __not_in_flash_func(startup_core1_loop)(){
     uint16_t* buf = (linebuf_ab? linebuf_b[line]: linebuf_a[line]); // REVISIT obvs hacky below
     uint16_t* puf = line==0? (linebuf_ab? linebuf_a[LINEBUF_LINES-1]: linebuf_b[LINEBUF_LINES-1]): 0;
     ont_hx_scanline(buf, puf, scan_y);
-//  SCANLINE_TIMER_MID
+    SCANLINE_TIMER_MID
   }
-//SCANLINE_TIMER_END
+  SCANLINE_TIMER_END
 }
 
 
