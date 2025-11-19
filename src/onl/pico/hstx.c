@@ -445,7 +445,7 @@ void __not_in_flash_func(startup_core1_loop)(){
   linebuf_switched = false;
 
 //REVISIT: we're going to have to move this loop into ont_hx
-  SCANLINE_TIMER_BEGIN
+//SCANLINE_TIMER_BEGIN
   uint16_t linebuf_scanline_at_entry=linebuf_scanline;
   for(uint16_t line=0; line < LINEBUF_LINES; line++){
     uint16_t scan_y=linebuf_scanline_at_entry+line;
@@ -453,9 +453,9 @@ void __not_in_flash_func(startup_core1_loop)(){
     uint16_t* buf = (linebuf_ab? linebuf_b[line]: linebuf_a[line]); // REVISIT obvs hacky below
     uint16_t* puf = line==0? (linebuf_ab? linebuf_a[LINEBUF_LINES-1]: linebuf_b[LINEBUF_LINES-1]): 0;
     ont_hx_scanline(buf, puf, scan_y);
-    SCANLINE_TIMER_MID
+//  SCANLINE_TIMER_MID
   }
-  SCANLINE_TIMER_END
+//SCANLINE_TIMER_END
 }
 
 
