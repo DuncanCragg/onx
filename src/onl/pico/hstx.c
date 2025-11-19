@@ -143,17 +143,18 @@ static volatile bool     linebuf_switched = false;
 static volatile int64_t  linebuf_switch_time = 0;
 static volatile uint16_t linebuf_scanline = 0;
 
-static volatile uint16_t v_scanline = 2;
-
 static volatile bool     in_frame = false;
 static volatile bool     do_flip = false;
+
+volatile int64_t ont_hx_frame_time;
+
+static volatile uint16_t v_scanline = 2;
 
 static bool dma_pong = false;
 static bool vactive_cmdlist_posted = false; // h blank/sync period
 
-volatile int64_t ont_hx_frame_time;
 
-void __not_in_flash_func(dma_irq_handler)() {
+static void __not_in_flash_func(dma_irq_handler)() {
 
     uint ch_num = dma_pong ? DMA_CH_PONG : DMA_CH_PING;
     dma_channel_hw_t *ch = &dma_hw->ch[ch_num];
@@ -280,7 +281,7 @@ void __not_in_flash_func(dma_irq_handler)() {
          0 << HSTX_CTRL_EXPAND_SHIFT_RAW_SHIFT_LSB    ;
 */
 
-void set_up_dma(){
+static void set_up_hstx(){
 
     // --------------------------------------------------------------------
     // Configure HSTX's TMDS encoder for RGB555
@@ -350,43 +351,47 @@ void set_up_dma(){
     for (int i = 12; i <= 19; ++i) {
         gpio_set_function(i, 0); // REVISIT: use gpio api
     }
+}
 
-    dma_channel_config c;
+static void set_up_dma(){
 
-    c = dma_channel_get_default_config(DMA_CH_PING);
-    channel_config_set_chain_to(&c, DMA_CH_PONG);
-    channel_config_set_dreq(&c, DREQ_HSTX);
-    channel_config_set_high_priority(&c, true);
-    dma_channel_configure(
-        DMA_CH_PING,
-        &c,
-        &hstx_fifo_hw->fifo,
-        vblank_line_vsync_off,
-        count_of(vblank_line_vsync_off),
-        false
-    );
+  dma_channel_config c;
 
-    c = dma_channel_get_default_config(DMA_CH_PONG);
-    channel_config_set_chain_to(&c, DMA_CH_PING);
-    channel_config_set_dreq(&c, DREQ_HSTX);
-    channel_config_set_high_priority(&c, true);
-    dma_channel_configure(
-        DMA_CH_PONG,
-        &c,
-        &hstx_fifo_hw->fifo,
-        vblank_line_vsync_off,
-        count_of(vblank_line_vsync_off),
-        false
-    );
+  c = dma_channel_get_default_config(DMA_CH_PING);
+  channel_config_set_chain_to(&c, DMA_CH_PONG);
+  channel_config_set_dreq(&c, DREQ_HSTX);
+  channel_config_set_high_priority(&c, true);
+  dma_channel_configure(
+      DMA_CH_PING,
+      &c,
+      &hstx_fifo_hw->fifo,
+      vblank_line_vsync_off,
+      count_of(vblank_line_vsync_off),
+      false
+  );
 
-    dma_hw->ints0 = (1u << DMA_CH_PING) | (1u << DMA_CH_PONG);
-    dma_hw->inte0 = (1u << DMA_CH_PING) | (1u << DMA_CH_PONG);
-    irq_set_exclusive_handler(DMA_IRQ_0, dma_irq_handler);
-    irq_set_enabled(DMA_IRQ_0, true);
+  c = dma_channel_get_default_config(DMA_CH_PONG);
+  channel_config_set_chain_to(&c, DMA_CH_PING);
+  channel_config_set_dreq(&c, DREQ_HSTX);
+  channel_config_set_high_priority(&c, true);
+  dma_channel_configure(
+      DMA_CH_PONG,
+      &c,
+      &hstx_fifo_hw->fifo,
+      vblank_line_vsync_off,
+      count_of(vblank_line_vsync_off),
+      false
+  );
+  irq_set_exclusive_handler(DMA_IRQ_0, dma_irq_handler);
+  bus_ctrl_hw->priority = BUSCTRL_BUS_PRIORITY_DMA_W_BITS | BUSCTRL_BUS_PRIORITY_DMA_R_BITS;
+}
 
-    bus_ctrl_hw->priority = BUSCTRL_BUS_PRIORITY_DMA_W_BITS | BUSCTRL_BUS_PRIORITY_DMA_R_BITS;
-
-    dma_channel_start(DMA_CH_PING);
+static void start_dma(){
+  dma_hw->ints0 = (1u << DMA_CH_PING) | (1u << DMA_CH_PONG);
+  dma_hw->inte0 = (1u << DMA_CH_PING) | (1u << DMA_CH_PONG);
+  irq_set_enabled(DMA_IRQ_0, true);
+  dma_channel_start(DMA_CH_PING);
+  log_write("DMA started\n");
 }
 
 // ------------------------------------------------------
@@ -435,8 +440,10 @@ void __not_in_flash_func(startup_core0_loop)(){
         }
 
 void startup_core1_init(){
-
+  set_up_hstx();
   set_up_dma();
+  start_dma();
+  log_write("HSTX and DMA set up --------\n");
 }
 
 void __not_in_flash_func(startup_core1_loop)(){
