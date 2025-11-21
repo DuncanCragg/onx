@@ -406,8 +406,8 @@ void __not_in_flash_func(startup_core0_loop)(){
           static int f=0; f++;                                                   \
           if(f % 5000 == 0){                                                     \
             int64_t end_time=time_us();                                          \
-            log_write("scanline=%d skips=%u lowest line=%u line time=%.3lluus\n",\
-                       v_scanline, scanline_skips, low_line_at_skip,             \
+            log_write("skips=%u lowest line=%u line time=%.3lluus\n",            \
+                       scanline_skips, low_line_at_skip,                         \
                        (end_time-start_time)/LINEBUF_LINES);                     \
             scanline_skips=0; low_line_at_skip=65535;                            \
           }                                                                      \
