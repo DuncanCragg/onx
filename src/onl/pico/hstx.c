@@ -387,11 +387,12 @@ void __not_in_flash_func(startup_core0_loop)(){
   ont_hx_frame();
 }
 
-#define NO_SCANLINE_TIMER
+#define DO_SCANLINE_TIMER
 #ifdef  DO_SCANLINE_TIMER
 #define SCANLINE_TIMER_BEGIN                                                 \
         static uint32_t scanline_skips=0;                                    \
         static uint16_t low_line_at_skip = 65535;                            \
+        int64_t start_time=time_us();                                        \
 
 #define SCANLINE_TIMER_MID                                                   \
         if(linebuf_scanline != linebuf_scanline_at_entry){                   \
@@ -400,11 +401,16 @@ void __not_in_flash_func(startup_core0_loop)(){
           break;                                                             \
         }                                                                    \
 
-#define SCANLINE_TIMER_END                                                        \
-        static int f=0; f++;                                                      \
-        if(f % 3000 == 0){                                                        \
-          log_write("skips: %u low line %u\n", scanline_skips, low_line_at_skip); \
-          scanline_skips=0; low_line_at_skip=65535;                               \
+#define SCANLINE_TIMER_END                                                       \
+        if(v_scanline>=400){                                                     \
+          static int f=0; f++;                                                   \
+          if(f % 5000 == 0){                                                     \
+            int64_t end_time=time_us();                                          \
+            log_write("scanline=%d skips=%u lowest line=%u line time=%.3lluus\n",\
+                       v_scanline, scanline_skips, low_line_at_skip,             \
+                       (end_time-start_time)/LINEBUF_LINES);                     \
+            scanline_skips=0; low_line_at_skip=65535;                            \
+          }                                                                      \
         }
 #else
 #define SCANLINE_TIMER_BEGIN
