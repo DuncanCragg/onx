@@ -393,12 +393,14 @@ extern uint16_t g2d_buffer[];
 void __not_in_flash_func(ont_hx_scanline)(uint16_t* buf, uint16_t* puf, uint16_t scan_y){
     if(scan_y <= Y_OFFSET) return;
 #ifdef DO_WALLPAPER
-    memset(buf, (uint8_t)0x11, H_RESOLUTION*2);
+    dma_memset16(buf,        0x1111, H_RESOLUTION, DMA_CH_READ, true);
+ // memset(      buf, (uint8_t)0x11, H_RESOLUTION*2);
 #endif // DO_WALLPAPER
 #ifdef DO_G2D
     if(scan_y < (320+Y_OFFSET)){
       void* g2d_addr = (g2d_buffer + ((scan_y-Y_OFFSET) * 240));
-      dma_memcpy16(buf, g2d_addr, 240, DMA_CH_READ, false);
+      dma_memcpy16(buf+640, g2d_addr, 240, DMA_CH_READ, true);
+   // memcpy(      buf+640, g2d_addr, 240*2);
     }
 #endif
     for(int s=0; s < NUM_SPRITES; s++){
@@ -434,7 +436,7 @@ void __not_in_flash_func(ont_hx_scanline)(uint16_t* buf, uint16_t* puf, uint16_t
             s=time_us();
           }
 #endif
-       // dma_memcpy16(buf+sx, src_addr, sw, DMA_CH_READ, false);
+       // dma_memcpy16(buf+sx, src_addr, sw, DMA_CH_READ, true);
           memcpy(      buf+sx, src_addr, sw*2);
 #ifdef DO_TIME_PSRAM
           if(lc % PSRAM_TIME_RATE == 0){
@@ -450,12 +452,13 @@ void __not_in_flash_func(ont_hx_scanline)(uint16_t* buf, uint16_t* puf, uint16_t
             prev_line=buf+sx-H_RESOLUTION;
           }
           memcpy(buf+sx, prev_line, sw*2);
-          // memset(buf+sx, 0x0, sw*2);
+       // memset(buf+sx, 0x0, sw*2);
         }
 #endif
-      }else{
+      } else {
 #ifdef DO_ALL_SPRITES
-        dma_memset16(buf+sx, sc, sw, DMA_CH_READ, false);
+        dma_memset16(buf+sx, sc, sw, DMA_CH_READ, true);
+     // memset(      buf+sx, sc, sw*2);
 #endif
       }
     }
