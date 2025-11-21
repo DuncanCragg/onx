@@ -423,19 +423,20 @@ void __not_in_flash_func(ont_hx_scanline)(uint16_t* buf, uint16_t* puf, uint16_t
           void* src_addr = (psram_buffer + (image_line * H_RESOLUTION));
 #endif
 #ifdef DO_TIME_PSRAM
+          #define PSRAM_TIME_RATE 49999
           static uint64_t lc=0;
-          uint64_t s=0;
+          int64_t s=0;
           lc++;
-          if(lc % 6000 == 0){
+          if(lc % PSRAM_TIME_RATE == 0){
             s=time_us();
           }
 #endif
        // dma_memcpy16(buf+sx, src_addr, sw, DMA_CH_READ, false);
           memcpy(      buf+sx, src_addr, sw*2);
 #ifdef DO_TIME_PSRAM
-          if(lc % 6000 == 0){
-            uint64_t e=time_us();
-            log_write("d=%lld w=%d t/pix=%.1fns\n", e-s, sw, (e-s)*1000.0f/sw);
+          if(lc % PSRAM_TIME_RATE == 0){
+            int64_t e=time_us();
+            log_write("psram cpy=%.3lluus sw=%d t/pix=%.1fns\n", e-s, sw, (e-s)*1000.0f/sw);
           }
 #endif
         }else{
