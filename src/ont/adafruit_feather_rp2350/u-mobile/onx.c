@@ -388,13 +388,16 @@ void ont_hx_frame(){ // REVISIT: only called on frame flip - do on each loop wit
 extern uint16_t g2d_buffer[];
 #endif
 
+#define Y_OFFSET 20
+
 void __not_in_flash_func(ont_hx_scanline)(uint16_t* buf, uint16_t* puf, uint16_t scan_y){
+    if(scan_y <= Y_OFFSET) return;
 #ifdef DO_WALLPAPER
     memset(buf, (uint8_t)0x11, H_RESOLUTION*2);
 #endif // DO_WALLPAPER
 #ifdef DO_G2D
-    if(scan_y<320){
-      void* g2d_addr = (g2d_buffer + (scan_y * 240));
+    if(scan_y < (320+Y_OFFSET)){
+      void* g2d_addr = (g2d_buffer + ((scan_y-Y_OFFSET) * 240));
       dma_memcpy16(buf, g2d_addr, 240, DMA_CH_READ, false);
     }
 #endif
