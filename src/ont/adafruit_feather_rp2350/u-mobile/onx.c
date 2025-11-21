@@ -65,16 +65,33 @@ volatile uint32_t pending_user_event_time;
 
 // -----------------------------------------------------
 
-#define NO_MOUNTAINS   // DO_MOUNTAINS
+#define NO_PHOTO_FRAME // DO_PHOTO_FRAME
+
+#ifdef  DO_PHOTO_FRAME
+
+#define DO_MOUNTAINS   // DO_MOUNTAINS
 #define NO_ALL_SPRITES // DO_ALL_SPRITES
 #define DO_IMAGE_PANEL // DO_IMAGE_PANEL
 #define NO_WALLPAPER   // DO_WALLPAPER
 #define NO_G2D         // DO_G2D
-#define NO_TIME_PSRAM  // DO_TIME_PSRAM
-#define DO_INTERLACING 1
+#define SCROLL_SPEED 0
+#define NUM_SPRITES  1
 
+#else
+
+#define NO_MOUNTAINS   // DO_MOUNTAINS
+#define DO_ALL_SPRITES // DO_ALL_SPRITES
+#define DO_IMAGE_PANEL // DO_IMAGE_PANEL
+#define DO_WALLPAPER   // DO_WALLPAPER
+#define DO_G2D         // DO_G2D
 #define SCROLL_SPEED 1
-#define NUM_SPRITES  12
+#define NUM_SPRITES  3
+
+#endif
+
+#define DO_TIME_PSRAM  // DO_TIME_PSRAM
+#define DO_FRAME_TIME  // DO_FRAME_TIME
+#define DO_INTERLACING 1
 
 volatile bool scenegraph_write=false;
 
@@ -88,8 +105,13 @@ typedef struct sprite {
   uint16_t c;
 } sprite;
 
+#ifdef DO_PHOTO_FRAME
 #define SPRITE_DEF_IMG \
-  { 160,   0, 960, 800, 0b1000000000000000 },
+  { 140,   0,1000, 800, 0b1000000000000000 },
+#else
+#define SPRITE_DEF_IMG \
+  {   0,   0, 420, 800, 0b1000000000000000 },
+#endif
 
 #define SPRITE_DEFS                         \
   SPRITE_DEF_IMG                            \
