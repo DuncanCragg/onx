@@ -65,7 +65,7 @@ volatile uint32_t pending_user_event_time;
 
 // -----------------------------------------------------
 
-#define NO_PHOTO_FRAME // DO_PHOTO_FRAME
+#define DO_PHOTO_FRAME // DO_PHOTO_FRAME
 
 #ifdef  DO_PHOTO_FRAME
 
@@ -107,7 +107,7 @@ typedef struct sprite {
 
 #ifdef DO_PHOTO_FRAME
 #define SPRITE_DEF_IMG \
-  { 140,   0,1000, 800, 0b1000000000000000 },
+  { 310,   0,-480, 480, 0b1000000000000000 },
 #else
 #define SPRITE_DEF_IMG \
   {   0,   0, 420, 800, 0b1000000000000000 },
@@ -407,8 +407,14 @@ void __not_in_flash_func(ont_hx_scanline)(uint16_t* buf, uint16_t* puf, uint16_t
 
       sprite sp = scenegraph[scenegraph_read][s];
       uint16_t sx=sp.x; uint16_t sy=sp.y;
-      uint16_t sw=sp.w; uint16_t sh=sp.h;
+       int16_t sw=sp.w; uint16_t sh=sp.h;
       uint16_t sc=sp.c;
+
+      bool pixel_doubling = sw < 0;
+      if(pixel_doubling){
+        sw = -sw*2;
+        sh =  sh*2;
+      }
 
     ; if(scan_y < sy || scan_y >= sy + sh) continue;
     ; if(sx >= H_RESOLUTION) continue;
@@ -420,11 +426,13 @@ void __not_in_flash_func(ont_hx_scanline)(uint16_t* buf, uint16_t* puf, uint16_t
         bool is_even = !(scan_y % 2);
         if(!DO_INTERLACING || even_lines == is_even){
 
+          int32_t image_line = ((uint32_t)scan_y - sy + yoff);
+          if(pixel_doubling) image_line/=2;
 #ifdef DO_MOUNTAINS
-          int32_t image_line = ((uint32_t)scan_y - sy + yoff) % 480;
+          image_line%=480;
           void* src_addr = (psram_buffer + (image_line * 800));
 #else
-          int32_t image_line = ((uint32_t)scan_y - sy + yoff) % V_RESOLUTION;
+          image_line%=V_RESOLUTION;
           void* src_addr = (psram_buffer + (image_line * H_RESOLUTION));
 #endif
 #ifdef DO_TIME_PSRAM
@@ -437,7 +445,14 @@ void __not_in_flash_func(ont_hx_scanline)(uint16_t* buf, uint16_t* puf, uint16_t
           }
 #endif
        // dma_memcpy16(buf+sx, src_addr, sw, DMA_CH_READ, true);
-          memcpy(      buf+sx, src_addr, sw*2);
+          if(!pixel_doubling){
+            memcpy(buf+sx, src_addr, sw*2);
+          } else {
+            for(int16_t i=0; i<sw/2; i++){
+              *(buf+sx+i*2+0)=*((uint16_t*)src_addr+i);
+              *(buf+sx+i*2+1)=*((uint16_t*)src_addr+i);
+            }
+          }
 #ifdef DO_TIME_PSRAM
           if(lc % PSRAM_TIME_RATE == 0){
             int64_t e=time_us();
