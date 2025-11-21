@@ -74,6 +74,7 @@ volatile uint32_t pending_user_event_time;
 #define DO_INTERLACING 1
 
 #define SCROLL_SPEED 1
+#define NUM_SPRITES  12
 
 volatile bool scenegraph_write=false;
 
@@ -87,36 +88,24 @@ typedef struct sprite {
   uint16_t c;
 } sprite;
 
-#define NUM_SPRITES 12
-static sprite scenegraph[2][NUM_SPRITES] = {
- {
-  { 250, 200,300,200, 0b0111111111111111 },
-  { 350, 300, 90, 90, 0b0111100111111111 },
-  { 150, 100, 30, 30, 0b0111111111100111 },
-  { 250, 200, 60, 60, 0b0001111111111111 },
-  { 350, 350, 90, 90, 0b0000000000000000 },
-  { 100, 100, 90, 90, 0b0001110011100111 },
-  { 200, 200,300,200, 0b0111111111111111 },
-  { 300, 300, 90, 90, 0b0111100111111111 },
-  { 100, 100, 30, 30, 0b0111111111100111 },
-  { 200, 200, 60, 60, 0b0001111111111111 },
-  { 300, 300, 90, 90, 0b0111111111100000 },
-  { 160,   0,960,800, 0b1000000000000000 }
- },{
-  { 250, 200,300,200, 0b0111111111111111 },
-  { 350, 300, 90, 90, 0b0111100111111111 },
-  { 150, 100, 30, 30, 0b0111111111100111 },
-  { 250, 200, 60, 60, 0b0001111111111111 },
-  { 350, 350, 90, 90, 0b0000000000000000 },
-  { 100, 100, 90, 90, 0b0001110011100111 },
-  { 200, 200,300,200, 0b0111111111111111 },
-  { 300, 300, 90, 90, 0b0111100111111111 },
-  { 100, 100, 30, 30, 0b0111111111100111 },
-  { 200, 200, 60, 60, 0b0001111111111111 },
-  { 300, 300, 90, 90, 0b0111111111100000 },
-  { 160,   0,960,800, 0b1000000000000000 }
- }
-};
+#define SPRITE_DEF_IMG \
+  { 160,   0, 960, 800, 0b1000000000000000 },
+
+#define SPRITE_DEFS                         \
+  SPRITE_DEF_IMG                            \
+  { 350, 300,  90,  90, 0b0111100111111111 }, \
+  { 100, 100,  90,  90, 0b0001110011100111 }, \
+  { 150, 100,  30,  30, 0b0111111111100111 }, \
+  { 250, 200,  60,  60, 0b0001111111111111 }, \
+  { 350, 350,  90,  90, 0b0000000000000000 }, \
+  { 200, 200, 300, 200, 0b0111111111111111 }, \
+  { 250, 200, 300, 200, 0b0111111111111111 }, \
+  { 300, 300,  90,  90, 0b0111100111111111 }, \
+  { 100, 100,  30,  30, 0b0111111111100111 }, \
+  { 200, 200,  60,  60, 0b0001111111111111 }, \
+  { 300, 300,  90,  90, 0b0111111111100000 }  \
+
+static sprite scenegraph[2][12] = { { SPRITE_DEFS },{ SPRITE_DEFS } };
 
 // ------------------------------------------------------------------------
 
@@ -339,10 +328,11 @@ void ont_hx_frame(){ // REVISIT: only called on frame flip - do on each loop wit
   scenegraph_write = !scenegraph_write;
   for(int s=0; s<NUM_SPRITES; s++){
   ; if(scenegraph[scenegraph_read][s].c==0b1000000000000000) continue;
-    scenegraph[scenegraph_write][s].x=scenegraph[scenegraph_read][s].x+1+(NUM_SPRITES-s)/4;
-    scenegraph[scenegraph_write][s].y=scenegraph[scenegraph_read][s].y+1+(NUM_SPRITES-s)/4;
-    scenegraph[scenegraph_write][s].w=scenegraph[scenegraph_read][s].w+1+(NUM_SPRITES-s)/4;
-    scenegraph[scenegraph_write][s].h=scenegraph[scenegraph_read][s].h+1+(NUM_SPRITES-s)/4;
+    #define SPRITE_SPEED 16
+    scenegraph[scenegraph_write][s].x=scenegraph[scenegraph_read][s].x+1+(NUM_SPRITES-s)/SPRITE_SPEED;
+    scenegraph[scenegraph_write][s].y=scenegraph[scenegraph_read][s].y+1+(NUM_SPRITES-s)/SPRITE_SPEED;
+    scenegraph[scenegraph_write][s].w=scenegraph[scenegraph_read][s].w+1+(NUM_SPRITES-s)/SPRITE_SPEED;
+    scenegraph[scenegraph_write][s].h=scenegraph[scenegraph_read][s].h+1+(NUM_SPRITES-s)/SPRITE_SPEED;
     if(scenegraph[scenegraph_write][s].x > H_RESOLUTION) scenegraph[scenegraph_write][s].x=0;
     if(scenegraph[scenegraph_write][s].y > V_RESOLUTION) scenegraph[scenegraph_write][s].y=0;
     if(scenegraph[scenegraph_write][s].w > 400)          scenegraph[scenegraph_write][s].w=100;
