@@ -29,37 +29,49 @@
 
 //-------------------------------------------
 
-static void calc_and_show_clock_params(uint32_t cpu_clock_hz_required) {
-  uint reference_freq_hz = XOSC_HZ / PLL_SYS_REFDIV;
-  for (uint fbdiv = 320; fbdiv >= 16; fbdiv--) {
-    uint vco_freq = fbdiv * reference_freq_hz;
-  ; if (vco_freq < PICO_PLL_VCO_MIN_FREQ_HZ || vco_freq > PICO_PLL_VCO_MAX_FREQ_HZ) continue;
-    for (uint postdiv1 = 7; postdiv1 >= 1; postdiv1--) {
-      for (uint postdiv2 = postdiv1; postdiv2 >= 1; postdiv2--) {
-        uint32_t cpu_clock_hz = vco_freq / (postdiv1 * postdiv2);
-        if(abs((int32_t)cpu_clock_hz - (int32_t)cpu_clock_hz_required) < 5*1000*1000 && !(vco_freq % (postdiv1 * postdiv2))) {
-          log_write("clock params for %ld=>%ld: vco=%ldMz div1=%ld div2=%ld\n",
-                                      cpu_clock_hz_required/1000/1000,
-                                      cpu_clock_hz/1000/1000,
-                                      vco_freq/1000/1000,
-                                      postdiv1, postdiv2);
-        }
-      }
-    }
-  }
-}
+static uint32_t set_nearest_cpu_clock() {
 
-/*
-How to overclock:
- - set the clock from xtal
- - integer increments around PLL settings
- - set regulator voltage higher - 1.3V
- - set flash clock divider for 133MHz max
- - USB or UART: USB requires a precise 48 MHz clock: ensure correct PLL config
- - peripheral timing: PWM, I²C, and SPI (and HSTX!)
- - stability: flash r/w and peripheral i/o
- - thermal: package temperature
-*/
+  uint32_t cpu_clock_hz_required = startup_clockspeed_khz*1000;
+
+  uint32_t reference_freq_hz = XOSC_HZ / PLL_SYS_REFDIV;
+
+  uint32_t vco_freq=0;
+  uint32_t postdiv1=0;
+  uint32_t postdiv2=0;
+
+  int32_t best_delta=100*1000*1000;
+
+  for(uint32_t fbdiv = 320; fbdiv >= 16 && best_delta; fbdiv--) {
+
+    uint32_t vco_freq_ = fbdiv * reference_freq_hz;
+  ; if(vco_freq_ < PICO_PLL_VCO_MIN_FREQ_HZ || vco_freq_ > PICO_PLL_VCO_MAX_FREQ_HZ) continue;
+
+    for(uint32_t postdiv1_ = 7;         postdiv1_ >= 1 && best_delta; postdiv1_--) {
+    for(uint32_t postdiv2_ = postdiv1_; postdiv2_ >= 1 && best_delta; postdiv2_--) {
+
+    ; if(vco_freq_ % (postdiv1_ * postdiv2_)) continue;
+
+      uint32_t cpu_clock_hz = vco_freq_ / (postdiv1_ * postdiv2_);
+
+      int32_t delta = abs((int32_t)cpu_clock_hz - (int32_t)cpu_clock_hz_required);
+    ; if(delta >= best_delta) continue;
+      best_delta = delta;
+
+      vco_freq=vco_freq_;
+      postdiv1=postdiv1_;
+      postdiv2=postdiv2_;
+    }}
+  }
+  if(vco_freq==0){
+;   return 0;
+  }
+
+  pll_init(pll_sys, PLL_SYS_REFDIV, vco_freq, postdiv1, postdiv2);
+
+  uint32_t clockspeed_hz = vco_freq / (postdiv1 * postdiv2);
+
+  return clockspeed_hz;
+}
 
 uint32_t prev_flash_timing;
 
@@ -81,63 +93,9 @@ static void set_up_clocks(){
       USB_CLK_HZ
   );
 
-  uint vco_freq =0;
-  uint postdiv1=0;
-  uint postdiv2=0;
+  uint32_t clockspeed_hz = set_nearest_cpu_clock();
 
-  // REVISIT: now try the sdk function again, but find nearest, don't bail
-
-  switch(startup_clockspeed_khz){
-    case(400*1000):{
-      vco_freq=1200 * MHZ;
-      postdiv1=3;
-      postdiv2=1;
-      break;
-    }
-    case(384*1000):{
-      vco_freq=1152 * MHZ; // 380 = 1140
-      postdiv1=3;
-      postdiv2=1;
-      break;
-    }
-    case(372*1000):{
-      vco_freq=1116 * MHZ;
-      postdiv1=3;
-      postdiv2=1;
-      break;
-    }
-    case(356*1000):{
-      vco_freq=1068 * MHZ; // 360=1440/4
-      postdiv1=3;
-      postdiv2=1;
-      break;
-    }
-    case(340*1000):{
-      vco_freq=1020 * MHZ;
-      postdiv1=3;
-      postdiv2=1;
-      break;
-    }
-    case(324*1000):{
-      vco_freq=1296 * MHZ;
-      postdiv1=4;
-      postdiv2=1;
-      break;
-    }
-    case(300*1000):{
-      vco_freq=1500 * MHZ;
-      postdiv1=5;
-      postdiv2=1;
-      break;
-    }
-  }
-  if(vco_freq==0){
-    return; // can't log things yet
-  }
-
-  pll_init(pll_sys, PLL_SYS_REFDIV, vco_freq, postdiv1, postdiv2);
-
-  uint32_t cpu_clock_hz = vco_freq / (postdiv1 * postdiv2);
+  if(!clockspeed_hz) return; // can't log things yet
 
   clock_configure_undivided(
       clk_ref,
@@ -149,21 +107,21 @@ static void set_up_clocks(){
       clk_sys,
       CLOCKS_CLK_SYS_CTRL_SRC_VALUE_CLKSRC_CLK_SYS_AUX,
       CLOCKS_CLK_SYS_CTRL_AUXSRC_VALUE_CLKSRC_PLL_SYS,
-      cpu_clock_hz
+      clockspeed_hz
   );
   clock_configure_undivided(
       clk_peri,
       0,
       CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLKSRC_PLL_SYS,
-      cpu_clock_hz
+      clockspeed_hz
   );
 #if defined(PICO_RP2350)
   clock_configure(
       clk_hstx,
       0,
       CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLKSRC_PLL_SYS,
-      cpu_clock_hz,
-      cpu_clock_hz / startup_hstx_clock_divider
+      clockspeed_hz,
+      clockspeed_hz / startup_hstx_clock_divider
   );
 #endif
 }
@@ -188,7 +146,6 @@ void __not_in_flash_func(core0_main)() {
   uint32_t syst = clock_get_hz(clk_sys);
   uint32_t peri = clock_get_hz(clk_peri);
   uint32_t hstx = clock_get_hz(clk_hstx);
-  calc_and_show_clock_params(startup_clockspeed_khz*1000);
   log_write("CPU clock:         %luMHz\n", syst/1000000);
   log_write("peripherals clock: %luMHz\n", peri/1000000);
   log_write("HSTX clock:        %luMHz\n", hstx/1000000);
