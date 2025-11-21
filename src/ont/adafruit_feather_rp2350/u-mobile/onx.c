@@ -65,7 +65,7 @@ volatile uint32_t pending_user_event_time;
 
 // -----------------------------------------------------
 
-#define DO_PHOTO_FRAME // DO_PHOTO_FRAME
+#define NO_PHOTO_FRAME // DO_PHOTO_FRAME
 
 #ifdef  DO_PHOTO_FRAME
 
@@ -107,7 +107,7 @@ typedef struct sprite {
 
 #ifdef DO_PHOTO_FRAME
 #define SPRITE_DEF_IMG \
-  { 310,   0,-480, 480, 0b1000000000000000 },
+  { 140,   0,1000, 800, 0b1000000000000000 },
 #else
 #define SPRITE_DEF_IMG \
   {   0,   0, 420, 800, 0b1000000000000000 },
