@@ -46,7 +46,7 @@ void log_init() {
 
   if(initialised) return;
 
-  saved_messages = list_new(64);
+  if(!saved_messages) saved_messages = list_new(64);
   gfx_log_buffer = list_new(32);
 
 #if defined(RTT_LOG_ENABLED)
@@ -224,6 +224,7 @@ int16_t log_write_mode(uint8_t mode, char* file, uint32_t line, const char* fmt,
     r+=     vsnprintf(log_buffer+r, LOG_BUF_SIZE-r, fmt, args);                                            LOGCHK
     within_line=!strchr(log_buffer,'\n');
     char* lb=strdup(log_buffer);
+    if(!saved_messages) saved_messages = list_new(64);
     DISABLE_INTERRUPTS;
     if(!list_add(saved_messages, lb)) free(lb);
     ENABLE_INTERRUPTS;
