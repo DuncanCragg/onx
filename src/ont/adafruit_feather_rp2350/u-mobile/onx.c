@@ -85,7 +85,7 @@ volatile uint32_t pending_user_event_time;
 #define DO_WALLPAPER   // DO_WALLPAPER
 #define DO_G2D         // DO_G2D
 #define SCROLL_SPEED 1
-#define NUM_SPRITES  3
+#define NUM_SPRITES  4
 
 #endif
 
@@ -110,7 +110,7 @@ typedef struct sprite {
   { 140,   0,1000, 800, 0b1000000000000000 },
 #else
 #define SPRITE_DEF_IMG \
-  {   0,   0, 420, 800, 0b1000000000000000 },
+  {   0,   0, 200, 800, 0b1000000000000000 },
 #endif
 
 #define SPRITE_DEFS                         \
