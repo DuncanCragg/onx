@@ -220,7 +220,7 @@
 // lifecycle calls up from onl to ont
 
 void ont_hx_init();
-void ont_hx_frame();
-void ont_hx_scanline(uint16_t* buf, uint16_t* puf, uint16_t scan_y);
+void ont_hx_frame(bool new_frame);
+void ont_hx_scanline(uint16_t* buf, uint16_t* puf, uint16_t scan_y, bool free_time);
 
 #endif

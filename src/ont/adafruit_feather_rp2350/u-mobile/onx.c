@@ -43,10 +43,6 @@ const char* onn_test_uid_prefix = 0;
 
 // -----------------------------------------------------
 
-#include <mountains_800x480_rgb565.h>
-
-// -----------------------------------------------------
-
 char* useruid;
 char* homeuid;
 char* inventoryuid;
@@ -63,13 +59,14 @@ volatile uint32_t pending_user_event_time;
 
 #define RGB_BYTES_TO_RGB555(r,g,b) (((r)&0b11111000)<<7)|(((g)&0b11111000)<<2)|(((b)&0b11111000)>>3)
 
+// RGB565 to RGB555: ((pixel >> 1) & 0x7fe0) | (pixel & 0x001f);
+
 // -----------------------------------------------------
 
-#define NO_PHOTO_FRAME // DO_PHOTO_FRAME
+#define DO_PHOTO_FRAME // DO_PHOTO_FRAME
 
 #ifdef  DO_PHOTO_FRAME
 
-#define DO_MOUNTAINS   // DO_MOUNTAINS
 #define NO_ALL_SPRITES // DO_ALL_SPRITES
 #define DO_IMAGE_PANEL // DO_IMAGE_PANEL
 #define NO_WALLPAPER   // DO_WALLPAPER
@@ -79,7 +76,6 @@ volatile uint32_t pending_user_event_time;
 
 #else
 
-#define NO_MOUNTAINS   // DO_MOUNTAINS
 #define DO_ALL_SPRITES // DO_ALL_SPRITES
 #define DO_IMAGE_PANEL // DO_IMAGE_PANEL
 #define DO_WALLPAPER   // DO_WALLPAPER
@@ -107,7 +103,7 @@ typedef struct sprite {
 
 #ifdef DO_PHOTO_FRAME
 #define SPRITE_DEF_IMG \
-  { 140,   0,1000, 800, 0b1000000000000000 },
+  { 140,   0, 940, 800, 0b1000000000000000 },
 #else
 #define SPRITE_DEF_IMG \
   {   0,   0, 200, 800, 0b1000000000000000 },
@@ -131,28 +127,77 @@ static sprite scenegraph[2][12] = { { SPRITE_DEFS },{ SPRITE_DEFS } };
 
 // ------------------------------------------------------------------------
 
+#define CHUNXIZE 320
+#define NUMCHUNX (798*(1280/CHUNXIZE)) // 3192
+
+uint16_t   sram_buffer[CHUNXIZE];
 uint16_t* psram_buffer =  (uint16_t*)0x15000000;
 
-void copy_mountains_to_psram(){
-  for(uint32_t i=0; i< 800*480; i++){
-    uint16_t pixel = mountains_800x480[i];
-    psram_buffer[i] = ((pixel >> 1) & 0x7fe0) | (pixel & 0x001f);
+void __not_in_flash_func(write_image_chunk_to_psram)(uint32_t offset, uint32_t length){
+  memcpy(psram_buffer+offset, sram_buffer, length*2);
+}
+
+static volatile bool alternate_image=false;
+
+// simulates filling the sram_buffer with image data, slowly, from SD card
+// alternate_image determines how it looks, so is the image "ID" from two choices
+void __not_in_flash_func(write_image_chunk_to_sram)(uint32_t offset, uint32_t length){
+  uint8_t d=alternate_image? 4: 3;
+  uint32_t n=length;
+  int ystart=offset / H_RESOLUTION;
+  int xstart=offset % H_RESOLUTION;
+  for(int y=ystart; n; y++){
+    int line_offset = (y * H_RESOLUTION);
+    for(int x=xstart; n; x++){
+      uint32_t i=x+line_offset;
+      uint16_t pixel;
+      if(y<V_RESOLUTION*1/d) pixel = d==4? (i/2 & 0x03fe): (i & 0x7c00);
+      else
+      if(y<V_RESOLUTION*2/d) pixel = d==4? (i/2 & 0x7fd0): (i & 0x03e0);
+      else
+                             pixel = d==4? (i/2 & 0x7ede): (i & 0x001f);
+      sram_buffer[length-n] = pixel;
+      if(n % 4) time_delay_us(1);
+      n--;
+    }
   }
 }
 
-void copy_an_image_to_psram(){
-  for(int y=0; y < V_RESOLUTION; y++){
-    int line_offset  = (y * H_RESOLUTION);
-    for(int x=0; x < H_RESOLUTION; x++){
-      uint16_t pixel;
-      if(y<V_RESOLUTION*1/3) pixel = (x+line_offset) & 0x7c00;
-      else
-      if(y<V_RESOLUTION*2/3) pixel = (x+line_offset) & 0x03e0;
-      else
-                           pixel = (x+line_offset) & 0x001f;
-      psram_buffer[x + line_offset] = pixel;
-    }
+static volatile bool sram_writable=false;
+static volatile bool sram_readable=false;
+static volatile uint32_t chunk_number=0;
+
+// trigger a pipeline pushing "SD card images" via sram to psram to show on-screen
+// set alternate_image to the "ID" of the image we want
+void log_user_key_cb(){
+  if(sram_readable) return;
+  alternate_image=!alternate_image;
+  chunk_number=0;
+  sram_writable=true;
+}
+
+void __not_in_flash_func(write_next_chunk_to_sram)(){
+  static int64_t s=0;
+  static int64_t e=0;
+  if(chunk_number==0){
+    s=time_us();
   }
+  if(chunk_number==NUMCHUNX){
+    sram_writable=false;
+    e=time_us();
+    log_write("copy done in %.3llums\n", (e-s)/1000);
+;   return;
+  }
+  write_image_chunk_to_sram(chunk_number*CHUNXIZE, CHUNXIZE);
+  sram_readable=true;
+  sram_writable=false;
+}
+
+void __not_in_flash_func(write_next_chunk_to_psram)(){
+  write_image_chunk_to_psram(chunk_number*CHUNXIZE, CHUNXIZE);
+  sram_readable=false;
+  sram_writable=true;
+  chunk_number++;
 }
 
 // ------------------------------------------------------------------------
@@ -326,12 +371,6 @@ void ont_hx_init(){
   g2d_init();
 
   init_onx();
-
-#ifdef DO_MOUNTAINS
-  copy_mountains_to_psram();
-#else
-  copy_an_image_to_psram();
-#endif
 }
 
 uint32_t loop_time=0;
@@ -340,7 +379,11 @@ static volatile int yoff=0;
 
 static bool even_lines=true;
 
-void ont_hx_frame(){ // REVISIT: only called on frame flip - do on each loop with do_flip
+void __not_in_flash_func(ont_hx_frame)(bool new_frame){
+
+  if(sram_writable) write_next_chunk_to_sram();
+
+; if(!new_frame) return;
 
   even_lines = !even_lines;
 
@@ -390,7 +433,7 @@ extern uint16_t g2d_buffer[];
 
 #define Y_OFFSET 20
 
-void __not_in_flash_func(ont_hx_scanline)(uint16_t* buf, uint16_t* puf, uint16_t scan_y){
+void __not_in_flash_func(ont_hx_scanline)(uint16_t* buf, uint16_t* puf, uint16_t scan_y, bool free_time){
     if(scan_y <= Y_OFFSET) return;
 #ifdef DO_WALLPAPER
     dma_memset16(buf,        0x1111, H_RESOLUTION, DMA_CH_READ, true);
@@ -428,13 +471,8 @@ void __not_in_flash_func(ont_hx_scanline)(uint16_t* buf, uint16_t* puf, uint16_t
 
           int32_t image_line = ((uint32_t)scan_y - sy + yoff);
           if(pixel_doubling) image_line/=2;
-#ifdef DO_MOUNTAINS
-          image_line%=480;
-          void* src_addr = (psram_buffer + (image_line * 800));
-#else
           image_line%=V_RESOLUTION;
           void* src_addr = (psram_buffer + (image_line * H_RESOLUTION));
-#endif
 #ifdef DO_TIME_PSRAM
           #define PSRAM_TIME_RATE 49999
           static uint64_t lc=0;
@@ -477,6 +515,7 @@ void __not_in_flash_func(ont_hx_scanline)(uint16_t* buf, uint16_t* puf, uint16_t
 #endif
       }
     }
+    if(free_time && sram_readable) write_next_chunk_to_psram();
 }
 
 // -----------------------------------------------------

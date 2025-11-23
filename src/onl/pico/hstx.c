@@ -142,7 +142,7 @@ static volatile uint16_t linebuf_line=0;
 static volatile bool     linebuf_switched = false;
 static volatile uint16_t linebuf_scanline = 0;
 
-static volatile bool     do_frame = false;
+static volatile bool     new_frame = false;
 
 static volatile uint16_t v_scanline = 2;
 
@@ -200,7 +200,7 @@ static void __not_in_flash_func(dma_irq_handler)() {
         linebuf_ab = true; // REVISIT: couldn't this trash the final line?
         linebuf_switched=true;
         linebuf_scanline=0;
-        do_frame=true;
+        new_frame=true; // REVISIT: set pending to set true on re-entry, since there's a final line going out?
       }
     }
 }
@@ -382,9 +382,13 @@ void startup_core0_init(){
 }
 
 void __not_in_flash_func(startup_core0_loop)(){
-  if(!do_frame) return;  // REVISIT: expose do_frame and move core0 up to ont hx
-  do_frame=false;
-  ont_hx_frame();
+  do{
+    bool nf=new_frame;
+    ont_hx_frame(nf);
+  ; if(!nf && new_frame) continue;
+    new_frame=false;
+  ; break;
+  } while(1);
 }
 
 #define DO_SCANLINE_TIMER
@@ -438,7 +442,7 @@ void __not_in_flash_func(startup_core1_loop)(){
   ; if(scan_y >= V_RESOLUTION) break;
     uint16_t* buf = (linebuf_ab? linebuf_b[line]: linebuf_a[line]); // REVISIT obvs hacky below
     uint16_t* puf = line==0? (linebuf_ab? linebuf_a[LINEBUF_LINES-1]: linebuf_b[LINEBUF_LINES-1]): 0;
-    ont_hx_scanline(buf, puf, scan_y);
+    ont_hx_scanline(buf, puf, scan_y, line==LINEBUF_LINES-1);
     SCANLINE_TIMER_MID
   }
   SCANLINE_TIMER_END
