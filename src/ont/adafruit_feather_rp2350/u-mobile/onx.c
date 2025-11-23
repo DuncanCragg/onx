@@ -43,20 +43,6 @@ const char* onn_test_uid_prefix = 0;
 
 // -----------------------------------------------------
 
-char* useruid;
-char* homeuid;
-char* inventoryuid;
-
-object* user;
-object* responses;
-
-volatile bool     button_pressed=false;
-
-volatile uint8_t  pending_user_event;
-volatile uint32_t pending_user_event_time;
-
-// -----------------------------------------------------
-
 #define RGB_BYTES_TO_RGB555(r,g,b) (((r)&0b11111000)<<7)|(((g)&0b11111000)<<2)|(((b)&0b11111000)>>3)
 
 // RGB565 to RGB555: ((pixel >> 1) & 0x7fe0) | (pixel & 0x001f);
@@ -200,6 +186,20 @@ void __not_in_flash_func(write_next_chunk_to_psram)(){
   chunk_number++;
 }
 
+// -----------------------------------------------------
+
+char* useruid;
+char* homeuid;
+char* inventoryuid;
+
+object* user;
+object* responses;
+
+volatile bool     button_pressed=false;
+
+volatile uint8_t  pending_user_event;
+volatile uint32_t pending_user_event_time;
+
 // ------------------------------------------------------------------------
 
 static bool touch_down=false;
@@ -253,6 +253,8 @@ static char note_text_big[] =
   "with behaviour rules you can write yourself "
   "and animate ourselves with spreadsheet-like rules "
   "----- ----- ----- ----- -----";
+
+// -----------------------------------------------------
 
 bool evaluate_user(object* usr, void* d) {
   return evaluate_user_2d(usr, d);
@@ -416,6 +418,7 @@ void __not_in_flash_func(ont_hx_frame)(bool new_frame){
     log_write("%.1fHz (%.3lluus)\n", 1e6/frame_time, frame_time);
   }
 #endif
+
   uint64_t ct=time_ms();
   static uint64_t lt=0;
   if(lt) loop_time=(uint32_t)(ct-lt);
