@@ -197,7 +197,7 @@ static void __not_in_flash_func(dma_irq_handler)() {
       v_scanline = (v_scanline + 1) % MODE_V_TOTAL_LINES;
       if(v_scanline==0){
         linebuf_line=0;
-        linebuf_ab = true;
+        linebuf_ab = true; // REVISIT: couldn't this trash the final line?
         linebuf_switched=true;
         linebuf_scanline=0;
         do_frame=true;

@@ -444,8 +444,8 @@ void __not_in_flash_func(ont_hx_scanline)(uint16_t* buf, uint16_t* puf, uint16_t
             s=time_us();
           }
 #endif
-       // dma_memcpy16(buf+sx, src_addr, sw, DMA_CH_READ, true);
           if(!pixel_doubling){
+         // dma_memcpy16(buf+sx, src_addr, sw, DMA_CH_READ, true);
             memcpy(buf+sx, src_addr, sw*2);
           } else {
             for(int16_t i=0; i<sw/2; i++){

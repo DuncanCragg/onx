@@ -141,7 +141,7 @@ void __not_in_flash_func(core0_main)() {
 
   log_init();
 
-  log_write("\n=============================== core 0 start ===============================\n");
+  log_write("=============================== core 0 start ===============================\n");
 
   uint32_t syst = clock_get_hz(clk_sys);
   uint32_t peri = clock_get_hz(clk_peri);
