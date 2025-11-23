@@ -7,7 +7,6 @@
 #include <hardware/clocks.h>
 #include <hardware/gpio.h>
 #include <hardware/regs/addressmap.h>
-#include <hardware/spi.h>
 #include <hardware/structs/qmi.h>
 #include <hardware/structs/xip_ctrl.h>
 #include <hardware/sync.h>
