@@ -3,7 +3,7 @@
 
 // ------------------------------------------------------------------------------
 
-#define WS10
+#define WS5
 
 #ifdef WS10
 #define WS10_PUSH_PSRAM
@@ -62,11 +62,11 @@
 // 384/4=96 /5=19.2MHz pxclk *800x480 = 39.4Hz
 #else // 60Hz
 #define HSTX_VREG_V                VREG_VOLTAGE_1_30
-#define HSTX_CLOCKSPEED_KHZ       (300*1000)
+#define HSTX_CLOCKSPEED_KHZ       (320*1000)
 #define HSTX_CLOCK_DIVIDER         2
 #define HSTX_FLASH_CLOCK_DIVIDER   3
 #define HSTX_PSRAM_CLOCK_DIVIDER   2
-// 300/2=150 /5=30MHz pxclk *800x480 = 60Hz
+// 320/2=160 /5=32MHz pxclk *800x480 = 66Hz
 #endif
 #endif
 

@@ -143,7 +143,7 @@ void __not_in_flash_func(write_image_chunk_to_sram)(uint32_t offset, uint32_t le
       else
                              pixel = d==4? (i/2 & 0x7ede): (i & 0x001f);
       sram_buffer[length-n] = pixel;
-      if(n % 4) time_delay_us(1);
+      // if(n % 4) time_delay_us(1);
       n--;
     }
   }
@@ -236,22 +236,20 @@ static char note_text_big[] =
   "xxxxxxxxxxxxxxxxxxx " "xxxxxxxxxxxxxxxxxx " "xxxxxxxxxxxxxxxx " "xxxxxxxxxxxxxxx "
   "xxxxxxxxxxxxxx " "xxxxxxxxxxxxx " "xxxxxxxxxxxx " "xxxxxxxxxxx " "xxxxxxxxxx "
   "xxxxxxxxx " "xxxxxxxx " "xxxxxxx " "xxxxxx " "xxxxx " "xxxx " "xxx " "xx " "x "
-  "Welcome to ONX! " "and the Object Network " "A Smartwatch OS " "Without Apps "
-  "app-killer, inversion " "only see data in HX " "no apps, like the Web " "all our data "
+  "Welcome to ONX! " "and the Object Network "
+  "only see data in HX " "all our data "
   "just stuff - objects " "you can link to and list " "little objects "
   "of all kinds of data " "linked together " "semantic " "on our own devices "
-  "hosted by you (including you) " "sewn together " "into a global, shared fabric "
-  "which we can all Link up " "into a shared global data fabric " "like the Web " "mesh "
-  "see objects inside other watches " "add their objects to your lists "
-  "internet after mesh " "we create a global data fabric "
-  "from all our objects linked up " "a two-way dynamic data Web " "a global Meshaverse "
-  "chat Freedom Meshaverse " "spanning the planet " "animated by us "
-  "internally-animated " "programmed like a spreadsheet "
+  "hosted by you (including you) " "sewn together " "into a shared fabric "
+  "which we can all Link up " "into a shared data fabric " "mesh "
+  "see objects inside other devices " "add their objects to your lists "
+  "we create a data fabric "
+  "from all our objects linked up " "a two-way dynamic data fabric "
+  "with behaviour rules you can write yourself "
+  "animated by us " "internally-animated " "programmed like a spreadsheet "
+  "and animate ourselves with spreadsheet-like rules "
   "objects are live - you see them change " "you have live presence as an object yourself "
   "SS-like PL over objects as objects themselves " "can share rule object set objects "
-  "like 'downloading an app' " "internally-animated "
-  "with behaviour rules you can write yourself "
-  "and animate ourselves with spreadsheet-like rules "
   "----- ----- ----- ----- -----";
 
 // -----------------------------------------------------

@@ -59,7 +59,7 @@ void log_init() {
   if(log_to_std){
     tud_init(0);
     stdio_usb_init();
-    for(int i=0; i<500 && !stdio_usb_connected(); i++){
+    for(int i=0; i<500 && !stdio_usb_connected(); i++){ // REVISIT: drop this
       time_delay_ms(1);
       tud_task();
     }
@@ -99,7 +99,7 @@ static char* get_reason_to_save_logs(){
   if(already_in_log_write)                 return "LOG ";
   if(time_ms() < LOG_EARLY_MS)             return "ERL ";
   if(in_interrupt_context())               return "INT ";
-  if(log_to_std && !stdio_usb_connected()) return "CON ";
+  if(log_to_std && !stdio_usb_connected()) return "CON "; // REVISIT: doesn't work in early logging
   return 0;
 }
 
