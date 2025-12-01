@@ -7,6 +7,7 @@ add_executable(onx-u-mobile
     ${PROJECT_SOURCE_DIR}/src/ont/user-2d.c
     ${PROJECT_SOURCE_DIR}/src/ont/keyboard.c
     ${PROJECT_SOURCE_DIR}/src/ont/io-evaluators.c
+    ${PROJECT_SOURCE_DIR}/src/ont/logic-evaluators.c
     onx.c
 )
 

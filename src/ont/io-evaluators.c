@@ -12,6 +12,7 @@
 #include <onx/colours.h>
 #include <onx/led-strip.h>
 #include <onx/led-matrix.h>
+#include <onx/io.h>
 
 #include <io-evaluators.h>
 
@@ -150,6 +151,31 @@ bool evaluate_bcs_in(object* bcs, void* d){
   object_property_set_fmt(bcs, "colour",     "%d", colour);
   object_property_set_fmt(bcs, "softness",   "%d", softness);
   object_property_set(    bcs, "state",            rot_pressed? "down": "up");
+
+  return true;
+}
+
+bool evaluate_button_in(object* btn, void* d) {
+  bool button_pressed = !!d;
+  object_property_set(btn, "state", button_pressed? "down": "up");
+  return true;
+}
+
+bool evaluate_touch_in(object* tch, void* d) {
+
+  object_property_set_fmt(tch, "coords", "%3d %3d", io.touch_x, io.touch_y);
+  object_property_set(    tch, "state",             io.touched? "down": "up");
+
+  return true;
+}
+
+/* extern */ char __BUILD_TIME = 0; // REVISIT: get from build line
+
+bool evaluate_about_in(object* abt, void* d) {
+
+  object_property_set_fmt(abt, "cpu",        "%d%%", boot_cpu());
+  object_property_set_fmt(abt, "mem",        "%ld",  mem_used());
+  object_property_set_fmt(abt, "build-info", "%lu", (unsigned long)&__BUILD_TIME);
 
   return true;
 }

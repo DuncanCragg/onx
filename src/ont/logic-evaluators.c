@@ -197,7 +197,7 @@ bool evaluate_clock_sync_logic(object* o, void* d) {
   return true;
 }
 
-extern char __BUILD_TIMEZONE_OFFSET;
+/* extern */ char __BUILD_TIMEZONE_OFFSET = 0; // REVISIT: get from build line
 
 bool evaluate_clock_logic(object* o, void* d) {
 
