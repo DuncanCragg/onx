@@ -72,13 +72,13 @@ bool evaluate_light_logic(object* o, void* d){
     }
   }
 
-  object_property(o, "button:is"); // REVISIT: "observe the button"?
+//object_property(o, "button:is"); // REVISIT: "observe the button"?
 
   bool has_bcs_link     = object_property(o, "bcs:1:is");
-  bool has_compass_link = object_property(o, "compass:1:is");
   bool has_touch_link   = object_property(o, "touch:1:is");
+  bool has_compass_link = object_property(o, "compass:1:is");
 
-  if(has_bcs_link || has_compass_link || has_touch_link){
+  if(has_bcs_link || has_touch_link || has_compass_link){
 
     uint8_t brightness = 0xff;
     uint8_t colour     = 0xff;
@@ -89,13 +89,7 @@ bool evaluate_light_logic(object* o, void* d){
       colour     = (uint8_t)object_property_int32(o, "bcs:1:colour");
       softness   = (uint8_t)object_property_int32(o, "bcs:1:softness");
     }
-#ifdef DO_COMPASS_LINK
-    if(has_compass_link){
-      int32_t direction = object_property_int32(o, "compass:1:direction");
-      colour = (uint8_t)((direction + 180)*256/360);
-    }
-#endif
-#ifdef DO_TOUCH_LINK
+    else
     if(has_touch_link){
       int32_t touch_x = object_property_int32(o, "touch:1:coords:1");
       int32_t touch_y = object_property_int32(o, "touch:1:coords:2");
@@ -103,17 +97,34 @@ bool evaluate_light_logic(object* o, void* d){
       colour   = (255-touch_x) & 0xff;
       softness = (    touch_y) & 0xff;
     }
-#endif
+    else
+    if(has_compass_link){
+      int32_t direction = object_property_int32(o, "compass:1:direction");
+      colour = (uint8_t)((direction + 180)*256/360);
+    }
     object_property_set_fmt(o, "colour", "%%%02x%02x%02x", brightness, colour, softness);
   }
 
-  if(object_property(o, "touch:is") ||
+  if(object_property(o, "button:is")||
+     object_property(o, "bcs:is") ||
+     object_property(o, "touch:is") ||
+     object_property(o, "compass:is")||
      object_property(o, "motion:is")   ) return true;
 
+#ifdef DO_BUTTON_DISCOVERY
   discover_io_peer(o, "button", "button", 4);
+#endif
+#ifdef DO_BCS_DISCOVERY
   discover_io_peer(o, "bcs", "bcs", 4);
-#ifdef DO_TOUCH_LINK
+#endif
+#ifdef DO_TOUCH_DISCOVERY
   discover_io_peer(o, "touch", "touch", 4);
+#endif
+#ifdef DO_COMPASS_DISCOVERY
+  discover_io_peer(o, "compass", "compass", 4);
+#endif
+#ifdef DO_MOTION_DISCOVERY
+  discover_io_peer(o, "motion", "motion", 4);
 #endif
 
   if(light_on && object_property_is(o, "button:state", "up")){
