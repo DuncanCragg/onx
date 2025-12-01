@@ -2,7 +2,7 @@
 #include <onx/log.h>
 #include <onx/io.h>
 
-io_state io;
+io_state_t io;
 
 extern void touch_usb_init(io_state_changed_cb_t cb);
 

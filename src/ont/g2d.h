@@ -1,5 +1,5 @@
-#ifndef G2D_H
-#define G2D_H
+#ifndef __G2D_H__
+#define __G2D_H__
 
 #include <stdint.h>
 #include <stdbool.h>

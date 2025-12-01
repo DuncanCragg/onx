@@ -213,7 +213,7 @@ static void show_gfx_log(uint8_t root_g2d_node){
 }
 #endif
 
-static void show_touch_point(uint8_t g2d_node){
+static void show_touch_point(uint8_t g2d_node){ // REVISIT: assumptions about "io"
   g2d_node_rectangle(g2d_node, 0,io.touch_y, 240,1, G2D_MAGENTA);
   g2d_node_rectangle(g2d_node, io.touch_x,0, 1,280, G2D_MAGENTA);
 }
@@ -1177,7 +1177,7 @@ static void draw_notes(char* path, uint8_t g2d_node) {
   if(container_g2d_node){
 
   g2d_node_text(container_g2d_node, 10,5, G2D_BLUE, 2,
-                "fps: %02d (%d,%d)", fps, io.touch_x, io.touch_y);
+                "fps: %02d (%d,%d)", fps, io.touch_x, io.touch_y); // REVISIT: assumptions about "io"
 
   int16_t wd=g2d_node_width(g2d_node)-2*SIDE_MARGIN;
   int16_t ht=g2d_node_height(g2d_node)-2*TOP_MARGIN;
@@ -1285,7 +1285,7 @@ static void draw_about(char* path, uint8_t g2d_node) {
                                                view_ev,0,0);
   if(container_g2d_node){
 
-  g2d_node_text(container_g2d_node, 20,  40, G2D_BLUE, 2, "fps: %d (%d,%d)", fps, io.touch_x, io.touch_y);
+  g2d_node_text(container_g2d_node, 20,  40, G2D_BLUE, 2, "fps: %d (%d,%d)", fps, io.touch_x, io.touch_y); // REVISIT: assumptions about "io"
   g2d_node_text(container_g2d_node, 10, 110, G2D_BLUE, 3, "cpu: %s",   object_pathpair(user, path, "cpu"));
   g2d_node_text(container_g2d_node, 10, 140, G2D_BLUE, 2, "mem: %s",   object_pathpair(user, path, "mem"));
   g2d_node_text(container_g2d_node, 10, 190, G2D_BLUE, 1, "build: %s", object_pathpair(user, path, "build-info"));

@@ -12,7 +12,7 @@
 #include <hardware/vreg.h>
 #include <hardware/clocks.h>
 #include <hardware/pll.h>
-#include "hardware/structs/qmi.h"
+#include <hardware/structs/qmi.h>
 
 #include <sync-and-mem.h>
 
@@ -79,7 +79,8 @@ static void set_up_clocks(){
 
   vreg_set_voltage(startup_vreg_v);
 
-  prev_flash_timing = qmi_hw->m[0].timing; // 0x60007203
+  prev_flash_timing = qmi_hw->m[0].timing; // 0x60007203 << REVISIT: div of 3, although:
+                                           // #define PICO_FLASH_SPI_CLKDIV 2 ?
 
   qmi_hw->m[0].timing = startup_flash_clock_divider==3? 0x60007303: 0x60007202;
        // found on web: 0x40000204
@@ -175,7 +176,7 @@ void __not_in_flash_func(core0_main)() {
 #endif
 
   while(1){
-    if(!onn_loop()){
+    if(!onn_loop()){       // REVISIT: time onn_loop()
       // time_delay_ms(5); // REVISIT
     }
     startup_core0_loop();

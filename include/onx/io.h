@@ -9,7 +9,7 @@
 #include <stdbool.h>
 #include <pthread.h>
 
-typedef struct io_state {
+typedef struct {
 
   bool     d_pad_left;
   bool     d_pad_right;
@@ -39,9 +39,9 @@ typedef struct io_state {
 
   char     key;
 
-} io_state;
+} io_state_t;
 
-extern io_state io;
+extern io_state_t io;
 
 void io_state_show();
 
