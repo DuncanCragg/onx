@@ -148,8 +148,6 @@ static void sprintf_propname_from_inv_is(char* propname, uint16_t len){
   *(propname+s-1)=0;
 }
 
-#if defined(BOARD_MAGIC3)
-
 #if !defined(BIG_LOG)
   #define LOG_LINES_MAX 27
 #else
@@ -211,7 +209,6 @@ static void show_gfx_log(uint8_t root_g2d_node){
     g2d_node_text(root_g2d_node, LOG_MARGIN, y_off + i * LOG_LINE_HEIGHT, G2D_RED, LOG_FONT_SIZE, "%s", log_lines[i]);
   }
 }
-#endif
 
 static void show_touch_point(uint8_t g2d_node){ // REVISIT: assumptions about "io"
   g2d_node_rectangle(g2d_node, 0,io.touch_y, 240,1, G2D_MAGENTA);
@@ -394,13 +391,9 @@ bool evaluate_user_2d(object* usr, void* user_event_) {
   }
   time_of_last_user_eval=current_time;
 
-#if defined(BOARD_MAGIC3)
-  touch_disable();
-#endif
+  // REVISIT: was disabling touch for this before...
   bool go_on = do_evaluate_user_2d(usr, user_event);
-#if defined(BOARD_MAGIC3)
-  touch_enable();
-#endif
+  // REVISIT: ...and enabling it again
 
 #ifdef LOG_USER_WORK
   log_write("%ld %ld\n", current_time, (uint32_t)time_ms()-current_time);
@@ -578,9 +571,7 @@ static bool do_evaluate_user_2d(object* usr, uint8_t user_event){
 
   draw_by_type("viewing", root_g2d_node);
 
-#if defined(BOARD_MAGIC3)
   show_gfx_log(root_g2d_node);
-#endif
 
   g2d_render();
 
