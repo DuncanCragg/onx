@@ -9,8 +9,10 @@
 // references to external config consts
 extern const uint8_t  startup_vreg_v;
 extern const uint32_t startup_clockspeed_khz;
+#if defined(PICO_RP2350)
 extern const uint8_t  startup_hstx_clock_divider;
 extern const uint8_t  startup_flash_clock_divider;
+#endif
 
 // calls to external functions
 void startup_core0_init();

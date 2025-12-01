@@ -12,7 +12,9 @@
 #include <hardware/vreg.h>
 #include <hardware/clocks.h>
 #include <hardware/pll.h>
+#if defined(PICO_RP2350)
 #include <hardware/structs/qmi.h>
+#endif
 
 #include <sync-and-mem.h>
 
@@ -73,12 +75,15 @@ static uint32_t set_nearest_cpu_clock() {
   return clockspeed_hz;
 }
 
+#if defined(PICO_RP2350)
 uint32_t prev_flash_timing;
+#endif
 
 static void set_up_clocks(){
 
   vreg_set_voltage(startup_vreg_v);
 
+#if defined(PICO_RP2350)
   prev_flash_timing = qmi_hw->m[0].timing; // 0x60007203 << REVISIT: div of 3, although:
                                            // #define PICO_FLASH_SPI_CLKDIV 2 ?
 
@@ -86,6 +91,7 @@ static void set_up_clocks(){
        // found on web: 0x40000204
        // 2 = RXDELAY: QSPI>100MHz RXDELAY=CLKDIV?
        // 4 = CLKDIV: can be 1,2,3,4,... 400/3 = 133
+#endif
 
   clock_configure_undivided(
       clk_sys,
@@ -146,9 +152,12 @@ void __not_in_flash_func(core0_main)() {
 
   uint32_t syst = clock_get_hz(clk_sys);
   uint32_t peri = clock_get_hz(clk_peri);
+#if defined(PICO_RP2350)
   uint32_t hstx = clock_get_hz(clk_hstx);
+#endif
   log_write("CPU clock:         %luMHz\n", syst/1000000);
   log_write("peripherals clock: %luMHz\n", peri/1000000);
+#if defined(PICO_RP2350)
   log_write("HSTX clock:        %luMHz\n", hstx/1000000);
   log_write("Pixel clock:       %luMHz\n", hstx/1000000/5);
   log_write("fr.rate  800x480:  %.1fHz\n", hstx        /5/( 800* 480*1.15));
@@ -157,6 +166,7 @@ void __not_in_flash_func(core0_main)() {
   log_write("previous flash timing: %#x\n", prev_flash_timing); // 0x60007203
   log_write("flash clock:       %luMHz\n", syst/1000000/startup_flash_clock_divider);
   log_write("PSRAM clock:       %luMHz\n", syst/1000000/psram_clock_divider);
+#endif
 
   random_init();
 
