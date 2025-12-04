@@ -1,0 +1,46 @@
+diff --git a/components/esp_driver_i2c/i2c_master.c b/components/esp_driver_i2c/i2c_master.c
+index 562e6788a3..6e19c29138 100644
+--- a/components/esp_driver_i2c/i2c_master.c
++++ b/components/esp_driver_i2c/i2c_master.c
+@@ -16,6 +16,7 @@
+ // Set the maximum log level for this source file
+ #define LOG_LOCAL_LEVEL ESP_LOG_DEBUG
+ #endif
++#include <rom/ets_sys.h>
+ #include "esp_log.h"
+ #include "esp_intr_alloc.h"
+ #include "freertos/FreeRTOS.h"
+@@ -530,6 +531,8 @@ static void s_i2c_send_commands(i2c_master_bus_handle_t i2c_master, TickType_t t
+     }
+     i2c_hal_master_trans_start(hal);
+ 
++    ets_delay_us(333); // 288us is abs min Magic Delay
++
+     // For blocking implementation, we must wait event interrupt to update the status.
+     // Otherwise, update status to timeout.
+     i2c_master_event_t event;
+diff --git a/components/esp_lcd/dsi/esp_lcd_mipi_dsi_bus.c b/components/esp_lcd/dsi/esp_lcd_mipi_dsi_bus.c
+index 33177a22e0..0f1fc97935 100644
+--- a/components/esp_lcd/dsi/esp_lcd_mipi_dsi_bus.c
++++ b/components/esp_lcd/dsi/esp_lcd_mipi_dsi_bus.c
+@@ -5,6 +5,7 @@
+  */
+ #include "freertos/FreeRTOS.h"
+ #include "freertos/task.h"
++#include <rom/ets_sys.h>
+ #include "soc/soc_caps.h"
+ #include "esp_check.h"
+ #include "esp_lcd_mipi_dsi.h"
+@@ -91,10 +92,10 @@ esp_err_t esp_lcd_new_dsi_bus(const esp_lcd_dsi_bus_config_t *bus_config, esp_lc
+ 
+     // wait for PHY initialization done
+     while (!mipi_dsi_phy_ll_is_pll_locked(hal->host)) {
+-        vTaskDelay(pdMS_TO_TICKS(1));
++        ets_delay_us(1000);
+     }
+     while (!mipi_dsi_phy_ll_are_lanes_stopped(hal->host, num_data_lanes)) {
+-        vTaskDelay(pdMS_TO_TICKS(1));
++        ets_delay_us(1000);
+     }
+ 
+     // initialize the DSI operation mode: command mode

@@ -1,0 +1,50 @@
+------------------------------------------
+Initially, temp patches while building own layer above HAL/LL:
+
+# in ESP-IDF
+
+cat esp-idf-no-free-rtos | (cd $esp; patch -p1)
+
+# in src/ont/waveshare_esp32_p4_module_dev_kit/u-console
+
+idf.py set-target esp32p4
+
+cat waveshare__esp_lcd_jd9365_10_1-no-free-rtos | patch -p1
+
+------------------------------------------
+Regularly:
+
+rm -rf build; idf.py set-target esp32p4
+
+------------------------------------------
+Every build:
+
+idf.py -p /dev/ttyACM0 build flash monitor
+
+------------------------------------------
+Other relevant commands:
+
+idf.py menuconfig
+idf.py add-dependency "waveshare/esp_lcd_jd9365_10_1"
+
+------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
