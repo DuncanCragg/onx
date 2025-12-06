@@ -163,11 +163,12 @@ bool log_loop() {
     if(char_recvd=='f') persistence_dump();
     if(char_recvd=='F') persistence_wipe();
     if(char_recvd=='m') mem_show_allocated(true);
+    if(char_recvd=='e') log_write("epoch time: %llds\n", time_es());
 //  if(char_recvd=='p') gpio_show_power_status(); // PORT
     if(char_recvd=='r') boot_reset(false);
     if(char_recvd=='b') boot_reset(true);
     if(char_recvd=='*') log_flash(1,1,1);
-    if(char_recvd=='h') log_write("c.ache n.otifies Vv.alues f.lash F.ormat m.em p.ower r.eset b.ootloader\n");
+    if(char_recvd=='h') log_write("u.ser key, object c.ache, n.otifies, Vv.alues, f.lash, F.ormat, m.em, e.poch, p.ower, r.eset, b.ootloader\n");
     char_recvd=0;
   }
 

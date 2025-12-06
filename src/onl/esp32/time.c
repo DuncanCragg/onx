@@ -1,5 +1,12 @@
 
 #include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+
+#include <esp_timer.h>
+#include <esp_log.h>
+#include <esp_sleep.h>
+#include <sdkconfig.h>
 
 #include <sync-and-mem.h>
 #include <esp_timer.h>
@@ -25,7 +32,6 @@ void time_init_set(uint64_t es) {
 
 void time_init() {
   if(initialised) return;
-  // any fast/slow clocks to start up?
   time_tick(every_second, 0, 1000);
   initialised=true;
 }
@@ -84,11 +90,31 @@ void time_es_set(uint64_t es) {
 // ----------------------------------------------------
 
 uint16_t time_tick(time_up_cb cb, void* arg, uint32_t every_ms){
-  return 0; // PORT
+  const esp_timer_create_args_t periodic_timer_args = {
+    .callback = cb,
+    .arg = arg,
+    .dispatch_method = ESP_TIMER_ISR,
+    .skip_unhandled_events = true,
+    .name = "periodic"
+  };
+  esp_timer_handle_t periodic_timer;
+  esp_timer_create(&periodic_timer_args, &periodic_timer);
+  esp_timer_start_periodic(periodic_timer, every_ms*1000);
+  return 0;
 }
 
 uint16_t time_once(time_up_cb cb, void* arg, uint32_t after_ms){
-  return 0; // PORT
+  const esp_timer_create_args_t oneshot_timer_args = {
+    .callback = cb,
+    .arg = arg,
+    .dispatch_method = ESP_TIMER_ISR,
+    .skip_unhandled_events = true,
+    .name = "one-shot"
+  };
+  esp_timer_handle_t oneshot_timer;
+  esp_timer_create(&oneshot_timer_args, &oneshot_timer);
+  esp_timer_start_once(oneshot_timer, after_ms*1000);
+  return 0;
 }
 
 void time_stop(uint16_t id) {
@@ -100,3 +126,7 @@ void time_end() {
 }
 
 // ----------------------------------------------------
+
+
+
+
