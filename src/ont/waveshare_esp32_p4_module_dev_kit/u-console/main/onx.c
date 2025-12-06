@@ -4,7 +4,7 @@
 #include <stdatomic.h>
 #include <inttypes.h>
 
-#include <rom/ets_sys.h>
+#include <esp_rom_sys.h>
 
 #include <esp_heap_caps_init.h>
 #include <esp_heap_caps.h>
@@ -43,7 +43,7 @@ void startup_core0_loop(){
      dsi_draw_bitmap(panel, 0, j * LINES_PER_BAND, H_RES, (j + 1) * LINES_PER_BAND, buf);
   }
 
-  ets_delay_us(1 * 1000 * 1000);
+  esp_rom_delay_us(1 * 1000 * 1000);
 
   for (int j = 0; j < NUM_BANDS; j++) {
      for (int i = 0; i < LINES_PER_BAND * H_RES; i++) {
@@ -54,7 +54,7 @@ void startup_core0_loop(){
      dsi_draw_bitmap(panel, 0, j * LINES_PER_BAND, H_RES, (j + 1) * LINES_PER_BAND, buf);
   }
 
-  ets_delay_us(1 * 1000 * 1000);
+  esp_rom_delay_us(1 * 1000 * 1000);
 }
 
 void startup_core1_init(){}

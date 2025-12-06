@@ -65,7 +65,6 @@ static bool    persist_loop();
 static void    persist_flush();
 static void    persist_pull_keep_active(list* keep_actives);
 
-static void    timer_init();
 static void    device_init();
 
 // ---------------------------------
@@ -322,7 +321,8 @@ void object_free(object* o) {
   mem_free(o);
 }
 
-char* get_key(char** p) {
+char* get_key(char** sp) {
+  unsigned char** p=(unsigned char**)sp;
   while(isspace(**p)) (*p)++;
   if(!**p) return 0;
   char* s=strchr(*p, ' ');
@@ -335,14 +335,15 @@ char* get_key(char** p) {
   return r;
 }
 
-char* get_val(char** p) {
+char* get_val(char** sp) {
+  unsigned char** p=(unsigned char**)sp;
   while(isspace(**p)) (*p)++;
   if(!**p) return 0;
   char* c=strstr(*p, ": ");
   while(c && *(c-1)=='\\') c=strstr(c+1, ": ");
   char* r=0;
   if(!c){
-    char* s=strrchr(*p, 0);
+    unsigned char* s=strrchr(*p, 0);
     do s--; while(isspace(*s)); s++;
     (*s)=0;
     r=mem_strdup(*p);
@@ -350,7 +351,7 @@ char* get_val(char** p) {
   }
   else{
     (*c)=0;
-    char* s=strrchr(*p, ' ');
+    unsigned char* s=strrchr(*p, ' ');
     if(!s){ (*c)=':'; return 0; }
     do s--; while(isspace(*s)); s++;
     (*c)=':';
@@ -713,8 +714,6 @@ bool object_property_contains_peek(object* n, char* path, char* expected) {
 
 // ---------------------------------------------------------------------------------
 
-
-static uint16_t timer_id;
 
 bool set_timer(object* n, char* timer) {
   value_free(n->timer);
@@ -1257,7 +1256,7 @@ char* object_to_text(object* n, char* b, uint16_t s, int target) {
 
   int j;
   for(j=1; j<=list_size(n->notifies); j++){
-    if(j==1) ln+=snprintf(b+ln, s-ln, " Notify:"); BUFCHK
+    if(j==1){ ln+=snprintf(b+ln, s-ln, " Notify:"); BUFCHK }
     ln+=snprintf(b+ln, s-ln, " "); BUFCHK
     ln+=strlen(value_to_text(list_get_n(n->notifies,j), b+ln, s-ln)); BUFCHK
   } // REVISIT list_to_text()

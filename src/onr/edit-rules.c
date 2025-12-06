@@ -26,7 +26,7 @@ bool evaluate_edit_rule(object* o, void* d) {
 
     char keyesc[128]; mem_strncpy(keyesc, key, 128);
     prefix_char_in_place(keyesc, '\\', ':');
-    char pathkey[128]; snprintf(pathkey, 128, "Alerted:%s", keyesc);
+    char pathkey[192]; snprintf(pathkey, 192, "Alerted:%s", keyesc);
     uint16_t ln = object_property_length(o, pathkey);
 
     uint16_t arrowindex=0;

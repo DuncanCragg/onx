@@ -4,10 +4,10 @@
 
 io_state_t io;
 
-extern void touch_usb_init(io_state_changed_cb_t cb);
+extern void touch_init(io_state_changed_cb_t cb);
 
 void io_init(io_state_changed_cb_t cb){
-  touch_usb_init(cb);
+  touch_init(cb);
 }
 
 void io_state_show(){

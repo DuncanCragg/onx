@@ -40,7 +40,8 @@ char* prefix_char_in_place(char* s, char prefix, char target){
   return s;
 }
 
-uint16_t num_tokens(char* s) {
+uint16_t num_tokens(char* ss) {
+  unsigned char* s=(unsigned char*)ss;
   if(!s || !(*s)) return 0;
   uint16_t n=0;
   bool in_token = false;
@@ -64,7 +65,8 @@ int32_t strto_int32(char* val){
   return r;
 }
 
-bool string_is_blank(char* s){
+bool string_is_blank(char* ss){
+  unsigned char* s=(unsigned char*)ss;
   if(!s) return true;
   while(*s) if(!isspace(*s++)) return false;
   return true;

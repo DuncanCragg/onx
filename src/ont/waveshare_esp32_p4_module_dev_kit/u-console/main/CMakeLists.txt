@@ -7,3 +7,23 @@ idf_component_register(
   INCLUDE_DIRS "../../../../../include"
   REQUIRES
 )
+
+idf_build_set_property(C_COMPILE_OPTIONS "-Wno-discarded-qualifiers" APPEND)
+idf_build_set_property(C_COMPILE_OPTIONS "-Wno-pointer-sign"         APPEND)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

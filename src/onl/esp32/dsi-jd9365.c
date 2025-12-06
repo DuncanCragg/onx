@@ -1,7 +1,6 @@
 
 #include <sdkconfig.h>
 #include <soc/soc_caps.h>
-#include <rom/ets_sys.h>
 
 #include <esp_private/startup_internal.h>
 #include <esp_private/periph_ctrl.h>

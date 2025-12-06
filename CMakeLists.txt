@@ -47,6 +47,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} \
     -Wno-discarded-qualifiers \
     -Wno-array-bounds \
     -Wno-char-subscripts \
+    -Wno-pointer-sign \
     -Wno-misleading-indentation \
     -Wimplicit-fallthrough=0 \
     -fvisibility=hidden \

@@ -17,6 +17,9 @@
 
 #include <persistence.h>
 
+// weak linkage fix
+void tud_cdc_rx_cb(uint8_t);
+static __attribute__((used)) void* __tud_cdc_rx_cb__ = tud_cdc_rx_cb;
 #include <onn.h>
 
 #define LOG_BUF_SIZE 2048
@@ -34,7 +37,7 @@ void log_set_usb_cb(log_usb_cb cb){
 
 static volatile char char_recvd=0;
 
-void tud_cdc_rx_cb(uint8_t itf) {
+void tud_cdc_rx_cb(uint8_t){
   tud_cdc_read(&char_recvd, 1);
   if(the_log_usb_cb){
     the_log_usb_cb(char_recvd);

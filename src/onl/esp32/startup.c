@@ -6,7 +6,7 @@
 
 #include <sdkconfig.h>
 #include <soc/soc_caps.h>
-#include <rom/ets_sys.h>
+#include <esp_rom_sys.h>
 
 #include <esp_private/startup_internal.h>
 #include <esp_private/periph_ctrl.h>
@@ -36,7 +36,7 @@ ESP_SYSTEM_INIT_FN(onx_startup_core_0, SECONDARY, BIT(0), 1000){
 
   esp_crosscore_int_init();
 
-  heap_caps_enable_nonos_stack_heaps();
+//heap_caps_enable_nonos_stack_heaps(); // REVISIT: how do you reclaim that?
 
 #if CONFIG_SPIRAM_MALLOC_RESERVE_INTERNAL
   if (esp_psram_is_initialized()) {
@@ -60,7 +60,7 @@ ESP_SYSTEM_INIT_FN(onx_startup_core_0, SECONDARY, BIT(0), 1000){
 
 ESP_SYSTEM_INIT_FN(onx_startup_core_1, SECONDARY, BIT(1), 1000){
 
-  ets_delay_us(50*1000);
+  esp_rom_delay_us(500*1000); // REVISIT: settling time? or sync up to something
 
   esp_crosscore_int_init();
 

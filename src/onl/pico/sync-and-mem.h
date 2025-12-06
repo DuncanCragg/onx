@@ -1,5 +1,5 @@
-#ifndef PICO_SUPPORT_H
-#define PICO_SUPPORT_H
+#ifndef SYNC_AND_MEM_H
+#define SYNC_AND_MEM_H
 
 #include <stdbool.h>
 

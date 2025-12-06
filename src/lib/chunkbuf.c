@@ -133,7 +133,7 @@ void chunkbuf_dump(chunkbuf* cb){
     if(c>=' ' && c<=126) n+=snprintf(b+n,BUFLENDUMP-n,"%c",       c);
     else                 n+=snprintf(b+n,BUFLENDUMP-n,"<0x%02x>", c);
   ; if(n>=BUFLENDUMP){ b[BUFLENDUMP-2]='#'; b[BUFLENDUMP-1]=0; break; }
-    if(IS_NL_DELIM(c)) n+=snprintf(b+n,BUFLENDUMP-n,"]\n[",   c);
+    if(IS_NL_DELIM(c)) n+=snprintf(b+n,BUFLENDUMP-n,"]\n[");
   }
   log_write("chunkbuf:[%s]\n",b);
 }
