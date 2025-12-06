@@ -16,6 +16,7 @@ add_library(lib_onx STATIC
     onl/pico/usb-host.c
 
     onl/mem.c
+    onl/log.c
     onl/persistence.c
     onl/touch-usb.c
     onl/tinyusb-host.c
