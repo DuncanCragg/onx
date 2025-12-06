@@ -1,12 +1,12 @@
 diff --git a/components/esp_driver_i2c/i2c_master.c b/components/esp_driver_i2c/i2c_master.c
-index 562e6788a3..6e19c29138 100644
+index 562e6788a3..3ef7a2ae5a 100644
 --- a/components/esp_driver_i2c/i2c_master.c
 +++ b/components/esp_driver_i2c/i2c_master.c
 @@ -16,6 +16,7 @@
  // Set the maximum log level for this source file
  #define LOG_LOCAL_LEVEL ESP_LOG_DEBUG
  #endif
-+#include <rom/ets_sys.h>
++#include <esp_rom_sys.h>
  #include "esp_log.h"
  #include "esp_intr_alloc.h"
  #include "freertos/FreeRTOS.h"
@@ -14,20 +14,36 @@ index 562e6788a3..6e19c29138 100644
      }
      i2c_hal_master_trans_start(hal);
  
-+    ets_delay_us(333); // 288us is abs min Magic Delay
++    esp_rom_delay_us(333); // 288us is abs min Magic Delay
 +
      // For blocking implementation, we must wait event interrupt to update the status.
      // Otherwise, update status to timeout.
      i2c_master_event_t event;
+diff --git a/components/esp_driver_usb_serial_jtag/src/usb_serial_jtag.c b/components/esp_driver_usb_serial_jtag/src/usb_serial_jtag.c
+index 631829de9e..55625bc957 100644
+--- a/components/esp_driver_usb_serial_jtag/src/usb_serial_jtag.c
++++ b/components/esp_driver_usb_serial_jtag/src/usb_serial_jtag.c
+@@ -147,6 +147,11 @@ static void usb_serial_jtag_isr_handler_default(void *arg)
+         // Read RX FIFO and send available data to ringbuffer.
+         uint8_t buf[USB_SER_JTAG_RX_MAX_SIZE];
+         uint32_t rx_fifo_len = usb_serial_jtag_ll_read_rxfifo(buf, USB_SER_JTAG_RX_MAX_SIZE);
++
++        extern void usb_serial_jtag_char_recvd_cb(uint8_t char_recvd);
++        if(rx_fifo_len) usb_serial_jtag_char_recvd_cb(*buf);
++;       return;
++
+         xRingbufferSendFromISR(p_usb_serial_jtag_obj->rx_ring_buf, buf, rx_fifo_len, &xTaskWoken);
+ 
+         if (p_usb_serial_jtag_obj->usj_select_notif_callback) {
 diff --git a/components/esp_lcd/dsi/esp_lcd_mipi_dsi_bus.c b/components/esp_lcd/dsi/esp_lcd_mipi_dsi_bus.c
-index 33177a22e0..0f1fc97935 100644
+index 33177a22e0..19b6701a97 100644
 --- a/components/esp_lcd/dsi/esp_lcd_mipi_dsi_bus.c
 +++ b/components/esp_lcd/dsi/esp_lcd_mipi_dsi_bus.c
 @@ -5,6 +5,7 @@
   */
  #include "freertos/FreeRTOS.h"
  #include "freertos/task.h"
-+#include <rom/ets_sys.h>
++#include <esp_rom_sys.h>
  #include "soc/soc_caps.h"
  #include "esp_check.h"
  #include "esp_lcd_mipi_dsi.h"
@@ -36,11 +52,11 @@ index 33177a22e0..0f1fc97935 100644
      // wait for PHY initialization done
      while (!mipi_dsi_phy_ll_is_pll_locked(hal->host)) {
 -        vTaskDelay(pdMS_TO_TICKS(1));
-+        ets_delay_us(1000);
++        esp_rom_delay_us(1000);
      }
      while (!mipi_dsi_phy_ll_are_lanes_stopped(hal->host, num_data_lanes)) {
 -        vTaskDelay(pdMS_TO_TICKS(1));
-+        ets_delay_us(1000);
++        esp_rom_delay_us(1000);
      }
  
      // initialize the DSI operation mode: command mode

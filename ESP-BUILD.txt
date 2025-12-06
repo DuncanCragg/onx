@@ -1,9 +1,7 @@
 ------------------------------------------
 Initially, temp patches while building own layer above HAL/LL:
 
-# in ESP-IDF
-
-cat esp-idf-no-free-rtos | (cd $esp; patch -p1)
+cat esp-idf-no-free-rtos | (cd $IDF_PATH; patch -p1)
 
 # in src/ont/waveshare_esp32_p4_module_dev_kit/u-console
 
