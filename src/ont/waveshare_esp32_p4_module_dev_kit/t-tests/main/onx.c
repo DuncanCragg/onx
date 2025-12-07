@@ -84,13 +84,13 @@ static void tick_cb(void* arg){
   if(numtix<10){
     numtix++;
     log_write("tick_cb #%d \"%s\" in_interrupt_context=%d core_id=%d\n",
-               numtix, (char*)arg, in_interrupt_context(), esp_cpu_get_core_id());
+               numtix, (char*)arg, in_interrupt_context(), boot_core_id());
   }
 }
 
 static void once_cb(void* arg){
   log_write("once_cb \"%s\" in_interrupt_context=%d core_id=%d\n",
-             (char*)arg, in_interrupt_context(), esp_cpu_get_core_id());
+             (char*)arg, in_interrupt_context(), boot_core_id());
 }
 
 // -----------------------------------------------------
@@ -106,6 +106,8 @@ void io_cb(){
 }
 
 void startup_core0_init(){
+
+  log_write("core %d init\n", boot_core_id());
 
   log_set_usb_cb(char_received);
 
@@ -146,10 +148,10 @@ void startup_core0_loop(){
 }
 
 void startup_core1_init(){
+  log_write("core %d init\n", boot_core_id());
   time_tick(tick_cb, "core-1-banana",  350);
   time_once(once_cb, "core-1-mango!", 3500);
 }
-
 
 void startup_core1_loop(){ }
 

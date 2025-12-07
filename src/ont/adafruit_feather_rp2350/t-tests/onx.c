@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <sync-and-mem.h>
+
 #include <pico/stdlib.h>
 #include <pico/multicore.h>
 #include <pico/time.h>
@@ -86,21 +88,23 @@ void run_tests() {
   run_onn_tests();
   run_evaluate_edit_rule_tests();
 
-  int failures=tests_assert_summary();
+  tests_assert_summary();
 }
 
 // -----------------------------------------------------
 
 static void tick_cb(void* arg){
   static uint8_t numtix=0;
-  if(numtix<5){
+  if(numtix<10){
     numtix++;
-    log_write("tick %d\n", numtix);
+    log_write("tick_cb #%d \"%s\" in_interrupt_context=%d core_id=%d\n",
+               numtix, (char*)arg, in_interrupt_context(), boot_core_id());
   }
 }
 
 static void once_cb(void* arg){
-  log_write("once_cb %s\n", (char*)arg);
+  log_write("once_cb \"%s\" in_interrupt_context=%d core_id=%d\n",
+             (char*)arg, in_interrupt_context(), boot_core_id());
 }
 
 // -----------------------------------------------------
@@ -192,12 +196,14 @@ void io_cb(){
 
 void startup_core0_init(){
 
+  log_write("core %d init\n", boot_core_id());
+
   log_set_usb_cb(char_received);
 
   io_init(io_cb);
 
-  time_tick(tick_cb, "banana",  250);
-  time_once(once_cb, "mango!", 2500);
+  time_tick(tick_cb, "core-0-banana",  250);
+  time_once(once_cb, "core-0-mango!", 2500);
 
   radio_ok=radio_init(radio_cb);
   log_write("radio %s\n", radio_ok? "up": "init failed");
@@ -219,22 +225,29 @@ void startup_core0_loop(){
     if(char_recvd=='l') run_actual_leds(true);
     if(char_recvd=='s') send_big_radio_data(true); // && radio_starter
     // ------ same as log.c ------------
+    if(char_recvd=='u') log_user_key_cb();
     if(char_recvd=='c') onn_show_cache();
     if(char_recvd=='n') onn_show_notify();
     if(char_recvd=='v') value_dump_small();
     if(char_recvd=='V') value_dump();
     if(char_recvd=='f') persistence_dump();
     if(char_recvd=='m') mem_show_allocated(true);
+    if(char_recvd=='e') log_write("epoch time: %llds\n", time_es());
     if(char_recvd=='p') gpio_show_power_status();
     if(char_recvd=='r') boot_reset(false);
     if(char_recvd=='b') boot_reset(true);
     if(char_recvd=='*') log_flash(1,1,1);
-    if(char_recvd=='h') log_write("t.ests co.l.our s.end-radio i.nputs | object c.ache n.otifies Vv.alues f.lash m.em p.ower r.eset b.ootloader\n");
+    if(char_recvd=='h') log_write("t.ests, co.l.our, s.end-radio, i.nputs | u.ser key, object c.ache, n.otifies, Vv.alues, f.lash, m.em, e.poch, p.ower, r.eset, b.ootloader\n");
     char_recvd=0;
   }
 }
 
-void startup_core1_init(){ } // REVISIT not used, so...
+void startup_core1_init(){
+  log_write("core %d init\n", boot_core_id());
+  time_tick(tick_cb, "core-1-banana",  350);
+  time_once(once_cb, "core-1-mango!", 3500);
+}
+
 void startup_core1_loop(){ }
 
 // -----------------------------------------------------
