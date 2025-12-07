@@ -60,3 +60,88 @@ index 33177a22e0..19b6701a97 100644
      }
  
      // initialize the DSI operation mode: command mode
+diff --git a/components/freertos/FreeRTOS-Kernel/portable/riscv/portasm.S b/components/freertos/FreeRTOS-Kernel/portable/riscv/portasm.S
+index 1bccf990c6..039857bf63 100644
+--- a/components/freertos/FreeRTOS-Kernel/portable/riscv/portasm.S
++++ b/components/freertos/FreeRTOS-Kernel/portable/riscv/portasm.S
+@@ -480,9 +480,18 @@ rtos_int_enter:
+     li      s2, 0
+ #endif /* SOC_CPU_COPROC_NUM > 0 */
+ 
++    /* Increment the ISR nesting count */
++    la      a0, port_uxInterruptNesting     /* a0 = &port_uxInterruptNesting */
+ #if ( configNUM_CORES > 1 )
+     csrr    s0, mhartid                     /* s0 = coreID */
+     slli    s0, s0, 2                       /* s0 = coreID * 4 */
++    add     a0, a0, s0                      /* a0 = &port_uxInterruptNesting[coreID] // s0 contains coreID * 4 */
++#endif /* ( configNUM_CORES > 1 ) */
++    lw      a1, 0(a0)                       /* a1 = port_uxInterruptNesting[coreID] */
++    addi    a2, a1, 1                       /* a2 = a1 + 1 */
++    sw      a2, 0(a0)                       /* port_uxInterruptNesting[coreID] = a2 */
++
++#if ( configNUM_CORES > 1 )
+     la      a0, port_xSchedulerRunning      /* a0 = &port_xSchedulerRunning */
+     add     a0, a0, s0                      /* a0 = &port_xSchedulerRunning[coreID] */
+     lw      a0, (a0)                        /* a0 = port_xSchedulerRunning[coreID] */
+@@ -492,15 +501,6 @@ rtos_int_enter:
+     /* In case we jump, return value (a0) is correct */
+     beqz    a0, rtos_int_enter_end          /* if (port_xSchedulerRunning[coreID] == 0) jump to rtos_int_enter_end */
+ 
+-    /* Increment the ISR nesting count */
+-    la      a0, port_uxInterruptNesting     /* a0 = &port_uxInterruptNesting */
+-#if ( configNUM_CORES > 1 )
+-    add     a0, a0, s0                      /* a0 = &port_uxInterruptNesting[coreID] // s0 contains coreID * 4 */
+-#endif /* ( configNUM_CORES > 1 ) */
+-    lw      a1, 0(a0)                       /* a1 = port_uxInterruptNesting[coreID] */
+-    addi    a2, a1, 1                       /* a2 = a1 + 1 */
+-    sw      a2, 0(a0)                       /* port_uxInterruptNesting[coreID] = a2 */
+-
+     /* If we reached here from another low-priority ISR, i.e, port_uxInterruptNesting[coreID] > 0, then skip stack pushing to TCB */
+     li      a0, 0                           /* return 0 in case we are going to branch */
+     bnez    a1, rtos_int_enter_end          /* if (port_uxInterruptNesting[coreID] > 0) jump to rtos_int_enter_end */
+@@ -612,9 +612,22 @@ rtos_int_exit:
+     mv      s8, a1
+ #endif
+ 
++    /* Update nesting interrupts counter */
++    la      a2, port_uxInterruptNesting     /* a2 = &port_uxInterruptNesting */
+ #if ( configNUM_CORES > 1 )
+     csrr    s7, mhartid                     /* s7 = coreID */
+     slli    s7, s7, 2                       /* s7 = s7 * 4 */
++    add     a2, a2, s7                      /* a2 = &port_uxInterruptNesting[coreID] */
++#endif /* ( configNUM_CORES > 1 ) */
++    lw      a0, 0(a2)                       /* a0 = port_uxInterruptNesting[coreID] */
++    /* Already zero, protect against underflow */
++    beqz    a0, skip_decrement  /* if (port_uxInterruptNesting[coreID] == 0) jump */
++    addi    a0, a0, -1                      /* a0 = a0 - 1 */
++    sw      a0, 0(a2)                       /* port_uxInterruptNesting[coreID] = a0 */
++skip_decrement:
++    bnez    a0, rtos_int_exit_end           /* if (port_uxInterruptNesting[coreID] != 0) jump to end */
++
++#if ( configNUM_CORES > 1 )
+     la      a0, port_xSchedulerRunning      /* a0 = &port_xSchedulerRunning */
+     add     a0, a0, s7                      /* a0 = &port_xSchedulerRunning[coreID] */
+     lw      a0, (a0)                        /* a0 = port_xSchedulerRunning[coreID] */
+@@ -623,21 +636,7 @@ rtos_int_exit:
+ #endif /* ( configNUM_CORES > 1 ) */
+     beqz    a0, rtos_int_exit_end           /* if (port_uxSchedulerRunning == 0) jump to rtos_int_exit_end */
+ 
+-    /* Update nesting interrupts counter */
+-    la      a2, port_uxInterruptNesting     /* a2 = &port_uxInterruptNesting */
+-#if ( configNUM_CORES > 1 )
+-    add     a2, a2, s7                      /* a2 = &port_uxInterruptNesting[coreID] // s7 already contains coreID * 4 */
+-#endif /* ( configNUM_CORES > 1 ) */
+-    lw      a0, 0(a2)                       /* a0 = port_uxInterruptNesting[coreID] */
+-
+-    /* Already zero, protect against underflow */
+-    beqz    a0, isr_skip_decrement          /* if (port_uxInterruptNesting[coreID] == 0) jump to isr_skip_decrement */
+-    addi    a0, a0, -1                      /* a0 = a0 - 1 */
+-    sw      a0, 0(a2)                       /* port_uxInterruptNesting[coreID] = a0 */
+-    /* May still have interrupts pending, skip section below and exit */
+-    bnez    a0, rtos_int_exit_end
+-
+-isr_skip_decrement:
++    /* now no more irq nesting and the scheduler is running */
+ 
+ #if ( SOC_CPU_COPROC_NUM > 0 )
+     /* Keep the current TCB in a0 */

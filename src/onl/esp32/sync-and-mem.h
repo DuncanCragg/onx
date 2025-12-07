@@ -3,6 +3,8 @@
 
 #include <stdbool.h>
 
+#include <esp_cpu.h>
+
 #define ALIGNED __attribute__((aligned(4)))
 
 #define CRITICAL_SECTION                     int
@@ -11,9 +13,11 @@
 #define CRITICAL_SECTION_EXIT(cs)            cs--
 #define CRITICAL_SECTION_EXIT_RETURN(cs,r)   { cs--; return r; }
 
+extern volatile uint32_t port_uxInterruptNesting[];
 
 static inline bool in_interrupt_context() {
-  return false; // PORT
+  uint16_t core_id = esp_cpu_get_core_id();
+  return port_uxInterruptNesting[core_id];
 }
 
 #endif

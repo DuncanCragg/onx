@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <sync-and-mem.h>
+
 #include <onx/time.h>
 #include <onx/boot.h>
 #include <onx/log.h>
@@ -79,14 +81,16 @@ void run_tests() {
 
 static void tick_cb(void* arg){
   static uint8_t numtix=0;
-  if(numtix<5){
+  if(numtix<10){
     numtix++;
-    log_write("tick %d %s\n", numtix, (char*)arg);
+    log_write("tick_cb #%d \"%s\" in_interrupt_context=%d core_id=%d\n",
+               numtix, (char*)arg, in_interrupt_context(), esp_cpu_get_core_id());
   }
 }
 
 static void once_cb(void* arg){
-  log_write("once_cb %s\n", (char*)arg);
+  log_write("once_cb \"%s\" in_interrupt_context=%d core_id=%d\n",
+             (char*)arg, in_interrupt_context(), esp_cpu_get_core_id());
 }
 
 // -----------------------------------------------------
@@ -107,8 +111,8 @@ void startup_core0_init(){
 
   io_init(io_cb);
 
-  time_tick(tick_cb, "banana",  250);
-  time_once(once_cb, "mango!", 2500);
+  time_tick(tick_cb, "core-0-banana",  250);
+  time_once(once_cb, "core-0-mango!", 2500);
 
   log_write("---------- tests --------------------\n");
   log_flash(1,0,0);
@@ -141,7 +145,12 @@ void startup_core0_loop(){
   }
 }
 
-void startup_core1_init(){ } // REVISIT not used, so...
+void startup_core1_init(){
+  time_tick(tick_cb, "core-1-banana",  350);
+  time_once(once_cb, "core-1-mango!", 3500);
+}
+
+
 void startup_core1_loop(){ }
 
 // -----------------------------------------------------
