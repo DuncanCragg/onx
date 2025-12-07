@@ -62,16 +62,16 @@ value* value_new(char* val) {
       log_write("VREF!%s %d\n", ours->val, ours->refs);
     }
     if(ours->refs==0){  log_write("V00!%s\n", ours->val); ours->refs++; }
-    CRITICAL_SECTION_EXIT_RETURN(cs,ours);
+    CRITICAL_SECTION_RETURN(cs,ours);
   }
   ours=(value*)mem_alloc(sizeof(value));
   if(!ours){
     log_write("VALS!!\n"); // this is serious
-    CRITICAL_SECTION_EXIT_RETURN(cs,0);
+    CRITICAL_SECTION_RETURN(cs,0);
   }
   if(strchr(val, ' ') || strchr(val, '\n')){
     log_write("VALS ! '%s'\n", val); // this is serious
- // CRITICAL_SECTION_EXIT_RETURN(cs,0);
+ // CRITICAL_SECTION_RETURN(cs,0);
  // it happens, so...
   }
   ours->type=ITEM_VALUE;
@@ -81,16 +81,16 @@ value* value_new(char* val) {
   if(!ours->val){
     log_write("!VALS!\n"); // this is serious
     mem_free(ours);
-    CRITICAL_SECTION_EXIT_RETURN(cs,0);
+    CRITICAL_SECTION_RETURN(cs,0);
   }
   if(!properties_set(all_values, ours->val, ours)){
     log_write("!!VALS\n"); // this is serious
     value_dump_small();
     mem_freestr(ours->val);
     mem_free(ours);
-    CRITICAL_SECTION_EXIT_RETURN(cs,0);
+    CRITICAL_SECTION_RETURN(cs,0);
   }
-  CRITICAL_SECTION_EXIT_RETURN(cs,ours);
+  CRITICAL_SECTION_RETURN(cs,ours);
 }
 
 value* value_new_fmt(char* fmt, ...){
@@ -106,7 +106,7 @@ value* value_ref(value* v) {
   if(!v) return 0;
   CRITICAL_SECTION_ENTER(cs);
   v->refs++;
-  CRITICAL_SECTION_EXIT_RETURN(cs,v);
+  CRITICAL_SECTION_RETURN(cs,v);
 }
 
 void value_free(value* v) {
