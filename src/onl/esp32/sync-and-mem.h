@@ -13,6 +13,11 @@
 #define CRITICAL_SECTION_EXIT(cs)            cs--
 #define CRITICAL_SECTION_EXIT_RETURN(cs,r)   { cs--; return r; }
 
+#define DISABLE_INTERRUPTS              
+#define DISABLE_INTERRUPTS_2            
+#define ENABLE_INTERRUPTS               
+#define RETURN_ENABLING_INTERRUPTS(r) { ; return r; }
+
 extern volatile uint32_t port_uxInterruptNesting[];
 
 static inline bool in_interrupt_context() {

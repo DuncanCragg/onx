@@ -23,6 +23,11 @@
 #define CRITICAL_SECTION_EXIT(cs)           critical_section_exit(&cs)
 #define CRITICAL_SECTION_EXIT_RETURN(cs,r)  critical_section_exit(&cs); return r
 
+#define DISABLE_INTERRUPTS              uint32_t __irq_saved_flags = save_and_disable_interrupts();
+#define DISABLE_INTERRUPTS_2            __irq_saved_flags = save_and_disable_interrupts();
+#define ENABLE_INTERRUPTS               restore_interrupts_from_disabled(__irq_saved_flags);
+#define RETURN_ENABLING_INTERRUPTS(r) { restore_interrupts_from_disabled(__irq_saved_flags); return r; }
+
 static inline bool in_interrupt_context() {
   return (SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) != 0;
 }
