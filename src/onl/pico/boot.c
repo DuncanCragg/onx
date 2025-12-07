@@ -1,6 +1,7 @@
 
 #include <hardware/watchdog.h>
 
+#include <pico/platform.h>
 #include <pico/bootrom.h>
 
 #include <onx/log.h>
@@ -55,6 +56,10 @@ void boot_sleep() {
 
     cpu_percent=(uint8_t)(100*running_time_diff/(running_time_diff+sleeping_time_diff));
   }
+}
+
+uint32_t boot_core_id(){
+  return get_core_num();
 }
 
 uint8_t boot_cpu() {

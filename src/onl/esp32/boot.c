@@ -1,5 +1,6 @@
 
 #include <esp_system.h>
+#include <esp_cpu.h>
 
 #include <onx/log.h>
 #include <onx/boot.h>
@@ -78,6 +79,10 @@ void boot_sleep() {
 
     cpu_percent=(uint8_t)(100*running_time_diff/(running_time_diff+sleeping_time_diff));
   }
+}
+
+uint32_t boot_core_id(){
+  return esp_cpu_get_core_id();
 }
 
 uint8_t boot_cpu() {
