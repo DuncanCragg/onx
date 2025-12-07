@@ -196,6 +196,8 @@ with any other similar marks covering other goods and services.
 
 #include "radio-rfm69.h" // pages and pages from the datasheet
 
+static CRITICAL_SECTION cs;
+
 #ifdef RADIO_RFM69_CS_PIN
 static const uint8_t radio_rfm69_cs_pin  = RADIO_RFM69_CS_PIN;
 static const uint8_t radio_rfm69_rst_pin = RADIO_RFM69_RST_PIN;
@@ -220,45 +222,45 @@ static int8_t rh_power = 0;
 
 static uint8_t rh_spi_read_register(uint8_t reg) {
   uint8_t val;
-  TIMING_CRITICAL_ENTER;
+  CRITICAL_SECTION_ENTER(cs);
   gpio_set(radio_rfm69_cs_pin, 0);
   spi_rw_byte(reg & ~RFM69_SPI_WRITE_MASK);
   val = spi_rw_byte(0);
   time_delay_us(1);
   gpio_set(radio_rfm69_cs_pin, 1);
-  TIMING_CRITICAL_END;
+  CRITICAL_SECTION_EXIT(cs);
   return val;
 }
 
 static void rh_spi_write_register(uint8_t reg, uint8_t val) {
-  TIMING_CRITICAL_ENTER;
+  CRITICAL_SECTION_ENTER(cs);
   gpio_set(radio_rfm69_cs_pin, 0);
   spi_rw_byte(reg | RFM69_SPI_WRITE_MASK);
   spi_rw_byte(val);
   time_delay_us(1);
   gpio_set(radio_rfm69_cs_pin, 1);
-  TIMING_CRITICAL_END;
+  CRITICAL_SECTION_EXIT(cs);
 }
 
 static uint16_t rh_spi_read(uint8_t reg, uint8_t* buf, uint8_t len) {
-  TIMING_CRITICAL_ENTER;
+  CRITICAL_SECTION_ENTER(cs);
   gpio_set(radio_rfm69_cs_pin, 0);
   spi_rw_byte(reg & ~RFM69_SPI_WRITE_MASK);
   uint16_t n=spi_read(buf, len);
   time_delay_us(1);
   gpio_set(radio_rfm69_cs_pin, 1);
-  TIMING_CRITICAL_END;
+  CRITICAL_SECTION_EXIT(cs);
   return n;
 }
 
 static void rh_spi_write(uint8_t reg, const uint8_t* buf, uint8_t len) {
-  TIMING_CRITICAL_ENTER;
+  CRITICAL_SECTION_ENTER(cs);
   gpio_set(radio_rfm69_cs_pin, 0);
   spi_rw_byte(reg | RFM69_SPI_WRITE_MASK);
   spi_write(buf, len);
   time_delay_us(1);
   gpio_set(radio_rfm69_cs_pin, 1);
-  TIMING_CRITICAL_END;
+  CRITICAL_SECTION_EXIT(cs);
 }
 
 #define RADIO_BROADCAST_ADDRESS 0xff
@@ -267,18 +269,18 @@ static void rh_write_fifo(uint8_t* buf, size_t len) {
 #ifdef X_TRACK_CHUNK_ASSEMBLY
   log_write("rh_write_fifo len=%d [%.*s]\n", len, len, buf);
 #endif
-  TIMING_CRITICAL_ENTER;
+  CRITICAL_SECTION_ENTER(cs);
   gpio_set(radio_rfm69_cs_pin, 0);
   spi_rw_byte(RFM69_REG_00_FIFO | RFM69_SPI_WRITE_MASK);
   spi_rw_byte(len);
   spi_write(buf, len);
   time_delay_us(1);
   gpio_set(radio_rfm69_cs_pin, 1);
-  TIMING_CRITICAL_END;
+  CRITICAL_SECTION_EXIT(cs);
 }
 
 static void rh_read_fifo() {
-  TIMING_CRITICAL_ENTER;
+  CRITICAL_SECTION_ENTER(cs);
   gpio_set(radio_rfm69_cs_pin, 0);
   spi_rw_byte(RFM69_REG_00_FIFO & ~RFM69_SPI_WRITE_MASK);
   uint8_t len = spi_rw_byte(0);
@@ -293,7 +295,7 @@ static void rh_read_fifo() {
   }
   time_delay_us(1);
   gpio_set(radio_rfm69_cs_pin, 1);
-  TIMING_CRITICAL_END;
+  CRITICAL_SECTION_EXIT(cs);
 }
 
 static void rh_set_opmode(uint8_t rfm_opmode) {
@@ -465,6 +467,8 @@ static void rh_reset(){
 }
 
 static bool rh_init() {
+
+  CRITICAL_SECTION_INIT(cs);
 
   spi_init();
 

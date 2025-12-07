@@ -1059,7 +1059,7 @@ static CRITICAL_SECTION cs;
 
 void set_to_notify(value* uid, void* data, value* alerted, uint64_t timeout){
 
-  CRITICAL_SECTION_ENTER_BLOCKING(cs);
+  CRITICAL_SECTION_ENTER(cs);
 
   uint16_t n=0;
   uint16_t h= -1;

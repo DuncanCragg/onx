@@ -27,6 +27,8 @@ static volatile list* saved_messages = 0;
 
 static volatile bool initialised=false;
 
+static CRITICAL_SECTION cs;
+
 static log_usb_cb the_log_usb_cb=0;
 
 void log_set_usb_cb(log_usb_cb cb){
@@ -46,6 +48,8 @@ void log_char_recvd(uint8_t ch) {
 void log_init() {
 
   if(initialised) return;
+
+  CRITICAL_SECTION_INIT(cs);
 
   if(!saved_messages) saved_messages = list_new(64);
   gfx_log_buffer = list_new(32);
@@ -101,14 +105,14 @@ static void flush_saved_messages(uint8_t to){
 
   if(get_reason_to_save_logs()) return;
 
-  DISABLE_INTERRUPTS;
+  CRITICAL_SECTION_ENTER(cs);
   uint16_t ls=list_size(saved_messages);
   list* saved_messages_copy;
   if(ls){
     saved_messages_copy = list_copy(saved_messages);
     list_clear(saved_messages, false);
   }
-  ENABLE_INTERRUPTS;
+  CRITICAL_SECTION_EXIT(cs);
   if(!ls) return;
   for(uint8_t i=1; i<=ls; i++){
 
@@ -220,9 +224,9 @@ int16_t log_write_mode(uint8_t mode, char* file, uint32_t line, const char* fmt,
     within_line=!strchr(log_buffer,'\n');
     char* lb=strdup(log_buffer);
     if(!saved_messages) saved_messages = list_new(64);
-    DISABLE_INTERRUPTS;
+    CRITICAL_SECTION_ENTER(cs);
     if(!list_add(saved_messages, lb)) free(lb);
-    ENABLE_INTERRUPTS;
+    CRITICAL_SECTION_EXIT(cs);
     return 0;
   }
 

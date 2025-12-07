@@ -49,7 +49,7 @@ value* value_new(char* val) {
     all_values=properties_new(MAX_VALUES);
     CRITICAL_SECTION_INIT(cs);
   }
-  CRITICAL_SECTION_ENTER_BLOCKING(cs);
+  CRITICAL_SECTION_ENTER(cs);
 
   value* ours=(value*)properties_get(all_values, val);
   if(ours){
@@ -104,7 +104,7 @@ value* value_new_fmt(char* fmt, ...){
 
 value* value_ref(value* v) {
   if(!v) return 0;
-  CRITICAL_SECTION_ENTER_BLOCKING(cs);
+  CRITICAL_SECTION_ENTER(cs);
   v->refs++;
   CRITICAL_SECTION_EXIT_RETURN(cs,v);
 }
@@ -112,7 +112,7 @@ value* value_ref(value* v) {
 void value_free(value* v) {
 
   if(!v) return;
-  CRITICAL_SECTION_ENTER_BLOCKING(cs);
+  CRITICAL_SECTION_ENTER(cs);
   v->refs--;
   if(v->refs){
     CRITICAL_SECTION_EXIT(cs);
