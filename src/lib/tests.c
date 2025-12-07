@@ -13,7 +13,6 @@
 static uint16_t success=0;
 static uint16_t failure=0;
 
-
 bool exit_on_fail=false;
 
 bool tests_assert_i(bool condition, const char* fail_message, char* actual, char* expected) {

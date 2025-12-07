@@ -2,14 +2,22 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include <esp_random.h>
+#include <bootloader_random.h>
+
 #include <onx/random.h>
 #include <onx/log.h>
 
 static bool initialised=false;
 
+// see https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/random.html
+
 static uint32_t get_rand() {
   if(!initialised){ log_flash(1,0,0); return 0; }
-  uint32_t r = 134134; // PORT!
+  log_write("Enabling true random, ADC must not be in use!\n");
+  bootloader_random_enable();
+  uint32_t r = esp_random();
+  bootloader_random_disable();
   return r;
 }
 
