@@ -1,14 +1,42 @@
 
+#include <esp_system.h>
+
 #include <onx/log.h>
 #include <onx/boot.h>
 
+char* reset_reason_string(esp_reset_reason_t rr){
+  switch(rr){
+    case ESP_RST_UNKNOWN:    return "unkown";
+    case ESP_RST_POWERON:    return "power-on";
+    case ESP_RST_EXT:        return "external pin";
+    case ESP_RST_SW:         return "esp_restart";
+    case ESP_RST_PANIC:      return "exception/panic";
+    case ESP_RST_INT_WDT:    return "interrupt watchdog";
+    case ESP_RST_TASK_WDT:   return "task watchdog";
+    case ESP_RST_WDT:        return "watchdog, not irq or task";
+    case ESP_RST_DEEPSLEEP:  return "exiting deep sleep mode";
+    case ESP_RST_BROWNOUT:   return "brownout";
+    case ESP_RST_SDIO:       return "SDIO";
+    case ESP_RST_USB:        return "USB peripheral";
+    case ESP_RST_JTAG:       return "JTAG";
+    case ESP_RST_EFUSE:      return "efuse error";
+    case ESP_RST_PWR_GLITCH: return "power glitch detected";
+    case ESP_RST_CPU_LOCKUP: return "CPU lock up (double exception)";
+  }
+  return "??";
+}
+
 void boot_init() {
-// PORT reset reason -> log_write
+
+  esp_reset_reason_t rr=esp_reset_reason();
+  log_write("reset reason=%d %s\n", rr, reset_reason_string(rr));
+
 // PORT watchdog init to 5s
 }
 
 void boot_reset(bool enter_bootloader) {
-// PORT bootloader or reset
+  if(!enter_bootloader) esp_restart();
+  else ;
 }
 
 void boot_feed_watchdog() {
