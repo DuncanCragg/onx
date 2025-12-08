@@ -42,4 +42,6 @@ void log_flush();
 /* implement to act on user typing 'u' */
 void log_user_key_cb();
 
+bool log_connected();
+
 #endif

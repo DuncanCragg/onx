@@ -337,4 +337,6 @@ void log_flush() {
 #endif
 }
 
+bool log_connected(){ return log_arch_connected(); }
+
 
