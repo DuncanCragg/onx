@@ -81,7 +81,7 @@ void run_tests() {
 
 static void tick_cb(void* arg){
   static uint8_t numtix=0;
-  if(numtix<10){
+  if(numtix<20){
     numtix++;
     log_write("tick_cb #%d \"%s\" in_interrupt_context=%d core_id=%d\n",
                numtix, (char*)arg, in_interrupt_context(), boot_core_id());
@@ -113,7 +113,7 @@ void startup_core0_init(){
 
   io_init(io_cb);
 
-  time_tick(tick_cb, "core-0-banana",  250);
+  time_tick(tick_cb, "core-0-banana",  850);
   time_once(once_cb, "core-0-mango!", 2500);
 
   log_write("---------- tests --------------------\n");
@@ -124,12 +124,15 @@ void startup_core0_init(){
 
 void startup_core0_loop(){
 
+  static uint32_t disconn=0; if(!log_connected()) disconn++;
+
   if(char_recvd){
     log_write(">%c<----------\n", char_recvd);
     if(char_recvd=='t') run_tests();
     if(char_recvd=='l') run_colour_tests();
     // ------ same as log.c ------------
     if(char_recvd=='u') log_user_key_cb();
+    if(char_recvd=='d') log_write("%d\n", disconn);
     if(char_recvd=='c') onn_show_cache();
     if(char_recvd=='n') onn_show_notify();
     if(char_recvd=='v') value_dump_small();
@@ -149,8 +152,8 @@ void startup_core0_loop(){
 
 void startup_core1_init(){
   log_write("core %d init\n", boot_core_id());
-  time_tick(tick_cb, "core-1-banana",  350);
-  time_once(once_cb, "core-1-mango!", 3500);
+  time_tick(tick_cb, "core-1-banana", 1000);
+  time_once(once_cb, "core-1-mango!", 2800);
 }
 
 void startup_core1_loop(){ }
