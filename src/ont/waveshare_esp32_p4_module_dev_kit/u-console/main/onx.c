@@ -48,18 +48,44 @@ void startup_core0_init(){
   buf = (uint8_t *)heap_caps_calloc(1, LINES_PER_BAND * H_RES * BPP, MALLOC_CAP_DMA);
 }
 
+static volatile bool alternate_image=false;
+
+void log_user_key_cb(){
+  alternate_image=!alternate_image;
+}
+
 void startup_core0_loop(){
 
   if(!panel) return;
 
-  static uint64_t next_change_time=0;
-  static bool     do_this_not_that=false;
-  uint64_t ct=time_ms();
-; if(next_change_time && ct < next_change_time) return;
-  next_change_time = ct+1000;
-  do_this_not_that = !do_this_not_that;
+  static bool was_connected=true;
+  static bool was_alternate=true;
 
-  if(do_this_not_that){
+  bool connected = log_connected();
+
+  if(!connected && was_connected){
+
+    was_connected=false;
+    was_alternate=!alternate_image;
+
+    log_write("redraw #\n");
+
+    for (int j = 0; j < NUM_BANDS; j++) {
+       for (int i = 0; i < LINES_PER_BAND * H_RES; i++) {
+           buf[i * BPP + 0] = 0;
+           buf[i * BPP + 1] = 0;
+           buf[i * BPP + 2] = (j%3==0)? j*10+15: 0;
+       }
+       dsi_draw_bitmap(panel, 0, j * LINES_PER_BAND, H_RES, (j + 1) * LINES_PER_BAND, buf);
+    }
+  }
+  else
+  if(connected && alternate_image && !was_alternate){
+
+    was_connected=true;
+    was_alternate=true;
+
+    log_write("redraw 1\n");
 
     for (int j = 0; j < NUM_BANDS; j++) {
        for (int i = 0; i < LINES_PER_BAND * H_RES; i++) {
@@ -70,7 +96,14 @@ void startup_core0_loop(){
        dsi_draw_bitmap(panel, 0, j * LINES_PER_BAND, H_RES, (j + 1) * LINES_PER_BAND, buf);
     }
 
-  } else {
+  }
+  else
+  if(connected && !alternate_image && was_alternate) {
+
+    was_connected=true;
+    was_alternate=false;
+
+    log_write("redraw 0\n");
 
     for (int j = 0; j < NUM_BANDS; j++) {
        for (int i = 0; i < LINES_PER_BAND * H_RES; i++) {
