@@ -80,11 +80,12 @@ ESP_SYSTEM_INIT_FN(onx_startup_core_0, SECONDARY, BIT(0), 1000){
 
 ESP_SYSTEM_INIT_FN(onx_startup_core_1, SECONDARY, BIT(1), 1000){
 
-  esp_rom_delay_us(500*1000); // REVISIT: settling time? or sync up to something
+  // REVISIT: settling time? or sync up to something: at least check log is alive
+  esp_rom_delay_us(500*1000);
 
   esp_crosscore_int_init();
 
-  printf("\n------------------------------- core 1 start -------------------------------\n");
+  log_write("\n------------------------------- core 1 start -------------------------------\n");
 
   startup_core1_init();
 

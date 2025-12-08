@@ -10,6 +10,7 @@
 #include <esp_heap_caps.h>
 
 #include <onx/time.h>
+#include <onx/log.h>
 #include <onx/dsi.h>
 
 // -----------------------------------------------------
@@ -42,7 +43,7 @@ void startup_core0_init(){
 
   panel = dsi_init();
 
-  if(!panel) return;
+; if(!panel){ log_write("can't create panel\n"); return; }
 
   buf = (uint8_t *)heap_caps_calloc(1, LINES_PER_BAND * H_RES * BPP, MALLOC_CAP_DMA);
 }

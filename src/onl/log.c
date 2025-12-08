@@ -94,10 +94,10 @@ static bool already_in_log_write = false;
 
 // no logging in here obvs
 static char* get_reason_to_save_logs(){
-  if(already_in_log_write)                return "LOG ";
+  if(log_to_std && !log_arch_connected()) return "CON ";
   if(time_ms() < LOG_EARLY_MS)            return "ERL ";
   if(in_interrupt_context())              return "INT ";
-  if(log_to_std && !log_arch_connected()) return "CON "; // REVISIT: doesn't work in early logging
+  if(already_in_log_write)                return "LOG ";
   return 0;
 }
 

@@ -84,7 +84,7 @@ void* dsi_init(){
 
   esp_lcd_new_panel_jd9365(mipi_dbi_io, &panel_config, &panel);
 
-  if(!panel){ printf("can't create panel\n"); return 0; }
+; if(!panel) return 0;
 
   esp_lcd_panel_reset(panel);
 
