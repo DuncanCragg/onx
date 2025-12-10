@@ -27,10 +27,6 @@
 
 const uint8_t  psram_clock_divider = 3;
 
-const uint8_t radio_rfm69_cs_pin  = -1;
-const uint8_t radio_rfm69_rst_pin = -1;
-const uint8_t radio_rfm69_int_pin = -1;
-
 const bool log_to_std = true;
 const bool log_to_gfx = false;
 const bool log_to_rtt = false;
@@ -145,7 +141,7 @@ void startup_core0_loop(){
     if(char_recvd=='r') boot_reset(false);
     if(char_recvd=='b') boot_reset(true);
     if(char_recvd=='*') log_flash(1,1,1);
-    if(char_recvd=='h') log_write("t.ests, co.l.our | u.ser key, object c.ache, n.otifies, Vv.alues, f.lash, F.ormat, m.em, e.poch, p.ower, r.eset, b.ootloader\n");
+    if(char_recvd=='h') log_write("t.ests, co.l.our | u.ser key, d.isconnections, object c.ache, n.otifies, Vv.alues, f.lash, F.ormat, m.em, e.poch, p.ower, r.eset, b.ootloader\n");
     char_recvd=0;
   }
 }
