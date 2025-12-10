@@ -6,6 +6,7 @@
 #include <sync-and-mem.h>
 
 #include <onx/log.h>
+#include <onx/gpio.h>
 #include <onx/dma-mem.h>
 #include <onx/hstx.h>
 #include <onx/items.h>
@@ -19,15 +20,13 @@
 
 #include <g2d.h>
 
+#include <io-evaluators.h>
+
 // -----------------------------------------------------
 
-const int8_t usb_host_pio_data_plus_pin = -1;
-const int8_t usb_host_pio_dma_channel   = -1;
+const int8_t usb_host_pio_data_plus_pin = 1;
+const int8_t usb_host_pio_dma_channel   = 9;
 const int8_t usb_host_pio_enable_pin    = 11;
-
-const uint8_t radio_rfm69_cs_pin  = 6;
-const uint8_t radio_rfm69_rst_pin = 9;
-const uint8_t radio_rfm69_int_pin = 5;
 
 const bool log_to_std = true;
 const bool log_to_gfx = false;
@@ -35,7 +34,7 @@ const bool log_to_rtt = false;
 const bool log_to_led = true;
 
 const bool  onp_log         = true;
-const char* onp_channels    = "radio";
+const char* onp_channels    = 0;
 const char* onp_ipv6_groups = 0;
 const char* onp_radio_bands = 0;
 
@@ -49,7 +48,7 @@ const char* onn_test_uid_prefix = 0;
 
 // -----------------------------------------------------
 
-#define DO_PHOTO_FRAME // DO_PHOTO_FRAME
+#define NO_PHOTO_FRAME // DO_PHOTO_FRAME
 
 #ifdef  DO_PHOTO_FRAME
 
@@ -59,21 +58,28 @@ const char* onn_test_uid_prefix = 0;
 #define NO_G2D         // DO_G2D
 #define SCROLL_SPEED 0
 #define NUM_SPRITES  1
+#define G2D_X_POS 600
+#define G2D_Y_POS 600
 
 #else
 
-#define DO_ALL_SPRITES // DO_ALL_SPRITES
-#define DO_IMAGE_PANEL // DO_IMAGE_PANEL
-#define DO_WALLPAPER   // DO_WALLPAPER
+#define NO_ALL_SPRITES // DO_ALL_SPRITES
+#define NO_IMAGE_PANEL // DO_IMAGE_PANEL
+#define NO_WALLPAPER   // DO_WALLPAPER
 #define DO_G2D         // DO_G2D
 #define SCROLL_SPEED 1
 #define NUM_SPRITES  4
+#define G2D_X_POS 100
+#define G2D_Y_POS 100
 
 #endif
 
 #define DO_TIME_PSRAM  // DO_TIME_PSRAM
 #define DO_FRAME_TIME  // DO_FRAME_TIME
 #define DO_INTERLACING 1
+#define G2D_W 240
+#define G2D_H 320
+#define Y_OFFSET 20
 
 volatile bool scenegraph_write=false;
 
@@ -192,6 +198,12 @@ char* useruid;
 char* homeuid;
 char* inventoryuid;
 
+static char* batteryuid;
+static char* touchuid;
+static char* buttonuid;
+static char* clockuid;
+static char* aboutuid;
+
 object* user;
 object* responses;
 
@@ -200,30 +212,51 @@ volatile bool     button_pressed=false;
 volatile uint8_t  pending_user_event;
 volatile uint32_t pending_user_event_time;
 
+static void every_second(void*){
+  onn_run_evaluators(clockuid, 0);
+  onn_run_evaluators(aboutuid, 0);
+}
+
+static void every_10s(void*){
+  onn_run_evaluators(batteryuid, 0);
+}
+
 // ------------------------------------------------------------------------
 
 static bool touch_down=false;
 
 static void io_cb() {
+
+  int16_t touch_x = ((int16_t)io.touch_x)-G2D_X_POS;
+  int16_t touch_y = ((int16_t)io.touch_y)-G2D_Y_POS;
+  if(touch_x<0) touch_x=0; if(touch_x>G2D_W) touch_x=G2D_W;
+  if(touch_y<0) touch_y=0; if(touch_y>G2D_H) touch_y=G2D_H;
+
   if(io.touched){
     touch_down = true;
-    g2d_touch_event(true, io.touch_x, io.touch_y);
+    g2d_touch_event(true, touch_x, touch_y);
   }
   else
   if(touch_down){ // you can get >1 touch up event so reduce to just one
     touch_down=false;
-    g2d_touch_event(false, io.touch_x, io.touch_y);
+    g2d_touch_event(false, touch_x, touch_y);
   }
+
+  onn_run_evaluators(touchuid, 0); // reads global io so don't need to pass here
+
   // simulate physical back button with bottom-left of screen
   if(io.touched && !button_pressed){
-    if(io.touch_x < 240 && io.touch_y > 320){
+    #define BACK_BUTTON_SIZE 200
+    if(touch_x < BACK_BUTTON_SIZE && touch_y > V_RESOLUTION-BACK_BUTTON_SIZE){
       button_pressed=true;
+      onn_run_evaluators(buttonuid, (void*)button_pressed);
       onn_run_evaluators(useruid, (void*)USER_EVENT_BUTTON);
     }
   }
   else
   if(!io.touched && button_pressed){
     button_pressed = false;
+    onn_run_evaluators(buttonuid, (void*)button_pressed);
     onn_run_evaluators(useruid, (void*)USER_EVENT_BUTTON);
   }
 }
@@ -269,19 +302,35 @@ void init_onx(){
 
   onn_set_evaluators("eval_default",   evaluate_edit_rule, evaluate_default, 0);
   onn_set_evaluators("eval_editable",  evaluate_edit_rule, 0);
-  onn_set_evaluators("eval_user",                          evaluate_user, 0);
+  onn_set_evaluators("eval_clock",     evaluate_clock_sync_logic, evaluate_clock_logic, 0);
+  onn_set_evaluators("eval_user",      evaluate_user, 0);
   onn_set_evaluators("eval_notes",     evaluate_edit_rule, 0);
+  onn_set_evaluators("eval_battery",   evaluate_battery_in, 0);
+  onn_set_evaluators("eval_touch",     evaluate_touch_in, 0);
+  onn_set_evaluators("eval_button",    evaluate_button_in, 0);
+  onn_set_evaluators("eval_about",     evaluate_about_in, 0);
 
+  object* battery;
+  object* touch;
+  object* button;
+  object* bcs;
+  object* oclock;
+  object* watchface;
   object* home;
   object* allobjects;
   object* inventory;
+  object* watch;
   object* note1;
   object* note2;
   object* notes;
+  object* about;
 
   char* allobjectsuid;
   char* responsesuid;
   char* deviceuid;
+  char* bcsuid;
+  char* watchfaceuid;
+  char* watchuid;
   char* note1uid;
   char* note2uid;
   char* notesuid;
@@ -291,27 +340,54 @@ void init_onx(){
 
     user      =object_new(0, "eval_user",      "user", 8);
     responses =object_new(0, "eval_default",   "user responses", 12); // REVISIT "editable"?
+    battery   =object_new(0, "eval_battery",   "battery", 4);
+    touch     =object_new(0, "eval_touch",     "touch", 6);
+    button    =object_new(0, "eval_button",    "button", 4);
+    bcs       =object_new(0, "eval_editable",  "bcs editable", 5);
+    oclock    =object_new(0, "eval_clock",     "clock event", 12);
+    watchface =object_new(0, "eval_editable",  "watchface editable", 9);
     home      =object_new(0, "eval_editable",  "list editable", 4);
     allobjects=object_new(0, "eval_editable",  "list editable", 4);
     inventory =object_new(0, "eval_editable",  "list editable", 4);
+    watch     =object_new(0, "eval_default",   "watch", 8);
     note1     =object_new(0, "eval_notes",     "text editable", 4);
     note2     =object_new(0, "eval_notes",     "text editable", 4);
     notes     =object_new(0, "eval_notes",     "text list editable", 4);
+    about     =object_new(0, "eval_about",     "about", 4);
 
-    deviceuid   =object_property(onn_device_object, "UID");
-    useruid     =object_property(user, "UID");
-    responsesuid=object_property(responses, "UID");
-
+    deviceuid    =object_property(onn_device_object, "UID");
+    useruid      =object_property(user, "UID");
+    responsesuid =object_property(responses, "UID");
+    batteryuid   =object_property(battery, "UID");
+    touchuid     =object_property(touch, "UID");
+    buttonuid    =object_property(button, "UID");
+    bcsuid       =object_property(bcs, "UID");
+    clockuid     =object_property(oclock, "UID");
+    watchfaceuid =object_property(watchface, "UID");
     homeuid      =object_property(home, "UID");
     allobjectsuid=object_property(allobjects, "UID");
     inventoryuid =object_property(inventory, "UID");
-
+    watchuid     =object_property(watch, "UID");
     note1uid     =object_property(note1, "UID");
     note2uid     =object_property(note2, "UID");
     notesuid     =object_property(notes, "UID");
+    aboutuid     =object_property(about, "UID");
 
     object_property_set(user, "responses", responsesuid);
     object_property_set(user, "inventory", inventoryuid);
+
+    object_property_set(bcs, "brightness", "128");
+    object_property_set(bcs, "colour",     "128");
+    object_property_set(bcs, "softness",   "128");
+
+    object_set_persist(oclock, "none");
+    object_property_set(oclock, "title", "OnexOS Clock");
+    object_property_set(oclock, "ts", "%unknown");
+    object_property_set(oclock, "tz", "%unknown");
+//  object_property_set(oclock, "device", deviceuid); // REVISIT: peer discovery isn't great
+
+    object_property_set(watchface, "clock", clockuid);
+    object_property_set(watchface, "ampm-24hr", "ampm");
 
     char* strtok_state = 0;
     char* word = strtok_r(note_text, " ", &strtok_state);
@@ -330,6 +406,7 @@ void init_onx(){
     object_property_add(notes, "list", note2uid);
 
     object_property_set(home, "title", "Home");
+    object_property_add(home, "list", bcsuid);
     object_property_add(home, "list", allobjectsuid);
     object_property_add(home, "list", notesuid);
 
@@ -338,6 +415,13 @@ void init_onx(){
     object_property_add(allobjects, "list", homeuid);
     object_property_add(allobjects, "list", inventoryuid);
     object_property_add(allobjects, "list", notesuid);
+    object_property_add(allobjects, "list", aboutuid);
+    object_property_add(allobjects, "list", watchuid);
+    object_property_add(allobjects, "list", clockuid);
+    object_property_add(allobjects, "list", batteryuid);
+    object_property_add(allobjects, "list", touchuid);
+    object_property_add(allobjects, "list", buttonuid);
+    object_property_add(allobjects, "list", watchfaceuid);
     object_property_add(allobjects, "list", useruid);
     object_property_add(allobjects, "list", note1uid);
     object_property_add(allobjects, "list", note2uid);
@@ -345,10 +429,22 @@ void init_onx(){
 
     object_property_set(inventory, "title", "Inventory");
 
-    object_property_set(user, "viewing", allobjectsuid);
+    object_property_set(watch, "battery",   batteryuid);
+    object_property_set(watch, "watchface", watchfaceuid);
+
+    object_property_set(user, "viewing", watchuid);
 
     object_property_set(onn_device_object, "name", "MobCon5");
     object_property_add(onn_device_object, "user", useruid);
+    object_property_add(onn_device_object, "io",   batteryuid);
+    object_property_add(onn_device_object, "io",   touchuid);
+    object_property_add(onn_device_object, "io",   buttonuid);
+    object_property_add(onn_device_object, "io",   clockuid);
+
+    object_set_persist(battery, "none");
+    object_set_persist(touch,   "none");
+    object_set_persist(button,  "none");
+    object_set_persist(about,   "none");
 
     uid_0=object_new("uid-0", 0, "config", 10);
     object_property_set(uid_0, "user", useruid);
@@ -359,6 +455,9 @@ void init_onx(){
 
     user = onn_get_from_cache(useruid);
   }
+  onn_run_evaluators(batteryuid, 0);
+  onn_run_evaluators(clockuid, 0);
+  onn_run_evaluators(aboutuid, 0);
   onn_run_evaluators(useruid, (void*)USER_EVENT_INITIAL);
 }
 
@@ -366,11 +465,16 @@ void init_onx(){
 
 void ont_hx_init(){
 
+  gpio_init();
+
   io_init(io_cb);
 
   g2d_init();
 
   init_onx();
+
+  time_tick(every_second, 0,  1000);
+  time_tick(every_10s,    0, 10000);
 }
 
 uint32_t loop_time=0;
@@ -380,6 +484,26 @@ static volatile int yoff=0;
 static bool even_lines=true;
 
 void __not_in_flash_func(ont_hx_frame)(bool new_frame){
+
+  uint64_t ct=time_ms();
+  static uint64_t lt=0;
+  if(lt) loop_time=(uint32_t)(ct-lt);
+  lt=ct;
+
+  if(g2d_pending()){
+    onn_run_evaluators(useruid, (void*)USER_EVENT_TOUCH);
+  }
+  if(gfx_log_buffer && list_size(gfx_log_buffer)){
+    onn_run_evaluators(useruid, (void*)USER_EVENT_LOG);
+  }
+  if(pending_user_event_time && ct > pending_user_event_time){
+    if(pending_user_event & USER_EVENT_NONE)   onn_run_evaluators(useruid, (void*)USER_EVENT_NONE_AL);
+    if(pending_user_event & USER_EVENT_BUTTON) onn_run_evaluators(useruid, (void*)USER_EVENT_BUTTON);
+    if(pending_user_event & USER_EVENT_TOUCH)  onn_run_evaluators(useruid, (void*)USER_EVENT_TOUCH);
+    if(pending_user_event & USER_EVENT_LOG)    onn_run_evaluators(useruid, (void*)USER_EVENT_LOG);
+    pending_user_event=0;
+    pending_user_event_time=0;
+  }
 
   if(sram_writable) write_next_chunk_to_sram();
 
@@ -416,23 +540,12 @@ void __not_in_flash_func(ont_hx_frame)(bool new_frame){
     log_write("%.1fHz (%.3lluus)\n", 1e6/frame_time, frame_time);
   }
 #endif
-
-  uint64_t ct=time_ms();
-  static uint64_t lt=0;
-  if(lt) loop_time=(uint32_t)(ct-lt);
-  lt=ct;
-
-  if(g2d_pending()){
-    onn_run_evaluators(useruid, (void*)USER_EVENT_TOUCH);
-  }
 }
 
 #ifdef  DO_G2D
-// #define G2D_BUFFER_SIZE (240 * 320)
+// #define G2D_BUFFER_SIZE (G2D_W * G2D_H)
 extern uint16_t g2d_buffer[];
 #endif
-
-#define Y_OFFSET 20
 
 void __not_in_flash_func(ont_hx_scanline)(uint16_t* buf, uint16_t* puf, uint16_t scan_y, bool free_time){
     if(scan_y <= Y_OFFSET) return;
@@ -441,10 +554,10 @@ void __not_in_flash_func(ont_hx_scanline)(uint16_t* buf, uint16_t* puf, uint16_t
  // memset(      buf, (uint8_t)0x11, H_RESOLUTION*2);
 #endif // DO_WALLPAPER
 #ifdef DO_G2D
-    if(scan_y < (320+Y_OFFSET)){
-      void* g2d_addr = (g2d_buffer + ((scan_y-Y_OFFSET) * 240));
-      dma_memcpy16(buf+640, g2d_addr, 240, DMA_CH_READ, true);
-   // memcpy(      buf+640, g2d_addr, 240*2);
+    if(scan_y >= G2D_Y_POS && scan_y < (G2D_Y_POS+G2D_H)){
+      void* g2d_addr = (g2d_buffer + ((scan_y-G2D_Y_POS) * G2D_W));
+      dma_memcpy16(buf+G2D_X_POS, g2d_addr, G2D_W, DMA_CH_READ, true);
+   // memcpy(      buf+G2D_X_POS, g2d_addr, G2D_W*2);
     }
 #endif
     for(int s=0; s < NUM_SPRITES; s++){
