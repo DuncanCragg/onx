@@ -66,16 +66,16 @@ void log_init() {
   if(log_to_led){
     gpio_init();
 #define LEDS_ACTIVE_STATE 1 // REVISIT: set in board defs
-#if defined(PICO_DEFAULT_LED2_R_PIN)
-    gpio_mode(PICO_DEFAULT_LED2_R_PIN, GPIO_MODE_OUTPUT);
-    gpio_mode(PICO_DEFAULT_LED2_G_PIN, GPIO_MODE_OUTPUT);
-    gpio_mode(PICO_DEFAULT_LED2_B_PIN, GPIO_MODE_OUTPUT);
-    gpio_set(PICO_DEFAULT_LED2_R_PIN, !LEDS_ACTIVE_STATE);
-    gpio_set(PICO_DEFAULT_LED2_G_PIN, !LEDS_ACTIVE_STATE);
-    gpio_set(PICO_DEFAULT_LED2_B_PIN, !LEDS_ACTIVE_STATE);
-#elif defined(PICO_DEFAULT_LED_PIN)
-    gpio_mode(PICO_DEFAULT_LED_PIN, GPIO_MODE_OUTPUT);
-    gpio_set(PICO_DEFAULT_LED_PIN,  !LEDS_ACTIVE_STATE);
+#if defined(LED2_R_PIN)
+    gpio_mode(LED2_R_PIN, GPIO_MODE_OUTPUT);
+    gpio_mode(LED2_G_PIN, GPIO_MODE_OUTPUT);
+    gpio_mode(LED2_B_PIN, GPIO_MODE_OUTPUT);
+    gpio_set(LED2_R_PIN, !LEDS_ACTIVE_STATE);
+    gpio_set(LED2_G_PIN, !LEDS_ACTIVE_STATE);
+    gpio_set(LED2_B_PIN, !LEDS_ACTIVE_STATE);
+#elif defined(LED_PIN)
+    gpio_mode(LED_PIN, GPIO_MODE_OUTPUT);
+    gpio_set(LED_PIN,  !LEDS_ACTIVE_STATE);
 #endif
     time_init();
     log_flash(0,1,0);
@@ -288,12 +288,12 @@ static volatile uint8_t flash_g=0;
 static volatile uint8_t flash_b=0;
 
 static void set_flash_state(){
-#if defined(PICO_DEFAULT_LED2_R_PIN)
-  if(flash_r) gpio_set(PICO_DEFAULT_LED2_R_PIN, flash_on? LEDS_ACTIVE_STATE: !LEDS_ACTIVE_STATE);
-  if(flash_g) gpio_set(PICO_DEFAULT_LED2_G_PIN, flash_on? LEDS_ACTIVE_STATE: !LEDS_ACTIVE_STATE);
-  if(flash_b) gpio_set(PICO_DEFAULT_LED2_B_PIN, flash_on? LEDS_ACTIVE_STATE: !LEDS_ACTIVE_STATE);
-#elif defined(PICO_DEFAULT_LED_PIN)
-  ;           gpio_set(PICO_DEFAULT_LED_PIN,  flash_on? LEDS_ACTIVE_STATE: !LEDS_ACTIVE_STATE);
+#if defined(LED2_R_PIN)
+  if(flash_r) gpio_set(LED2_R_PIN, flash_on? LEDS_ACTIVE_STATE: !LEDS_ACTIVE_STATE);
+  if(flash_g) gpio_set(LED2_G_PIN, flash_on? LEDS_ACTIVE_STATE: !LEDS_ACTIVE_STATE);
+  if(flash_b) gpio_set(LED2_B_PIN, flash_on? LEDS_ACTIVE_STATE: !LEDS_ACTIVE_STATE);
+#elif defined(LED_PIN)
+  ;           gpio_set(LED_PIN,  flash_on? LEDS_ACTIVE_STATE: !LEDS_ACTIVE_STATE);
 #endif
 }
 

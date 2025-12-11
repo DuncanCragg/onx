@@ -2,8 +2,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include <pico/stdlib.h>
-
 #include <onx/boot.h>
 #include <onx/mem.h>
 #include <onx/log.h>

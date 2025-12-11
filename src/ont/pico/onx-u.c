@@ -10,8 +10,6 @@
 #include <onx/dma-mem.h>
 #include <onx/hstx.h>
 
-#include <g2d.h>
-
 // -----------------------------------------------------
 
 #define RGB_BYTES_TO_RGB555(r,g,b) (((r)&0b11111000)<<7)|(((g)&0b11111000)<<2)|(((b)&0b11111000)>>3)
@@ -34,8 +32,8 @@
 #else
 
 #define NO_ALL_SPRITES // DO_ALL_SPRITES
-#define NO_IMAGE_PANEL // DO_IMAGE_PANEL
-#define NO_WALLPAPER   // DO_WALLPAPER
+#define DO_IMAGE_PANEL // DO_IMAGE_PANEL
+#define DO_WALLPAPER   // DO_WALLPAPER
 #define DO_G2D         // DO_G2D
 #define SCROLL_SPEED 1
 #define NUM_SPRITES  4
@@ -66,7 +64,7 @@ typedef struct sprite {
   { 140,   0, 940, 800, 0b1000000000000000 },
 #else
 #define SPRITE_DEF_IMG \
-  {   0,   0, 200, 800, 0b1000000000000000 },
+  { 900,   0, 200, 800, 0b1000000000000000 },
 #endif
 
 #define SPRITE_DEFS                         \
