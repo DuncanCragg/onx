@@ -2,7 +2,7 @@
 #include <onx/log.h>
 #include <tusb.h>
 
-extern void touch_usb_event(uint8_t* buf, uint16_t len);
+extern void touch_usb_event(uint8_t* buf, uint16_t len, uint8_t itf_protocol);
 
 // ------------ USB device plugged in
 void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* desc_report, uint16_t desc_len) {
@@ -24,11 +24,29 @@ void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance) {
 }
 
 // ------------ USB device sends data
-void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report, uint16_t len) {
+void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* buf, uint16_t len) {
 
   uint8_t itf_protocol = tuh_hid_interface_protocol(dev_addr, instance);
-  if(itf_protocol==0) {
-    touch_usb_event((uint8_t*)report, len);
+
+#define NO_LOG_HID_EVENT
+#ifdef  DO_LOG_HID_EVENT
+  log_write("tuh_hid_report_received_cb(%u/%u len=%d) protocol=%d\n", dev_addr, instance, len, itf_protocol);
+  if(len==0){
+    static uint8_t num_len_0=0;
+    if(num_len_0 < 10){
+      num_len_0++;
+      log_write("len==0!\n");
+    }
+;   return;
+  }
+  for(int i=0; i<len; i++) log_write("%.2x.", buf[i]);
+  log_write("\n");
+#endif
+
+  if(itf_protocol==HID_ITF_PROTOCOL_NONE ||
+     itf_protocol==HID_ITF_PROTOCOL_MOUSE   ) {
+
+    touch_usb_event((uint8_t*)buf, len, itf_protocol);
   }
   if(!tuh_hid_receive_report(dev_addr, instance)){
   }
