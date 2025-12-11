@@ -24,6 +24,11 @@
 
 // -----------------------------------------------------
 
+extern uint16_t screen_width;
+extern uint16_t screen_height;
+
+// -----------------------------------------------------
+
 #define RGB_BYTES_TO_RGB555(r,g,b) (((r)&0b11111000)<<7)|(((g)&0b11111000)<<2)|(((b)&0b11111000)>>3)
 
 // RGB565 to RGB555: ((pixel >> 1) & 0x7fe0) | (pixel & 0x001f);
@@ -40,8 +45,6 @@
 #define NO_G2D         // DO_G2D
 #define SCROLL_SPEED 0
 #define NUM_SPRITES  1
-#define G2D_X_POS 600
-#define G2D_Y_POS 600
 
 #else
 
@@ -51,17 +54,21 @@
 #define DO_G2D         // DO_G2D
 #define SCROLL_SPEED 1
 #define NUM_SPRITES  4
-#define G2D_X_POS 100
-#define G2D_Y_POS 100
 
 #endif
 
 #define DO_TIME_PSRAM  // DO_TIME_PSRAM
 #define DO_FRAME_TIME  // DO_FRAME_TIME
 #define DO_INTERLACING 1
-#define G2D_W 240
-#define G2D_H 320
 #define Y_OFFSET 20
+
+#ifdef  DO_G2D
+uint16_t g2d_x_pos=0;
+uint16_t g2d_y_pos=0;
+extern uint16_t g2d_width;
+extern uint16_t g2d_height;
+extern uint16_t g2d_buffer[]; // G2D_BUFFER_SIZE=(g2d_width * g2d_h)
+#endif
 
 volatile bool scenegraph_write=false;
 
@@ -209,10 +216,10 @@ static bool touch_down=false;
 
 static void io_cb() {
 
-  int16_t touch_x = ((int16_t)io.touch_x)-G2D_X_POS;
-  int16_t touch_y = ((int16_t)io.touch_y)-G2D_Y_POS;
-  if(touch_x<0) touch_x=0; if(touch_x>G2D_W) touch_x=G2D_W;
-  if(touch_y<0) touch_y=0; if(touch_y>G2D_H) touch_y=G2D_H;
+  int16_t touch_x = ((int16_t)io.touch_x)-g2d_x_pos;
+  int16_t touch_y = ((int16_t)io.touch_y)-g2d_y_pos;
+  if(touch_x<0) touch_x=0; if(touch_x>g2d_width)  touch_x=g2d_width;
+  if(touch_y<0) touch_y=0; if(touch_y>g2d_height) touch_y=g2d_height;
 
   if(io.touched){
     touch_down = true;
@@ -229,7 +236,7 @@ static void io_cb() {
   // simulate physical back button with bottom-left of screen
   if(io.touched && !button_pressed){
     #define BACK_BUTTON_SIZE 200
-    if(io.touch_x < BACK_BUTTON_SIZE && io.touch_y > V_RESOLUTION-BACK_BUTTON_SIZE){
+    if(io.touch_x < BACK_BUTTON_SIZE && io.touch_y > screen_height-BACK_BUTTON_SIZE){
       button_pressed=true;
       onn_run_evaluators(buttonuid, (void*)button_pressed);
       onn_run_evaluators(useruid, (void*)USER_EVENT_BUTTON);
@@ -452,6 +459,8 @@ void ont_hx_init(){
   io_init(io_cb);
 
   g2d_init();
+  g2d_x_pos=100;
+  g2d_y_pos=100;
 
   init_onx();
 
@@ -524,11 +533,6 @@ void __not_in_flash_func(ont_hx_frame)(bool new_frame){
 #endif
 }
 
-#ifdef  DO_G2D
-// #define G2D_BUFFER_SIZE (G2D_W * G2D_H)
-extern uint16_t g2d_buffer[];
-#endif
-
 void __not_in_flash_func(ont_hx_scanline)(uint16_t* buf, uint16_t* puf, uint16_t scan_y, bool free_time){
     if(scan_y <= Y_OFFSET) return;
 #ifdef DO_WALLPAPER
@@ -536,10 +540,10 @@ void __not_in_flash_func(ont_hx_scanline)(uint16_t* buf, uint16_t* puf, uint16_t
  // memset(      buf, (uint8_t)0x11, H_RESOLUTION*2);
 #endif // DO_WALLPAPER
 #ifdef DO_G2D
-    if(scan_y >= G2D_Y_POS && scan_y < (G2D_Y_POS+G2D_H)){
-      void* g2d_addr = (g2d_buffer + ((scan_y-G2D_Y_POS) * G2D_W));
-      dma_memcpy16(buf+G2D_X_POS, g2d_addr, G2D_W, DMA_CH_READ, true);
-   // memcpy(      buf+G2D_X_POS, g2d_addr, G2D_W*2);
+    if(scan_y >= g2d_y_pos && scan_y < (g2d_y_pos+g2d_height)){
+      void* g2d_addr = (g2d_buffer + ((scan_y-g2d_y_pos) * g2d_width));
+      dma_memcpy16(buf+g2d_x_pos, g2d_addr, g2d_width, DMA_CH_READ, true);
+   // memcpy(      buf+g2d_x_pos, g2d_addr, g2d_width*2);
     }
 #endif
     for(int s=0; s < NUM_SPRITES; s++){

@@ -15,6 +15,8 @@
 // ---------------------------------
 
 #define G2D_BUFFER_SIZE (240 * 320)
+uint16_t g2d_width =240;
+uint16_t g2d_height=320;
 uint16_t g2d_buffer[G2D_BUFFER_SIZE + 4];
 
 // ---------------------------------
@@ -31,7 +33,7 @@ void g2d_render() {
 }
 
 static void set_pixel(uint16_t x, uint16_t y, uint16_t colour) {
-  uint32_t i = (x + (y * 240));
+  uint32_t i = (x + (y * g2d_width));
   g2d_buffer[i] = colour;
 }
 

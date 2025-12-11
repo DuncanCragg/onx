@@ -376,7 +376,13 @@ static void start_dma(){
 
 // ------------------------------------------------------
 
+uint16_t screen_width=0;
+uint16_t screen_height=0;
+
 void startup_core0_init(){
+
+  screen_width= H_RESOLUTION;
+  screen_height=V_RESOLUTION;
 
   ont_hx_init();
 }
