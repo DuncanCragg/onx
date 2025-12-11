@@ -247,7 +247,7 @@ static void io_cb() {
   // simulate physical back button with bottom-left of screen
   if(io.touched && !button_pressed){
     #define BACK_BUTTON_SIZE 200
-    if(touch_x < BACK_BUTTON_SIZE && touch_y > V_RESOLUTION-BACK_BUTTON_SIZE){
+    if(io.touch_x < BACK_BUTTON_SIZE && io.touch_y > V_RESOLUTION-BACK_BUTTON_SIZE){
       button_pressed=true;
       onn_run_evaluators(buttonuid, (void*)button_pressed);
       onn_run_evaluators(useruid, (void*)USER_EVENT_BUTTON);
