@@ -34,6 +34,14 @@ idf_component_register(
 
     "../../../../onl/esp32/dsi-jd9365.c"
 
+    "../../../../ont/g2d.c"
+    "../../../../ont/g2d-buffer.c"
+    "../../../../ont/user-2d.c"
+    "../../../../ont/keyboard.c"
+    "../../../../ont/io-evaluators.c"
+    "../../../../ont/logic-evaluators.c"
+
+    "../../../../ont/onx-u.c"
     "onx.c"
 
   INCLUDE_DIRS
@@ -41,13 +49,14 @@ idf_component_register(
     "../../../../../src/onl/esp32"
     "../../../../../src/onn"
     "../../../../../src/onp"
+    "../../../../../src/ont"
 
   REQUIRES
 )
 
-idf_build_set_property(C_COMPILE_OPTIONS "-Wno-discarded-qualifiers" APPEND)
-idf_build_set_property(C_COMPILE_OPTIONS "-Wno-pointer-sign"         APPEND)
-
+idf_build_set_property(C_COMPILE_OPTIONS "-Wno-discarded-qualifiers"   APPEND)
+idf_build_set_property(C_COMPILE_OPTIONS "-Wno-pointer-sign"           APPEND)
+idf_build_set_property(C_COMPILE_OPTIONS "-Wno-misleading-indentation" APPEND)
 
 
 

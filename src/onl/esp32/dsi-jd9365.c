@@ -46,11 +46,20 @@ static esp_lcd_panel_handle_t    panel = 0;
 static esp_lcd_dsi_bus_handle_t  mipi_dsi_bus = 0;
 static esp_lcd_panel_io_handle_t mipi_dbi_io = 0;
 
-IRAM_ATTR static bool test_notify_refresh_ready(esp_lcd_panel_handle_t panel, esp_lcd_dpi_panel_event_data_t *edata, void *user_ctx) {
-    return 0;
+volatile bool dma_done=false;
+
+IRAM_ATTR static bool dma_done_cb(esp_lcd_panel_handle_t panel, esp_lcd_dpi_panel_event_data_t *edata, void *user_ctx) {
+  dma_done=true;
+  return false;
 }
 
+uint16_t screen_width=0;
+uint16_t screen_height=0;
+
 void* dsi_init(){
+
+  screen_width=1280;
+  screen_height=800;
 
   esp_ldo_channel_config_t ldo_mipi_phy_config = {
       .chan_id = TEST_MIPI_DSI_PHY_PWR_LDO_CHAN,
@@ -93,16 +102,19 @@ void* dsi_init(){
   esp_lcd_panel_disp_on_off(panel, true);
 
   esp_lcd_dpi_panel_event_callbacks_t cbs = {
-      .on_color_trans_done = test_notify_refresh_ready,
+      .on_color_trans_done = dma_done_cb,
   };
   esp_lcd_dpi_panel_register_event_callbacks(panel, &cbs, 0);
 
   return panel;
 }
 
-void dsi_draw_bitmap(void* panel, int x_start, int y_start, int x_end, int y_end, const void* buf){
-  esp_lcd_panel_draw_bitmap((esp_lcd_panel_handle_t)panel, x_start, y_start, x_end, y_end, buf);
-}
 
+void dsi_draw_bitmap(void* panel, void* buf, uint16_t x, uint16_t y, uint16_t w, uint16_t h, bool block){
+  dma_done=false;
+  esp_lcd_panel_draw_bitmap((esp_lcd_panel_handle_t)panel, x, y, x+w, y+h, buf);
+  if(block) while(!dma_done);
+  dma_done=false;
+}
 
 
