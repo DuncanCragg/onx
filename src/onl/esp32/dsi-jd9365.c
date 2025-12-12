@@ -41,10 +41,7 @@
 #define TEST_MIPI_DSI_PHY_PWR_LDO_CHAN (3)
 #define TEST_MIPI_DSI_PHY_PWR_LDO_VOLTAGE_MV (2500)
 
-static esp_ldo_channel_handle_t  ldo_mipi_phy = 0;
-static esp_lcd_panel_handle_t    panel = 0;
-static esp_lcd_dsi_bus_handle_t  mipi_dsi_bus = 0;
-static esp_lcd_panel_io_handle_t mipi_dbi_io = 0;
+static esp_lcd_panel_handle_t panel = 0;
 
 volatile bool dma_done=false;
 
@@ -65,12 +62,15 @@ void* dsi_init(){
       .chan_id = TEST_MIPI_DSI_PHY_PWR_LDO_CHAN,
       .voltage_mv = TEST_MIPI_DSI_PHY_PWR_LDO_VOLTAGE_MV,
   };
+  esp_ldo_channel_handle_t ldo_mipi_phy = 0;
   esp_ldo_acquire_channel(&ldo_mipi_phy_config, &ldo_mipi_phy);
 
-  esp_lcd_dsi_bus_config_t bus_config = JD9365_PANEL_BUS_DSI_2CH_CONFIG();
-  esp_lcd_new_dsi_bus(&bus_config, &mipi_dsi_bus);
+  esp_lcd_dsi_bus_config_t dsi_bus_config = JD9365_PANEL_BUS_DSI_2CH_CONFIG();
+  esp_lcd_dsi_bus_handle_t mipi_dsi_bus = 0;
+  esp_lcd_new_dsi_bus(&dsi_bus_config, &mipi_dsi_bus);
 
   esp_lcd_dbi_io_config_t dbi_config = JD9365_PANEL_IO_DBI_CONFIG();
+  esp_lcd_panel_io_handle_t mipi_dbi_io = 0;
   esp_lcd_new_panel_io_dbi(mipi_dsi_bus, &dbi_config, &mipi_dbi_io);
 
   esp_lcd_dpi_panel_config_t dpi_config = JD9365_800_1280_PANEL_60HZ_DPI_CONFIG(TEST_MIPI_DPI_PX_FORMAT);
@@ -95,16 +95,14 @@ void* dsi_init(){
 
 ; if(!panel) return 0;
 
-  esp_lcd_panel_reset(panel);
-
-  esp_lcd_panel_init(panel);
-
-  esp_lcd_panel_disp_on_off(panel, true);
-
   esp_lcd_dpi_panel_event_callbacks_t cbs = {
       .on_color_trans_done = dma_done_cb,
   };
   esp_lcd_dpi_panel_register_event_callbacks(panel, &cbs, 0);
+
+  esp_lcd_panel_reset(panel);
+  esp_lcd_panel_init(panel);
+  esp_lcd_panel_disp_on_off(panel, true);
 
   return panel;
 }
