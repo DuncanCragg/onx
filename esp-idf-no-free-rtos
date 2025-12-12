@@ -1,5 +1,5 @@
 diff --git a/components/esp_driver_i2c/i2c_master.c b/components/esp_driver_i2c/i2c_master.c
-index 562e6788a3..3ef7a2ae5a 100644
+index 562e6788a3..70935ddaf2 100644
 --- a/components/esp_driver_i2c/i2c_master.c
 +++ b/components/esp_driver_i2c/i2c_master.c
 @@ -16,6 +16,7 @@
@@ -10,11 +10,23 @@ index 562e6788a3..3ef7a2ae5a 100644
  #include "esp_log.h"
  #include "esp_intr_alloc.h"
  #include "freertos/FreeRTOS.h"
-@@ -530,6 +531,8 @@ static void s_i2c_send_commands(i2c_master_bus_handle_t i2c_master, TickType_t t
+@@ -487,6 +488,10 @@ static void s_i2c_send_commands(i2c_master_bus_handle_t i2c_master, TickType_t t
+     xQueueReset(i2c_master->event_queue);
+     i2c_master->event = I2C_EVENT_ALIVE;
+     while (i2c_master->i2c_trans.cmd_count) {
++
++        esp_rom_delay_us(1500);
++        ticks_to_wait = 2;
++
+         if (xSemaphoreTake(i2c_master->cmd_semphr, ticks_to_wait) != pdTRUE) {
+             // Software timeout, clear the command link and finish this transaction.
+             atomic_store(&i2c_master->status, I2C_STATUS_TIMEOUT);
+@@ -530,6 +535,9 @@ static void s_i2c_send_commands(i2c_master_bus_handle_t i2c_master, TickType_t t
      }
      i2c_hal_master_trans_start(hal);
  
-+    esp_rom_delay_us(333); // 288us is abs min Magic Delay
++    esp_rom_delay_us(1500);
++    ticks_to_wait = 2;
 +
      // For blocking implementation, we must wait event interrupt to update the status.
      // Otherwise, update status to timeout.

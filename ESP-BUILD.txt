@@ -24,6 +24,7 @@ Other relevant commands:
 
 idf.py menuconfig
 idf.py add-dependency "waveshare/esp_lcd_jd9365_10_1"
+idf.py add-dependency "espressif/esp_lcd_touch_gt911^1.2.0~1"
 
 ------------------------------------------
 

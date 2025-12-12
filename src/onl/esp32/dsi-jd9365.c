@@ -6,6 +6,8 @@
 #include <esp_private/periph_ctrl.h>
 #include <esp_private/esp_clk_tree_common.h>
 
+#include <i2c_bus.h>
+
 #include <esp_bit_defs.h>
 #include <esp_check.h>
 #include <esp_psram.h>
@@ -23,6 +25,7 @@
 #include <esp_lcd_panel_interface.h>
 #include <esp_lcd_mipi_dsi.h>
 #include <esp_lcd_jd9365_10_1.h>
+#include <esp_lcd_touch_gt911.h>
 
 #include <onx/dsi.h>
 
@@ -42,6 +45,7 @@
 #define TEST_MIPI_DSI_PHY_PWR_LDO_VOLTAGE_MV (2500)
 
 static esp_lcd_panel_handle_t panel = 0;
+static esp_lcd_touch_handle_t touch = 0;
 
 volatile bool dma_done=false;
 
@@ -103,6 +107,50 @@ void* dsi_init(){
   esp_lcd_panel_reset(panel);
   esp_lcd_panel_init(panel);
   esp_lcd_panel_disp_on_off(panel, true);
+
+  // -----------------------------------
+
+#define I2C_MASTER_NUM               0
+#define TOUCH_SDA_PIN                7
+#define TOUCH_SCL_PIN                8
+
+  i2c_master_bus_config_t i2c_mst_config = {
+      .clk_source = I2C_CLK_SRC_DEFAULT,
+      .i2c_port   = I2C_MASTER_NUM,
+      .sda_io_num = TOUCH_SDA_PIN,
+      .scl_io_num = TOUCH_SCL_PIN,
+      .flags.enable_internal_pullup = true,
+  };
+  i2c_master_bus_handle_t bus_handle;
+  i2c_new_master_bus(&i2c_mst_config, &bus_handle);
+
+  esp_lcd_panel_io_i2c_config_t i2c_config = ESP_LCD_TOUCH_IO_I2C_GT911_CONFIG();
+  i2c_config.scl_speed_hz = 400*1000;
+  esp_lcd_panel_io_handle_t touch_i2c = 0;
+  esp_lcd_new_panel_io_i2c(bus_handle, &i2c_config, &touch_i2c);
+
+  esp_lcd_touch_io_gt911_config_t touch_gt911_config = {
+      .dev_addr = i2c_config.dev_addr,
+  };
+
+  esp_lcd_touch_config_t touch_config = {
+      .x_max = screen_width,
+      .y_max = screen_height,
+      .rst_gpio_num = -1,
+      .int_gpio_num = -1,
+      .levels = {
+        .reset     = 0,
+        .interrupt = 0,
+      },
+      .flags = {
+        .swap_xy = 0,
+        .mirror_x = 0,
+        .mirror_y = 0,
+      },
+      .driver_data = &touch_gt911_config,
+  };
+
+  esp_lcd_touch_new_i2c_gt911(touch_i2c, &touch_config, &touch);
 
   return panel;
 }

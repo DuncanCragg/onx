@@ -7,6 +7,7 @@ set(COMPONENTS
   espressif__cmake_utilities
   espressif__i2c_bus
   waveshare__esp_lcd_jd9365_10_1
+  espressif__esp_lcd_touch_gt911
   main
 )
 

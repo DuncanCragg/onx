@@ -1,5 +1,21 @@
+diff --git a/managed_components/espressif__esp_lcd_touch_gt911/esp_lcd_touch_gt911.c b/managed_components/espressif__esp_lcd_touch_gt911/esp_lcd_touch_gt911.c
+index 7a429f5..41604f3 100644
+--- a/managed_components/espressif__esp_lcd_touch_gt911/esp_lcd_touch_gt911.c
++++ b/managed_components/espressif__esp_lcd_touch_gt911/esp_lcd_touch_gt911.c
+@@ -393,9 +393,9 @@ static esp_err_t touch_gt911_reset(esp_lcd_touch_handle_t tp)
+ 
+     if (tp->config.rst_gpio_num != GPIO_NUM_NC) {
+         ESP_RETURN_ON_ERROR(gpio_set_level(tp->config.rst_gpio_num, tp->config.levels.reset), TAG, "GPIO set level error!");
+-        vTaskDelay(pdMS_TO_TICKS(10));
++        esp_rom_delay_us(10*1000);
+         ESP_RETURN_ON_ERROR(gpio_set_level(tp->config.rst_gpio_num, !tp->config.levels.reset), TAG, "GPIO set level error!");
+-        vTaskDelay(pdMS_TO_TICKS(10));
++        esp_rom_delay_us(10*1000);
+     }
+ 
+     return ESP_OK;
 diff --git a/managed_components/waveshare__esp_lcd_jd9365_10_1/esp_lcd_jd9365_10_1.c b/managed_components/waveshare__esp_lcd_jd9365_10_1/esp_lcd_jd9365_10_1.c
-index fab4f32..8a9151c 100644
+index fab4f32..399afb0 100644
 --- a/managed_components/waveshare__esp_lcd_jd9365_10_1/esp_lcd_jd9365_10_1.c
 +++ b/managed_components/waveshare__esp_lcd_jd9365_10_1/esp_lcd_jd9365_10_1.c
 @@ -14,8 +14,7 @@
