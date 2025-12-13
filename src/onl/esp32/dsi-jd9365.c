@@ -30,25 +30,25 @@
 #include <onx/log.h>
 #include <onx/dsi.h>
 
-#define TEST_LCD_BIT_PER_PIXEL 24
-#define TEST_PIN_NUM_LCD_RST -1
-#define TEST_MIPI_DSI_LANE_NUM 2
+#define LCD_BIT_PER_PIXEL 24
+#define PIN_NUM_LCD_RST -1
+#define MIPI_DSI_LANE_NUM 2
 
-#if TEST_LCD_BIT_PER_PIXEL == 24
-#define TEST_MIPI_DPI_PX_FORMAT (LCD_COLOR_PIXEL_FORMAT_RGB888)
-#elif TEST_LCD_BIT_PER_PIXEL == 18
-#define TEST_MIPI_DPI_PX_FORMAT (LCD_COLOR_PIXEL_FORMAT_RGB666)
-#elif TEST_LCD_BIT_PER_PIXEL == 16
-#define TEST_MIPI_DPI_PX_FORMAT (LCD_COLOR_PIXEL_FORMAT_RGB565)
+#if LCD_BIT_PER_PIXEL == 24
+#define MIPI_DPI_PX_FORMAT LCD_COLOR_PIXEL_FORMAT_RGB888
+#elif LCD_BIT_PER_PIXEL == 18
+#define MIPI_DPI_PX_FORMAT LCD_COLOR_PIXEL_FORMAT_RGB666
+#elif LCD_BIT_PER_PIXEL == 16
+#define MIPI_DPI_PX_FORMAT LCD_COLOR_PIXEL_FORMAT_RGB565
 #endif
 
-#define TEST_MIPI_DSI_PHY_PWR_LDO_CHAN (3)
-#define TEST_MIPI_DSI_PHY_PWR_LDO_VOLTAGE_MV (2500)
+#define MIPI_DSI_PHY_PWR_LDO_CHAN 3
+#define MIPI_DSI_PHY_PWR_LDO_VOLTAGE_MV 2500
 
 static esp_lcd_panel_handle_t panel = 0;
 static esp_lcd_touch_handle_t touch = 0;
 
-volatile bool dma_done=false;
+static volatile bool dma_done=false;
 
 IRAM_ATTR static bool dma_done_cb(esp_lcd_panel_handle_t panel, esp_lcd_dpi_panel_event_data_t *edata, void *user_ctx) {
   dma_done=true;
@@ -64,8 +64,8 @@ void* dsi_init(){
   screen_height=800;
 
   esp_ldo_channel_config_t ldo_mipi_phy_config = {
-      .chan_id = TEST_MIPI_DSI_PHY_PWR_LDO_CHAN,
-      .voltage_mv = TEST_MIPI_DSI_PHY_PWR_LDO_VOLTAGE_MV,
+    .chan_id = MIPI_DSI_PHY_PWR_LDO_CHAN,
+    .voltage_mv = MIPI_DSI_PHY_PWR_LDO_VOLTAGE_MV,
   };
   esp_ldo_channel_handle_t ldo_mipi_phy = 0;
   esp_ldo_acquire_channel(&ldo_mipi_phy_config, &ldo_mipi_phy);
@@ -78,22 +78,23 @@ void* dsi_init(){
   esp_lcd_panel_io_handle_t mipi_dbi_io = 0;
   esp_lcd_new_panel_io_dbi(mipi_dsi_bus, &dbi_config, &mipi_dbi_io);
 
-  esp_lcd_dpi_panel_config_t dpi_config = JD9365_800_1280_PANEL_60HZ_DPI_CONFIG(TEST_MIPI_DPI_PX_FORMAT);
+  esp_lcd_dpi_panel_config_t dpi_config = JD9365_800_1280_PANEL_60HZ_DPI_CONFIG(MIPI_DPI_PX_FORMAT);
+
   jd9365_vendor_config_t vendor_config = {
-      .flags = {
-          .use_mipi_interface = 1,
-      },
-      .mipi_config = {
-          .dsi_bus = mipi_dsi_bus,
-          .dpi_config = &dpi_config,
-          .lane_num = TEST_MIPI_DSI_LANE_NUM,
-      },
+    .flags = {
+      .use_mipi_interface = 1,
+    },
+    .mipi_config = {
+      .dsi_bus = mipi_dsi_bus,
+      .dpi_config = &dpi_config,
+      .lane_num = MIPI_DSI_LANE_NUM,
+    },
   };
   const esp_lcd_panel_dev_config_t panel_config = {
-      .reset_gpio_num = TEST_PIN_NUM_LCD_RST,
-      .rgb_ele_order = LCD_RGB_ELEMENT_ORDER_RGB,
-      .bits_per_pixel = TEST_LCD_BIT_PER_PIXEL,
-      .vendor_config = &vendor_config,
+    .reset_gpio_num = PIN_NUM_LCD_RST,
+    .rgb_ele_order = LCD_RGB_ELEMENT_ORDER_RGB,
+    .bits_per_pixel = LCD_BIT_PER_PIXEL,
+    .vendor_config = &vendor_config,
   };
 
   esp_lcd_new_panel_jd9365(mipi_dbi_io, &panel_config, &panel);
@@ -110,11 +111,10 @@ void* dsi_init(){
   esp_lcd_panel_disp_on_off(panel, true);
 
   // -----------------------------------
-  // REVISIT: set up i2c before this as it's used above and complains
 
-#define I2C_MASTER_NUM               0
-#define TOUCH_SDA_PIN                7
-#define TOUCH_SCL_PIN                8
+  #define I2C_MASTER_NUM 0
+  #define TOUCH_SDA_PIN  7
+  #define TOUCH_SCL_PIN  8
 
   i2c_master_bus_config_t i2c_mst_config = {
       .clk_source = I2C_CLK_SRC_DEFAULT,
