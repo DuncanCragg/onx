@@ -5,7 +5,7 @@ idf_component_register(
     "../../../../onl/esp32/time.c"
     "../../../../onl/esp32/log.c"
     "../../../../onl/esp32/gpio.c"
-    "../../../../onl/esp32/touch-i2c.c"
+    "../../../../onl/touch-i2c.c"
     "../../../../onl/esp32/random.c"
 
     "../../../../onl/mem.c"
