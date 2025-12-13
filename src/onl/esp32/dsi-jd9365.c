@@ -155,6 +155,29 @@ void* dsi_init(){
   return panel;
 }
 
+extern void touch_i2c_event(uint16_t x[], uint16_t y[], uint8_t n);
+
+void dsi_loop(){
+
+  uint16_t x[5];
+  uint16_t y[5];
+  uint16_t s[5];
+  uint8_t  n = 0;
+
+  touch->read_data(touch);
+  bool touched = touch->get_xy(touch, x,y,s, &n, 5);
+
+  static bool pending_untouch=false;
+  if(touched){
+    touch_i2c_event(x,y,n);
+    pending_untouch=true;
+  }
+  else
+  if(pending_untouch){
+    touch_i2c_event(0,0,0);
+    pending_untouch=false;
+  }
+}
 
 void dsi_draw_bitmap(void* panel, void* buf, uint16_t x, uint16_t y, uint16_t w, uint16_t h, bool block){
   dma_done=false;

@@ -76,6 +76,20 @@ void startup_core0_loop(){
 
   if(!panel) return;
 
+  dsi_loop();
+
+  if(g2d_24bbp_buf){
+    static uint64_t lt=0;
+    uint64_t ct=time_ms();
+    if(ct > lt + 17){
+      lt=ct;
+      for(uint8_t seg=0; seg < NUM_SEGS; seg++){
+        from_16bpp_to_24bpp(seg);
+        dsi_draw_bitmap(panel, g2d_24bbp_buf, g2d_x_pos, g2d_y_pos + G2D_SEG_HEIGHT * seg, g2d_width, G2D_SEG_HEIGHT, true);
+      }
+    }
+  }
+
   static bool was_connected=true;
   static bool was_alternate=true;
 
@@ -113,12 +127,6 @@ void startup_core0_loop(){
        }
        dsi_draw_bitmap(panel, buf, 0, j * LINES_PER_BAND, screen_height, LINES_PER_BAND, true);
     }
-    if(g2d_24bbp_buf){
-      for(uint8_t seg=0; seg < NUM_SEGS; seg++){
-        from_16bpp_to_24bpp(seg);
-        dsi_draw_bitmap(panel, g2d_24bbp_buf, g2d_x_pos, g2d_y_pos + G2D_SEG_HEIGHT * seg, g2d_width, G2D_SEG_HEIGHT, true);
-      }
-    }
   }
   else
   if(connected && !alternate_image && was_alternate) {
@@ -135,12 +143,6 @@ void startup_core0_loop(){
            buf[i * BPP + 2] = (j%3==2)? (NUM_BANDS-1-j)*10+15: 0;
        }
        dsi_draw_bitmap(panel, buf, 0, j * LINES_PER_BAND, screen_height, LINES_PER_BAND, true);
-    }
-    if(g2d_24bbp_buf){
-      for(uint8_t seg=0; seg < NUM_SEGS; seg++){
-        from_16bpp_to_24bpp(seg);
-        dsi_draw_bitmap(panel, g2d_24bbp_buf, g2d_x_pos, g2d_y_pos + G2D_SEG_HEIGHT * seg, g2d_width, G2D_SEG_HEIGHT, true);
-      }
     }
   }
 }
