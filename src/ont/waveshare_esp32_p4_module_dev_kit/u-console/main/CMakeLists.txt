@@ -42,6 +42,7 @@ idf_component_register(
     "../../../../ont/logic-evaluators.c"
 
     "../../../../ont/onx-u.c"
+    "../../../../ont/esp32/onx-u.c"
     "onx.c"
 
   INCLUDE_DIRS
