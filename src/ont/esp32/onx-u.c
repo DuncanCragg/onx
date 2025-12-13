@@ -62,11 +62,9 @@ void startup_core0_init(){
   onx_u_init();
 }
 
-extern volatile bool back_button;
 static volatile bool alternate_image=false;
 
 void log_user_key_cb(){
-  back_button=true;
   alternate_image=!alternate_image;
 }
 

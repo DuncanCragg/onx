@@ -27,6 +27,7 @@
 #include <esp_lcd_jd9365_10_1.h>
 #include <esp_lcd_touch_gt911.h>
 
+#include <onx/log.h>
 #include <onx/dsi.h>
 
 #define TEST_LCD_BIT_PER_PIXEL 24
@@ -109,6 +110,7 @@ void* dsi_init(){
   esp_lcd_panel_disp_on_off(panel, true);
 
   // -----------------------------------
+  // REVISIT: set up i2c before this as it's used above and complains
 
 #define I2C_MASTER_NUM               0
 #define TOUCH_SDA_PIN                7

@@ -64,8 +64,6 @@ static void every_10s(void*){
 
 static bool touch_down=false;
 
-volatile bool back_button=false;
-
 static void io_cb() {
 
   int16_t touch_x = ((int16_t)io.touch_x)-g2d_x_pos;
@@ -97,13 +95,6 @@ static void io_cb() {
   else
   if(!io.touched && button_pressed){
     button_pressed = false;
-    onn_run_evaluators(buttonuid, (void*)button_pressed);
-    onn_run_evaluators(useruid, (void*)USER_EVENT_BUTTON);
-  }
-  // simulate physical back button with external boolean
-  if(back_button){
-    back_button=false;
-    button_pressed=!button_pressed;
     onn_run_evaluators(buttonuid, (void*)button_pressed);
     onn_run_evaluators(useruid, (void*)USER_EVENT_BUTTON);
   }
@@ -330,8 +321,6 @@ void onx_u_init(){
 uint32_t loop_time=0;
  
 void onx_u_loop(){
-
-  if(back_button) io_cb();
 
   uint64_t ct=time_ms();
   static uint64_t lt=0;
