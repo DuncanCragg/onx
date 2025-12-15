@@ -48,11 +48,12 @@
 static esp_lcd_panel_handle_t panel = 0;
 static esp_lcd_touch_handle_t touch = 0;
 
-static volatile bool dma_done=false;
+static volatile SemaphoreHandle_t dma_fin = 0;
 
-IRAM_ATTR static bool dma_done_cb(esp_lcd_panel_handle_t panel, esp_lcd_dpi_panel_event_data_t *edata, void *user_ctx) {
-  dma_done=true;
-  return false;
+IRAM_ATTR static bool dma_done_cb(esp_lcd_panel_handle_t panel, esp_lcd_dpi_panel_event_data_t *edata, void *user_ctx){
+  BaseType_t need_yield = pdFALSE;
+  xSemaphoreGiveFromISR(dma_fin, &need_yield);
+  return false; // need_yield;
 }
 
 uint16_t screen_width=0;
@@ -101,10 +102,12 @@ void* dsi_init(){
 
 ; if(!panel) return 0;
 
+  dma_fin = xSemaphoreCreateBinary();
+
   esp_lcd_dpi_panel_event_callbacks_t cbs = {
       .on_color_trans_done = dma_done_cb,
   };
-  esp_lcd_dpi_panel_register_event_callbacks(panel, &cbs, 0);
+  esp_lcd_dpi_panel_register_event_callbacks(panel, &cbs, dma_fin);
 
   esp_lcd_panel_reset(panel);
   esp_lcd_panel_init(panel);
@@ -181,11 +184,9 @@ void dsi_loop(){
   }
 }
 
-void dsi_draw_bitmap(void* panel, void* buf, uint16_t x, uint16_t y, uint16_t w, uint16_t h, bool block){
-  dma_done=false;
+void dsi_draw_bitmap(void* panel, void* buf, uint16_t x, uint16_t y, uint16_t w, uint16_t h){
   esp_lcd_panel_draw_bitmap((esp_lcd_panel_handle_t)panel, x, y, x+w, y+h, buf);
-  if(block) while(!dma_done);
-  dma_done=false;
+  xSemaphoreTake(dma_fin, 0); // .., portMAX_DELAY);
 }
 
 
