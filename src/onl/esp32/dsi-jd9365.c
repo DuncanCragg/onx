@@ -56,13 +56,10 @@ IRAM_ATTR static bool dma_done_cb(esp_lcd_panel_handle_t panel, esp_lcd_dpi_pane
   return false; // need_yield;
 }
 
-uint16_t screen_width=0;
-uint16_t screen_height=0;
+const uint16_t screen_width=1280;
+const uint16_t screen_height=800;
 
 void* dsi_init(){
-
-  screen_width=1280;
-  screen_height=800;
 
   esp_ldo_channel_config_t ldo_mipi_phy_config = {
     .chan_id = MIPI_DSI_PHY_PWR_LDO_CHAN,

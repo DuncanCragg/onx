@@ -4,8 +4,6 @@
 #include <stdatomic.h>
 #include <inttypes.h>
 
-#include <esp_rom_sys.h>
-
 #include <esp_heap_caps_init.h>
 #include <esp_heap_caps.h>
 
@@ -71,6 +69,9 @@ void log_user_key_cb(){
   alternate_image=!alternate_image;
 }
 
+#define NO_FASTNESS_TEST  // DO_FASTNESS_TEST
+
+#ifdef  DO_FASTNESS_TEST
 static uint8_t r=0;
 static uint8_t g=0;
 static uint8_t b=0;
@@ -86,21 +87,22 @@ IRAM_ATTR static void draw_test_animation() {
   uint16_t sh=screen_height;
   uint16_t sw=screen_width; // triple the speed when you read from the stack!?
 
-  if(!buff) buff = (uint8_t*)heap_caps_calloc(1, sh * 4 * 3, MALLOC_CAP_DMA);
+  if(!buff) buff = (uint8_t*)heap_caps_calloc(1, sh * 4 * BPP, MALLOC_CAP_DMA);
 
   r += ri; if(r==0) ri = -ri;
   g += gi; if(g==0) gi = -gi;
   b += bi; if(b==0) bi = -bi;
 
-  for(int l = 0; l< sw; l+=4){
-    for(int i = 0; i< sh * 4; i++){
-      buff[i*3+0] = r + (l * 255 / sw);
-      buff[i*3+1] = g + (l * 255 / sw);
-      buff[i*3+2] = b + (l * 255 / sw);
+  for(uint32_t l = 0; l< sw; l+=4){
+    for(uint32_t p = 0; p< sh * 4; p++){
+      buff[p*BPP+0] = r + (l * 255 / sw);
+      buff[p*BPP+1] = g + (l * 255 / sw);
+      buff[p*BPP+2] = b + (l * 255 / sw);
     }
     dsi_draw_bitmap(panel, buff, 0, l, sh, 4);
   }
 }
+#endif
 
 IRAM_ATTR void startup_core0_loop(){
 
@@ -108,8 +110,7 @@ IRAM_ATTR void startup_core0_loop(){
 
   if(!panel) return;
 
-#define NO_FASTNESS_TEST
-#ifdef  DO_FASTNESS_TEST
+#ifdef DO_FASTNESS_TEST
   int64_t ct = 0;
   int64_t lt = 0;
   int64_t frames = 0;
@@ -137,7 +138,8 @@ IRAM_ATTR void startup_core0_loop(){
       lt=ct;
       for(uint8_t seg=0; seg < NUM_SEGS; seg++){
         from_16bpp_to_24bpp(seg);
-        dsi_draw_bitmap(panel, g2d_24bbp_buf, g2d_x_pos, g2d_y_pos + G2D_SEG_HEIGHT * seg, g2d_width, G2D_SEG_HEIGHT);
+        dsi_draw_bitmap(panel, g2d_24bbp_buf, g2d_x_pos, G2D_SEG_HEIGHT * seg + g2d_y_pos,
+                                              g2d_width, G2D_SEG_HEIGHT);
       }
     }
   }
@@ -157,13 +159,13 @@ IRAM_ATTR void startup_core0_loop(){
 
     log_write("redraw #\n");
 
-    for (int j = 0; j < NUM_BANDS; j++) {
-       for (int i = 0; i < LINES_PER_BAND * sh; i++) {
-           buf[i * BPP + 0] = 0;
-           buf[i * BPP + 1] = 0;
-           buf[i * BPP + 2] = (j%3==0)? j*10+15: 0;
+    for(uint32_t b = 0; b < NUM_BANDS; b++) {
+       for(uint32_t p = 0; p < LINES_PER_BAND * sh; p++) {
+           buf[p * BPP + 0] = 0;
+           buf[p * BPP + 1] = 0;
+           buf[p * BPP + 2] = (b%3==0)? b*10+15: 0;
        }
-       dsi_draw_bitmap(panel, buf, 0, j * LINES_PER_BAND, sh, LINES_PER_BAND);
+       dsi_draw_bitmap(panel, buf, 0, b * LINES_PER_BAND, sh, LINES_PER_BAND);
     }
   }
   else
