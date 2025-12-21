@@ -23,7 +23,10 @@ extern uint16_t g2d_x_pos;
 extern uint16_t g2d_y_pos;
 extern uint16_t g2d_width;
 extern uint16_t g2d_height;
-extern uint16_t g2d_buffer[]; // G2D_BUFFER_SIZE=(g2d_width * g2d_height)
+
+#define SEG_BYTES 4096
+
+static uint8_t* g2d_buf=0;
 
 #define NO_FASTNESS_TEST  // DO_FASTNESS_TEST
 #define NO_UNCONN_RED     // DO_UNCONN_RED
@@ -37,8 +40,6 @@ static uint8_t* fastness_buf=0;
 static uint8_t* unconn_buf=0;
 #endif
 
-static uint8_t* g2d_24bbp_buf=0;
-
 #define BPP 3
 
 #define NUM_BANDS 128
@@ -50,15 +51,6 @@ static uint8_t* g2d_24bbp_buf=0;
 
 extern void onx_u_init();
 extern void onx_u_loop();
-
-IRAM_ATTR static void from_16bpp_to_24bpp(uint8_t seg){
-  for(uint32_t p=0; p < g2d_width * G2D_SEG_HEIGHT; p++){
-    uint16_t pixel_16bpp = g2d_buffer[p + seg * g2d_width * G2D_SEG_HEIGHT];
-    g2d_24bbp_buf[p * BPP + 0] = (uint8_t)((pixel_16bpp & 0x001f) <<  3);
-    g2d_24bbp_buf[p * BPP + 1] = (uint8_t)((pixel_16bpp & 0x07e0) >>  3);
-    g2d_24bbp_buf[p * BPP + 2] = (uint8_t)((pixel_16bpp & 0xf800) >>  8);
-  }
-}
 
 static uint8_t* image_1;
 static uint8_t* image_2;
@@ -130,6 +122,9 @@ IRAM_ATTR void startup_core0_init(){
   uint16_t sh=screen_height;
   uint16_t sw=screen_width;
 
+  g2d_buf = (uint8_t*)heap_caps_calloc(1, SEG_BYTES, MALLOC_CAP_DMA);
+  if(!g2d_buf) log_write("couldn't heap_caps_calloc(g2d_buf=%d)\n", SEG_BYTES);
+
 #ifdef DO_FASTNESS_TEST
   fastness_buf = (uint8_t*)heap_caps_calloc(1, LINES_AT_A_TIME * sh * BPP, MALLOC_CAP_DMA);
   if(!fastness_buf) log_write("couldn't heap_caps_calloc(fastness buflen=%d)\n", LINES_AT_A_TIME * sh * BPP);
@@ -139,9 +134,6 @@ IRAM_ATTR void startup_core0_init(){
   unconn_buf = (uint8_t *)heap_caps_calloc(1, LINES_PER_BAND * sh * BPP, MALLOC_CAP_DMA);
   if(!unconn_buf) log_write("couldn't heap_caps_calloc(red flash buflen=%d)\n", LINES_PER_BAND * sh * BPP);
 #endif
-
-  g2d_24bbp_buf = (uint8_t *)heap_caps_calloc(1, g2d_width * G2D_SEG_HEIGHT * BPP, MALLOC_CAP_DMA);
-  if(!g2d_24bbp_buf) log_write("couldn't heap_caps_calloc(g2d buffer=%d)\n", g2d_width * G2D_SEG_HEIGHT * BPP);
 
   create_and_fill_two_images_in_psram();
 
@@ -183,6 +175,61 @@ IRAM_ATTR static void draw_test_animation() {
 }
 #endif
 
+#define RGB565_TO_R(c) ((uint8_t)(((c) & 0xf800) >>  8))
+#define RGB565_TO_G(c) ((uint8_t)(((c) & 0x07e0) >>  3))
+#define RGB565_TO_B(c) ((uint8_t)(((c) & 0x001f) <<  3))
+
+void draw_rectangle(uint16_t cxtl, uint16_t cytl,
+                    uint16_t cxbr, uint16_t cybr,
+                    uint16_t colour){ // rect up to but not including cxbr / cybr
+
+  uint8_t r = RGB565_TO_R(colour);
+  uint8_t g = RGB565_TO_G(colour);
+  uint8_t b = RGB565_TO_B(colour);
+
+  uint16_t x=g2d_x_pos + cxtl;
+  uint16_t y=g2d_y_pos + cytl;
+
+  int16_t w=(cxbr-cxtl);
+  int16_t h=(cybr-cytl);
+
+  if(w<=0 || h<=0){
+    log_write("invalid params\n");
+;   return;
+  }
+
+  uint16_t seg_offst=0;
+  uint16_t seg_lines=0;
+  uint16_t seg_index=0;
+
+  while(1){
+
+    g2d_buf[seg_index + 0] = b;
+    g2d_buf[seg_index + 1] = g;
+    g2d_buf[seg_index + 2] = r;
+
+    seg_index += BPP;
+
+    if(seg_index % (w * BPP) == 0){
+
+      seg_lines++;
+
+      if(seg_index + w * BPP >= SEG_BYTES ||
+         seg_offst + seg_lines == h){
+
+        dsi_draw_bitmap(panel, g2d_buf, x, y + seg_offst, w, seg_lines);
+        time_delay_us(300); // REVISIT: time for actual sync!!
+
+        seg_offst += seg_lines;
+        seg_lines = 0;
+        seg_index = 0;
+
+  ;     if(seg_offst == h) break;
+      }
+    }
+  }
+}
+
 IRAM_ATTR void startup_core0_loop(){
 
   onx_u_loop();
@@ -209,19 +256,6 @@ IRAM_ATTR void startup_core0_loop(){
 #endif
 
   dsi_loop();
-
-  if(g2d_24bbp_buf){
-    static uint64_t lt=0;
-    uint64_t ct=time_ms();
-    if(ct > lt + 17){
-      lt=ct;
-      for(uint8_t seg=0; seg < NUM_SEGS; seg++){
-        from_16bpp_to_24bpp(seg);
-        dsi_draw_bitmap(panel, g2d_24bbp_buf, g2d_x_pos, G2D_SEG_HEIGHT * seg + g2d_y_pos,
-                                              g2d_width, G2D_SEG_HEIGHT);
-      }
-    }
-  }
 
   uint16_t sh=screen_height;
   uint16_t sw=screen_width;

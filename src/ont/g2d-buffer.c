@@ -12,12 +12,14 @@
 
 #include <onx/log.h>
 
+void draw_rectangle(uint16_t cxtl, uint16_t cytl,
+                    uint16_t cxbr, uint16_t cybr,
+                    uint16_t colour);
+
 // ---------------------------------
 
-#define G2D_BUFFER_SIZE (240 * 320)
 uint16_t g2d_width =240;
 uint16_t g2d_height=320;
-uint16_t g2d_buffer[G2D_BUFFER_SIZE + 4];
 
 // ---------------------------------
 
@@ -25,27 +27,18 @@ void g2d_init() {
 }
 
 void g2d_clear_screen() {
-  memset(g2d_buffer, 0x00, G2D_BUFFER_SIZE*2);
+  draw_rectangle(0,0,g2d_width,g2d_height,0);
 }
 
 void g2d_render() {
 
 }
 
-static void set_pixel(uint16_t x, uint16_t y, uint16_t colour) {
-  uint32_t i = (x + (y * g2d_width));
-  g2d_buffer[i] = colour;
-}
-
 void g2d_internal_rectangle(uint16_t cxtl, uint16_t cytl,
                             uint16_t cxbr, uint16_t cybr,
                             uint16_t colour){
 
-  for(uint16_t py = cytl; py < cybr; py++){
-    for(uint16_t px = cxtl; px < cxbr; px++){
-      set_pixel(px, py, colour);
-    }
-  }
+  draw_rectangle(cxtl, cytl, cxbr, cybr, colour);
 }
 
 void g2d_internal_text(int16_t ox, int16_t oy,
@@ -83,7 +76,7 @@ void g2d_internal_text(int16_t ox, int16_t oy,
 
         for(uint16_t py = ry; py < yh; py++){
           for(uint16_t px = rx; px < xw; px++){
-            set_pixel(px, py, col);
+  //        draw_rectangle(px, py, px+1, py+1, col);
           }
         }
       }
