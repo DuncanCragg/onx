@@ -25,7 +25,18 @@ extern uint16_t g2d_width;
 extern uint16_t g2d_height;
 extern uint16_t g2d_buffer[]; // G2D_BUFFER_SIZE=(g2d_width * g2d_height)
 
-static uint8_t* buf=0;
+#define NO_FASTNESS_TEST  // DO_FASTNESS_TEST
+#define NO_UNCONN_RED     // DO_UNCONN_RED
+
+#ifdef DO_FASTNESS_TEST
+#define LINES_AT_A_TIME 4
+static uint8_t* fastness_buf=0;
+#endif
+
+#ifdef DO_UNCONN_RED
+static uint8_t* unconn_buf=0;
+#endif
+
 static uint8_t* g2d_24bbp_buf=0;
 
 #define BPP 3
@@ -119,8 +130,15 @@ IRAM_ATTR void startup_core0_init(){
   uint16_t sh=screen_height;
   uint16_t sw=screen_width;
 
-  buf = (uint8_t *)heap_caps_calloc(1, LINES_PER_BAND * sh * BPP, MALLOC_CAP_DMA);
-  if(!buf) log_write("couldn't heap_caps_calloc(test card buffer=%d)\n", LINES_PER_BAND * sh * BPP);
+#ifdef DO_FASTNESS_TEST
+  fastness_buf = (uint8_t*)heap_caps_calloc(1, LINES_AT_A_TIME * sh * BPP, MALLOC_CAP_DMA);
+  if(!fastness_buf) log_write("couldn't heap_caps_calloc(fastness buflen=%d)\n", LINES_AT_A_TIME * sh * BPP);
+#endif
+
+#ifdef DO_UNCONN_RED
+  unconn_buf = (uint8_t *)heap_caps_calloc(1, LINES_PER_BAND * sh * BPP, MALLOC_CAP_DMA);
+  if(!unconn_buf) log_write("couldn't heap_caps_calloc(red flash buflen=%d)\n", LINES_PER_BAND * sh * BPP);
+#endif
 
   g2d_24bbp_buf = (uint8_t *)heap_caps_calloc(1, g2d_width * G2D_SEG_HEIGHT * BPP, MALLOC_CAP_DMA);
   if(!g2d_24bbp_buf) log_write("couldn't heap_caps_calloc(g2d buffer=%d)\n", g2d_width * G2D_SEG_HEIGHT * BPP);
@@ -136,9 +154,7 @@ void log_user_key_cb(){
   alternate_image=!alternate_image;
 }
 
-#define NO_FASTNESS_TEST  // DO_FASTNESS_TEST
-
-#ifdef  DO_FASTNESS_TEST
+#ifdef DO_FASTNESS_TEST
 static uint8_t r=0;
 static uint8_t g=0;
 static uint8_t b=0;
@@ -147,26 +163,22 @@ static int8_t ri = +1;
 static int8_t gi = -2;
 static int8_t bi = +4;
 
-static uint8_t* buff=0;
-
 IRAM_ATTR static void draw_test_animation() {
 
   uint16_t sh=screen_height;
   uint16_t sw=screen_width; // triple the speed when you read from the stack!?
 
-  if(!buff) buff = (uint8_t*)heap_caps_calloc(1, sh * 4 * BPP, MALLOC_CAP_DMA);
-
   r += ri; if(r==0) ri = -ri;
   g += gi; if(g==0) gi = -gi;
   b += bi; if(b==0) bi = -bi;
 
-  for(uint32_t l = 0; l< sw; l+=4){
-    for(uint32_t p = 0; p< sh * 4; p++){
-      buff[p*BPP+0] = r + (l * 255 / sw);
-      buff[p*BPP+1] = g + (l * 255 / sw);
-      buff[p*BPP+2] = b + (l * 255 / sw);
+  for(uint32_t l = 0; l< sw; l+=LINES_AT_A_TIME){
+    for(uint32_t p = 0; p< sh * LINES_AT_A_TIME; p++){
+      fastness_buf[p*BPP+0] = r + (l * 255 / sw);
+      fastness_buf[p*BPP+1] = g + (l * 255 / sw);
+      fastness_buf[p*BPP+2] = b + (l * 255 / sw);
     }
-    dsi_draw_bitmap(panel, buff, 0, l, sh, 4);
+    dsi_draw_bitmap(panel, fastness_buf, 0, l, sh, LINES_AT_A_TIME);
   }
 }
 #endif
@@ -230,14 +242,16 @@ IRAM_ATTR void startup_core0_loop(){
 
     log_write("redraw #\n");
 
+#ifdef DO_UNCONN_RED
     for(uint32_t b = 0; b < NUM_BANDS; b++) {
        for(uint32_t p = 0; p < LINES_PER_BAND * sh; p++) {
-           buf[p * BPP + 0] = 0;
-           buf[p * BPP + 1] = 0;
-           buf[p * BPP + 2] = (b%3==0)? b*10+15: 0;
+           unconn_buf[p * BPP + 0] = 0;
+           unconn_buf[p * BPP + 1] = 0;
+           unconn_buf[p * BPP + 2] = (b%3==0)? b*10+15: 0;
        }
-       dsi_draw_bitmap(panel, buf, 0, b * LINES_PER_BAND, sh, LINES_PER_BAND);
+       dsi_draw_bitmap(panel, unconn_buf, 0, b * LINES_PER_BAND, sh, LINES_PER_BAND);
     }
+#endif
   }
   else
   if(connected && alternate_image && !was_alternate){

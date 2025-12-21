@@ -24,7 +24,6 @@ extern uint16_t screen_width;  // from hstx, etc
 extern uint16_t screen_height;
 extern uint16_t g2d_width;     // from g2d-buffer
 extern uint16_t g2d_height;
-extern uint16_t g2d_buffer[];  // G2D_BUFFER_SIZE=(g2d_width * g2d_h)
 
 uint16_t g2d_x_pos=0;
 uint16_t g2d_y_pos=0;
