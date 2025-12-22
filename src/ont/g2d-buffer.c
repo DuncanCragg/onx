@@ -29,11 +29,51 @@ uint16_t g2d_height=320;
 
 static uint8_t* g2d_buf=0;
 
-#define SEG_BYTES 4096
+#define SEG_BYTES 8192
 
 void g2d_init() {
   g2d_buf = (uint8_t*)heap_caps_calloc(1, SEG_BYTES, MALLOC_CAP_DMA);
   if(!g2d_buf) log_write("couldn't heap_caps_calloc(g2d_buf=%d)\n", SEG_BYTES);
+}
+
+static bool pixels_to_draw=false;
+
+static void draw_pixel(uint16_t x, uint16_t y, uint16_t w, uint8_t r, uint8_t g, uint8_t b){
+
+  uint32_t p = (x + (y * w)) * BPP;
+
+  if(p + 2 >= SEG_BYTES){
+    static uint8_t num_logs=10;
+    if(num_logs){
+      num_logs--;
+      log_write("draw_pixel out of g2d_buf range x=%d y=%d w=%d p=%d\n", x, y, w, p);
+    }
+    return;
+  }
+  g2d_buf[p + 0] = b;
+  g2d_buf[p + 1] = g;
+  g2d_buf[p + 2] = r;
+
+  pixels_to_draw = true;
+}
+
+static void clear_pixel_buf(uint16_t w, uint16_t h){
+  for(uint16_t y=0; y<h; y++){
+    for(uint16_t x=0; x<w; x++){
+      draw_pixel(x,y,w, 0x0,0x0,0x0);
+    }
+  }
+  pixels_to_draw = false;
+}
+
+static void draw_pixel_buf(uint16_t x, uint16_t y, uint16_t w, uint16_t h){
+
+; if(!pixels_to_draw) return;
+
+  dsi_draw_bitmap(g2d_buf, g2d_x_pos + x, g2d_y_pos + y, w, h);
+  time_delay_us(300); // REVISIT: time for actual sync!!
+
+  pixels_to_draw = false;
 }
 
 static void draw_rectangle(uint16_t cxtl, uint16_t cytl,
@@ -108,6 +148,10 @@ void g2d_internal_text(int16_t ox, int16_t oy,
                        char* text,
                        uint16_t colour, uint8_t size){
 
+  uint8_t r = RGB565_TO_R(colour);
+  uint8_t g = RGB565_TO_G(colour);
+  uint8_t b = RGB565_TO_B(colour);
+
   for(uint16_t p = 0; p < strlen(text); p++){      // each char/glyph
 
     int16_t xx = ox + (p * 6 * size);
@@ -115,6 +159,8 @@ void g2d_internal_text(int16_t ox, int16_t oy,
     unsigned char c=text[p];
 
     if(c < 32 || c >= 127) c=' ';
+
+    clear_pixel_buf(6 * size, 8 * size);
 
     for(uint8_t i = 0; i < 6; i++) {               // each vert line of char
 
@@ -140,11 +186,12 @@ void g2d_internal_text(int16_t ox, int16_t oy,
 
         for(uint16_t py = ry; py < yh; py++){
           for(uint16_t px = rx; px < xw; px++){
-  //        draw_rectangle(px, py, px+1, py+1, col);
+            draw_pixel(px-xx, py-oy, 6 * size, r,g,b);
           }
         }
       }
     }
+    draw_pixel_buf(xx, oy, 6 * size, 8 * size);
   }
 }
 
