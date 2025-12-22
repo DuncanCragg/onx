@@ -155,6 +155,8 @@ IRAM_ATTR static void draw_test_animation() {
 }
 #endif
 
+void dsi_draw_right_on_fbs();
+
 IRAM_ATTR void startup_core0_loop(){
 
   onx_u_loop();
@@ -217,7 +219,7 @@ IRAM_ATTR void startup_core0_loop(){
     was_alternate=true;
 
     s=time_us();
-    draw_image_from_psram(1);
+    dsi_draw_right_on_fbs(); // draw_image_from_psram(1);
   }
   else
   if(connected && !alternate_image && was_alternate) {

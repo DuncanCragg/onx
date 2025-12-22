@@ -76,6 +76,7 @@ void dsi_init(){
   esp_lcd_new_panel_io_dbi(mipi_dsi_bus, &dbi_config, &mipi_dbi_io);
 
   esp_lcd_dpi_panel_config_t dpi_config = JD9365_800_1280_PANEL_60HZ_DPI_CONFIG(MIPI_DPI_PX_FORMAT);
+  dpi_config.num_fbs = 2;
 
   jd9365_vendor_config_t vendor_config = {
     .flags = {
@@ -173,6 +174,32 @@ void dsi_loop(){
   if(pending_untouch){
     touch_i2c_event(0,0,0);
     pending_untouch=false;
+  }
+}
+
+#define BPP 3
+
+void dsi_draw_right_on_fbs(){
+
+  uint8_t* fbs[2];
+  esp_lcd_dpi_panel_get_frame_buffer(panel, 2, (void**)&fbs[0], (void**)&fbs[1]);
+
+  for(int i=0; i < 8; i++) {
+    int x = rand() % 700;
+    int y = rand() % 700;
+    uint8_t r = rand() & 0xff;
+    uint8_t g = rand() & 0xff;
+    uint8_t b = rand() & 0xff;
+    for (int j = y; j < y + 100; j++) {
+      for (int k = x; k < x + 100; k++) {
+        uint32_t p = (j * 800 + k) * BPP;
+        fbs[i % 2][p + 0] = b;
+        fbs[i % 2][p + 1] = g;
+        fbs[i % 2][p + 2] = r;
+      }
+    }
+    esp_lcd_panel_draw_bitmap(panel, 2, y, x+100, y+100, fbs[i % 2]);
+    time_delay_ms(1000);
   }
 }
 
