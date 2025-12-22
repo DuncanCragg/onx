@@ -14,8 +14,6 @@
 #include <onx/log.h>
 #include <onx/dsi.h>
 
-static void* panel=0;
-
 extern uint16_t screen_width;
 extern uint16_t screen_height;
 
@@ -108,16 +106,14 @@ static void draw_image_from_psram(uint8_t im){
     uint16_t y=LINES_PER_BAND * b;
     uint16_t h=LINES_PER_BAND;
 
-    dsi_draw_bitmap(panel, (im==1? image_1: image_2)+(off * BPP), x, y, w, h);
+    dsi_draw_bitmap((im==1? image_1: image_2)+(off * BPP), x, y, w, h);
     time_delay_us(300); // REVISIT: time for actual sync!!
   }
 }
 
 IRAM_ATTR void startup_core0_init(){
 
-  panel = dsi_init();
-
-; if(!panel){ log_write("can't create panel\n"); return; }
+  dsi_init();
 
   uint16_t sh=screen_height;
   uint16_t sw=screen_width;
@@ -170,7 +166,7 @@ IRAM_ATTR static void draw_test_animation() {
       fastness_buf[p*BPP+1] = g + (l * 255 / sw);
       fastness_buf[p*BPP+2] = b + (l * 255 / sw);
     }
-    dsi_draw_bitmap(panel, fastness_buf, 0, l, sh, LINES_AT_A_TIME);
+    dsi_draw_bitmap(fastness_buf, 0, l, sh, LINES_AT_A_TIME);
   }
 }
 #endif
@@ -217,7 +213,7 @@ void draw_rectangle(uint16_t cxtl, uint16_t cytl,
       if(seg_index + w * BPP >= SEG_BYTES ||
          seg_offst + seg_lines == h){
 
-        dsi_draw_bitmap(panel, g2d_buf, x, y + seg_offst, w, seg_lines);
+        dsi_draw_bitmap(g2d_buf, x, y + seg_offst, w, seg_lines);
         time_delay_us(300); // REVISIT: time for actual sync!!
 
         seg_offst += seg_lines;
@@ -233,8 +229,6 @@ void draw_rectangle(uint16_t cxtl, uint16_t cytl,
 IRAM_ATTR void startup_core0_loop(){
 
   onx_u_loop();
-
-  if(!panel) return;
 
 #ifdef DO_FASTNESS_TEST
   int64_t ct = 0;
@@ -283,7 +277,7 @@ IRAM_ATTR void startup_core0_loop(){
            unconn_buf[p * BPP + 1] = 0;
            unconn_buf[p * BPP + 2] = (b%3==0)? b*10+15: 0;
        }
-       dsi_draw_bitmap(panel, unconn_buf, 0, b * LINES_PER_BAND, sh, LINES_PER_BAND);
+       dsi_draw_bitmap(unconn_buf, 0, b * LINES_PER_BAND, sh, LINES_PER_BAND);
     }
 #endif
   }

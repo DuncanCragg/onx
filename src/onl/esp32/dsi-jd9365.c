@@ -59,7 +59,7 @@ IRAM_ATTR static bool dma_done_cb(esp_lcd_panel_handle_t panel, esp_lcd_dpi_pane
 const uint16_t screen_width=1280;
 const uint16_t screen_height=800;
 
-void* dsi_init(){
+void dsi_init(){
 
   esp_ldo_channel_config_t ldo_mipi_phy_config = {
     .chan_id = MIPI_DSI_PHY_PWR_LDO_CHAN,
@@ -97,7 +97,7 @@ void* dsi_init(){
 
   esp_lcd_new_panel_jd9365(mipi_dbi_io, &panel_config, &panel);
 
-; if(!panel) return 0;
+; if(!panel){ log_write("can't create panel\n"); return; }
 
   dma_fin = xSemaphoreCreateBinary();
 
@@ -153,8 +153,6 @@ void* dsi_init(){
   };
 
   esp_lcd_touch_new_i2c_gt911(touch_i2c, &touch_config, &touch);
-
-  return panel;
 }
 
 extern void touch_i2c_event(uint16_t x[], uint16_t y[], uint8_t n);
@@ -181,8 +179,9 @@ void dsi_loop(){
   }
 }
 
-void dsi_draw_bitmap(void* panel, void* buf, uint16_t x, uint16_t y, uint16_t w, uint16_t h){
-  esp_lcd_panel_draw_bitmap((esp_lcd_panel_handle_t)panel, x, y, x+w, y+h, buf);
+void dsi_draw_bitmap(void* buf, uint16_t x, uint16_t y, uint16_t w, uint16_t h){
+  if(!panel) return;
+  esp_lcd_panel_draw_bitmap(panel, x, y, x+w, y+h, buf);
   xSemaphoreTake(dma_fin, 0); // .., portMAX_DELAY);
 }
 
