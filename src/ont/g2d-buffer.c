@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <stdarg.h>
 
+#include <esp_heap_caps.h>
+
 #include <mathlib.h>
 #include <g2d.h>
 #include <g2d-internal.h>
@@ -11,19 +13,78 @@
 #include <font57.h>
 
 #include <onx/log.h>
-
-void draw_rectangle(uint16_t cxtl, uint16_t cytl,
-                    uint16_t cxbr, uint16_t cybr,
-                    uint16_t colour);
+#include <onx/dsi.h>
 
 // ---------------------------------
+
+extern uint16_t g2d_x_pos;
+extern uint16_t g2d_y_pos;
 
 uint16_t g2d_width =240;
 uint16_t g2d_height=320;
 
+#define BPP 3
+
 // ---------------------------------
 
+static uint8_t* g2d_buf=0;
+
+#define SEG_BYTES 4096
+
 void g2d_init() {
+  g2d_buf = (uint8_t*)heap_caps_calloc(1, SEG_BYTES, MALLOC_CAP_DMA);
+  if(!g2d_buf) log_write("couldn't heap_caps_calloc(g2d_buf=%d)\n", SEG_BYTES);
+}
+
+void draw_rectangle(uint16_t cxtl, uint16_t cytl,
+                    uint16_t cxbr, uint16_t cybr,
+                    uint16_t colour){ // rect up to but not including cxbr / cybr
+
+  uint8_t r = RGB565_TO_R(colour);
+  uint8_t g = RGB565_TO_G(colour);
+  uint8_t b = RGB565_TO_B(colour);
+
+  uint16_t x=g2d_x_pos + cxtl;
+  uint16_t y=g2d_y_pos + cytl;
+
+  int16_t w=(cxbr-cxtl);
+  int16_t h=(cybr-cytl);
+
+  if(w<=0 || h<=0){
+    log_write("invalid params\n");
+;   return;
+  }
+
+  uint16_t seg_offst=0;
+  uint16_t seg_lines=0;
+  uint16_t seg_index=0;
+
+  while(1){
+
+    g2d_buf[seg_index + 0] = b;
+    g2d_buf[seg_index + 1] = g;
+    g2d_buf[seg_index + 2] = r;
+
+    seg_index += BPP;
+
+    if(seg_index % (w * BPP) == 0){
+
+      seg_lines++;
+
+      if(seg_index + w * BPP >= SEG_BYTES ||
+         seg_offst + seg_lines == h){
+
+        dsi_draw_bitmap(g2d_buf, x, y + seg_offst, w, seg_lines);
+        time_delay_us(300); // REVISIT: time for actual sync!!
+
+        seg_offst += seg_lines;
+        seg_lines = 0;
+        seg_index = 0;
+
+  ;     if(seg_offst == h) break;
+      }
+    }
+  }
 }
 
 void g2d_clear_screen() {

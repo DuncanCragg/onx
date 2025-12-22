@@ -17,15 +17,6 @@
 extern uint16_t screen_width;
 extern uint16_t screen_height;
 
-extern uint16_t g2d_x_pos;
-extern uint16_t g2d_y_pos;
-extern uint16_t g2d_width;
-extern uint16_t g2d_height;
-
-#define SEG_BYTES 4096
-
-static uint8_t* g2d_buf=0;
-
 #define NO_FASTNESS_TEST  // DO_FASTNESS_TEST
 #define NO_UNCONN_RED     // DO_UNCONN_RED
 
@@ -43,9 +34,6 @@ static uint8_t* unconn_buf=0;
 #define NUM_BANDS 128
 #define LINES_PER_BAND (sw / NUM_BANDS)
 #define PIX_PER_BAND   (sw * sh / NUM_BANDS)
-
-#define NUM_SEGS 8
-#define G2D_SEG_HEIGHT (g2d_height / NUM_SEGS)
 
 extern void onx_u_init();
 extern void onx_u_loop();
@@ -111,6 +99,8 @@ static void draw_image_from_psram(uint8_t im){
   }
 }
 
+void g2d_init();
+
 IRAM_ATTR void startup_core0_init(){
 
   dsi_init();
@@ -118,8 +108,7 @@ IRAM_ATTR void startup_core0_init(){
   uint16_t sh=screen_height;
   uint16_t sw=screen_width;
 
-  g2d_buf = (uint8_t*)heap_caps_calloc(1, SEG_BYTES, MALLOC_CAP_DMA);
-  if(!g2d_buf) log_write("couldn't heap_caps_calloc(g2d_buf=%d)\n", SEG_BYTES);
+  g2d_init();
 
 #ifdef DO_FASTNESS_TEST
   fastness_buf = (uint8_t*)heap_caps_calloc(1, LINES_AT_A_TIME * sh * BPP, MALLOC_CAP_DMA);
@@ -170,61 +159,6 @@ IRAM_ATTR static void draw_test_animation() {
   }
 }
 #endif
-
-#define RGB565_TO_R(c) ((uint8_t)(((c) & 0xf800) >>  8))
-#define RGB565_TO_G(c) ((uint8_t)(((c) & 0x07e0) >>  3))
-#define RGB565_TO_B(c) ((uint8_t)(((c) & 0x001f) <<  3))
-
-void draw_rectangle(uint16_t cxtl, uint16_t cytl,
-                    uint16_t cxbr, uint16_t cybr,
-                    uint16_t colour){ // rect up to but not including cxbr / cybr
-
-  uint8_t r = RGB565_TO_R(colour);
-  uint8_t g = RGB565_TO_G(colour);
-  uint8_t b = RGB565_TO_B(colour);
-
-  uint16_t x=g2d_x_pos + cxtl;
-  uint16_t y=g2d_y_pos + cytl;
-
-  int16_t w=(cxbr-cxtl);
-  int16_t h=(cybr-cytl);
-
-  if(w<=0 || h<=0){
-    log_write("invalid params\n");
-;   return;
-  }
-
-  uint16_t seg_offst=0;
-  uint16_t seg_lines=0;
-  uint16_t seg_index=0;
-
-  while(1){
-
-    g2d_buf[seg_index + 0] = b;
-    g2d_buf[seg_index + 1] = g;
-    g2d_buf[seg_index + 2] = r;
-
-    seg_index += BPP;
-
-    if(seg_index % (w * BPP) == 0){
-
-      seg_lines++;
-
-      if(seg_index + w * BPP >= SEG_BYTES ||
-         seg_offst + seg_lines == h){
-
-        dsi_draw_bitmap(g2d_buf, x, y + seg_offst, w, seg_lines);
-        time_delay_us(300); // REVISIT: time for actual sync!!
-
-        seg_offst += seg_lines;
-        seg_lines = 0;
-        seg_index = 0;
-
-  ;     if(seg_offst == h) break;
-      }
-    }
-  }
-}
 
 IRAM_ATTR void startup_core0_loop(){
 

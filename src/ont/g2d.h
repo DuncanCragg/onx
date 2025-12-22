@@ -12,6 +12,10 @@
 #define SCREEN_HEIGHT 280
 #endif
 
+#define RGB565_TO_R(c) ((uint8_t)(((c) & 0xf800) >>  8))
+#define RGB565_TO_G(c) ((uint8_t)(((c) & 0x07e0) >>  3))
+#define RGB565_TO_B(c) ((uint8_t)(((c) & 0x001f) <<  3))
+
 #define G2D_WHITE    0xffff
 #define G2D_BLACK    0x0000
 #define G2D_GREY_1E  0xf79e // 1.1.1.1:0/1.1.1:1.0.0/1:1.1.1.0
