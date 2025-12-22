@@ -36,9 +36,9 @@ void g2d_init() {
   if(!g2d_buf) log_write("couldn't heap_caps_calloc(g2d_buf=%d)\n", SEG_BYTES);
 }
 
-void draw_rectangle(uint16_t cxtl, uint16_t cytl,
-                    uint16_t cxbr, uint16_t cybr,
-                    uint16_t colour){ // rect up to but not including cxbr / cybr
+static void draw_rectangle(uint16_t cxtl, uint16_t cytl,
+                           uint16_t cxbr, uint16_t cybr,
+                           uint16_t colour){ // rect up to but not including cxbr / cybr
 
   uint8_t r = RGB565_TO_R(colour);
   uint8_t g = RGB565_TO_G(colour);
@@ -108,7 +108,7 @@ void g2d_internal_text(int16_t ox, int16_t oy,
                        char* text,
                        uint16_t colour, uint8_t size){
 
-  for(uint16_t p = 0; p < strlen(text); p++){
+  for(uint16_t p = 0; p < strlen(text); p++){      // each char/glyph
 
     int16_t xx = ox + (p * 6 * size);
 
@@ -116,22 +116,25 @@ void g2d_internal_text(int16_t ox, int16_t oy,
 
     if(c < 32 || c >= 127) c=' ';
 
-    for(uint8_t i = 0; i < 6; i++) {
+    for(uint8_t i = 0; i < 6; i++) {               // each vert line of char
 
       uint8_t line = i<5? font57[c * 5 + i]: 0;
 
       int16_t rx=xx + i * size;
-      if(rx<cxtl || rx>=cxbr) continue;
 
-      for(uint8_t j = 0; j < 8; j++, line >>= 1){
+    ; if(rx<cxtl || rx>=cxbr) continue;
+
+      for(uint8_t j = 0; j < 8; j++, line >>= 1){  // each pixel in line
 
         int16_t ry=oy + j * size;
-        if(ry<cytl || ry>=cybr) continue;
 
-        if(!(line & 1)) continue;
-        uint16_t col=colour;
+      ; if(ry<cytl || ry>=cybr) continue;
+
+      ; if(!(line & 1)) continue;
+
         uint16_t yh=ry+size;
         uint16_t xw=rx+size;
+
         if(yh > cybr) yh=cybr;
         if(xw > cxbr) xw=cxbr;
 

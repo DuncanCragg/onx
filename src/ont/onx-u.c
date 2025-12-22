@@ -219,7 +219,7 @@ void init_onx(){
     object_property_set(bcs, "softness",   "128");
 
     object_set_persist(oclock, "none");
-    object_property_set(oclock, "title", "OnexOS Clock");
+    object_property_set(oclock, "title", "ONX Clock");
     object_property_set(oclock, "ts", "%unknown");
     object_property_set(oclock, "tz", "%unknown");
 //  object_property_set(oclock, "device", deviceuid); // REVISIT: peer discovery isn't great
