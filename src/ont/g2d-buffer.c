@@ -4,7 +4,9 @@
 #include <stdbool.h>
 #include <stdarg.h>
 
-#include <esp_heap_caps.h>
+// on ESP32 instead of mem_alloc, do:
+// #include <esp_heap_caps.h>
+// heap_caps_calloc(1, SEG_BYTES, MALLOC_CAP_DMA);
 
 #include <mathlib.h>
 #include <g2d.h>
@@ -13,7 +15,10 @@
 #include <font57.h>
 
 #include <onx/log.h>
+#include <onx/mem.h>
 #include <onx/dsi.h>
+
+#define CACHE_LINE_ALIGN_BY 64
 
 // ---------------------------------
 
@@ -24,16 +29,19 @@ uint16_t g2d_width =240;
 uint16_t g2d_height=320;
 
 #define BPP 3
-
-// ---------------------------------
-
-static uint8_t* g2d_buf=0;
-
 #define SEG_BYTES 8192
 
+#ifdef G2D_BUF_MALLOCD
+static uint8_t* g2d_buf=0;
+#else
+static uint8_t __attribute__((aligned(CACHE_LINE_ALIGN_BY))) g2d_buf[SEG_BYTES];
+#endif
+
 void g2d_init() {
-  g2d_buf = (uint8_t*)heap_caps_calloc(1, SEG_BYTES, MALLOC_CAP_DMA);
-  if(!g2d_buf) log_write("couldn't heap_caps_calloc(g2d_buf=%d)\n", SEG_BYTES);
+#ifdef G2D_BUF_MALLOCD
+  g2d_buf = (uint8_t*)mem_alloc(SEG_BYTES);
+  if(!g2d_buf) log_write("couldn't alloc g2d_buf %d bytes\n", SEG_BYTES);
+#endif
 }
 
 static bool pixels_to_draw=false;
@@ -89,10 +97,7 @@ static void draw_rectangle(uint16_t cxtl, uint16_t cytl,
   int16_t w=(cxbr-cxtl);
   int16_t h=(cybr-cytl);
 
-  if(w<=0 || h<=0){
-    log_write("invalid params\n");
-;   return;
-  }
+; if(w<=0 || h<=0) return;
 
   uint16_t seg_offst=0;
   uint16_t seg_lines=0;
