@@ -18,7 +18,7 @@ extern uint16_t screen_width;
 extern uint16_t screen_height;
 
 #define NO_FASTNESS_TEST  // DO_FASTNESS_TEST
-#define NO_UNCONN_RED     // DO_UNCONN_RED
+#define DO_UNCONN_RED     // DO_UNCONN_RED
 
 #ifdef DO_FASTNESS_TEST
 #define LINES_AT_A_TIME 4
@@ -94,12 +94,9 @@ static void draw_image_from_psram(uint8_t im){
     uint16_t y=LINES_PER_BAND * b;
     uint16_t h=LINES_PER_BAND;
 
-    dsi_draw_bitmap((im==1? image_1: image_2)+(off * BPP), x, y, w, h);
-    time_delay_us(300); // REVISIT: time for actual sync!!
+    dsi_draw_bitmap((im==1? image_1: image_2)+(off * BPP), x, y, w, h, 300);
   }
 }
-
-void g2d_init();
 
 IRAM_ATTR void startup_core0_init(){
 
@@ -107,8 +104,6 @@ IRAM_ATTR void startup_core0_init(){
 
   uint16_t sh=screen_height;
   uint16_t sw=screen_width;
-
-  g2d_init();
 
 #ifdef DO_FASTNESS_TEST
   fastness_buf = (uint8_t*)heap_caps_calloc(1, LINES_AT_A_TIME * sh * BPP, MALLOC_CAP_DMA);
@@ -155,7 +150,7 @@ IRAM_ATTR static void draw_test_animation() {
       fastness_buf[p*BPP+1] = g + (l * 255 / sw);
       fastness_buf[p*BPP+2] = b + (l * 255 / sw);
     }
-    dsi_draw_bitmap(fastness_buf, 0, l, sh, LINES_AT_A_TIME);
+    dsi_draw_bitmap(fastness_buf, 0, l, sh, LINES_AT_A_TIME, 0);
   }
 }
 #endif
@@ -211,7 +206,7 @@ IRAM_ATTR void startup_core0_loop(){
            unconn_buf[p * BPP + 1] = 0;
            unconn_buf[p * BPP + 2] = (b%3==0)? b*10+15: 0;
        }
-       dsi_draw_bitmap(unconn_buf, 0, b * LINES_PER_BAND, sh, LINES_PER_BAND);
+       dsi_draw_bitmap(unconn_buf, 0, b * LINES_PER_BAND, sh, LINES_PER_BAND, 0);
     }
 #endif
   }

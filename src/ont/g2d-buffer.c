@@ -70,8 +70,7 @@ static void draw_pixel_buf(uint16_t x, uint16_t y, uint16_t w, uint16_t h){
 
 ; if(!pixels_to_draw) return;
 
-  dsi_draw_bitmap(g2d_buf, g2d_x_pos + x, g2d_y_pos + y, w, h);
-  time_delay_us(300); // REVISIT: time for actual sync!!
+  dsi_draw_bitmap(g2d_buf, g2d_x_pos + x, g2d_y_pos + y, w, h, 300);
 
   pixels_to_draw = false;
 }
@@ -114,8 +113,7 @@ static void draw_rectangle(uint16_t cxtl, uint16_t cytl,
       if(seg_index + w * BPP >= SEG_BYTES ||
          seg_offst + seg_lines == h){
 
-        dsi_draw_bitmap(g2d_buf, x, y + seg_offst, w, seg_lines);
-        time_delay_us(300); // REVISIT: time for actual sync!!
+        dsi_draw_bitmap(g2d_buf, x, y + seg_offst, w, seg_lines, 300);
 
         seg_offst += seg_lines;
         seg_lines = 0;
