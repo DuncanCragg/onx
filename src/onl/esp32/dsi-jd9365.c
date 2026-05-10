@@ -203,6 +203,12 @@ void dsi_draw_right_on_fbs(){
   }
 }
 
+uint8_t* dsi_get_fb(uint8_t i){
+  uint8_t* fbs[2];
+  esp_lcd_dpi_panel_get_frame_buffer(panel, 2, (void**)&fbs[0], (void**)&fbs[1]);
+  return fbs[i];
+}
+
 void dsi_draw_bitmap(void* buf, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint32_t wait_for){
   if(!panel) return;
   dma_done=false;
