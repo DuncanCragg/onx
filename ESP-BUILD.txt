@@ -1,4 +1,9 @@
 ------------------------------------------
+Basic set-up
+
+. .../esp-idf/export.sh
+
+------------------------------------------
 Initially, temp patches while building own layer above HAL/LL:
 
 cat esp-idf-no-free-rtos | (cd $IDF_PATH; patch -p1)
@@ -12,7 +17,7 @@ cat waveshare__esp_lcd_jd9365_10_1-no-free-rtos | patch -p1
 ------------------------------------------
 Regularly:
 
-rm -rf build; idf.py set-target esp32p4
+rm -rf build sdkconfig; idf.py set-target esp32p4
 
 ------------------------------------------
 Every build:
