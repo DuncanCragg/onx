@@ -4,13 +4,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#if defined(ST7789_WIDTH)
-#define SCREEN_WIDTH  ST7789_WIDTH
-#define SCREEN_HEIGHT ST7789_HEIGHT
-#else
-#define SCREEN_WIDTH  240
-#define SCREEN_HEIGHT 280
-#endif
+extern uint16_t g2d_width;     // from g2d-buffer
+extern uint16_t g2d_height;
 
 #define RGB565_TO_R(c) ((uint8_t)(((c) & 0xf800) >>  8))
 #define RGB565_TO_G(c) ((uint8_t)(((c) & 0x07e0) >>  3))
