@@ -5,7 +5,6 @@ idf_component_register(
     "../../../../onl/esp32/time.c"
     "../../../../onl/esp32/log.c"
     "../../../../onl/esp32/gpio.c"
-    "../../../../onl/touch-i2c.c"
     "../../../../onl/esp32/random.c"
 
     "../../../../onl/mem.c"
@@ -14,6 +13,7 @@ idf_component_register(
     "../../../../onl/io.c"
     "../../../../onl/radio-stub.c"
     "../../../../onl/ipv6-stub.c"
+    "../../../../onl/touch-i2c.c"
 
     "../../../../lib/lib.c"
     "../../../../lib/chunkbuf.c"

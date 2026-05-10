@@ -1,5 +1,6 @@
 .gitattributes
-.*.sw*
 docs/local
-build*
+.*.sw*
+build*/
+sdkconfig
 sdkconfig.old
