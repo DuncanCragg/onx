@@ -18,12 +18,15 @@ ONX includes both:
 
 ------
 
-The first demo I'm working on is a family digital notepad built on the ESP32-P4 Seeed
-Studio reTerminal D1001 and the M5Stack Tab5 tablets.
+The first demo I'm working on is a family Digital Living Space (DLS) device built on the
+ESP32-P4 Seeed Studio reTerminal D1001 and the M5Stack Tab5 tablets.
 
-Here, the data objects are local hypertext such as notes, messages and documents along with
-lists and collections of those, all interlinked and shared over the family WiFi.
+Here the data objects are hyperdata such as notes, paragraphs, tables, tasks, events,
+contacts, messages, comments, along with lists and collections of those, building
+documents, articles, books, libraries, chat groups, address books, task lists, calendars,
+all interlinked and shared live over the family WiFi.
 
-This notepad can be your first view into the Digital Living Space.
+The DLS device is a view into the single Digital Living Space that I envisage in the
+article above.
 
 ---------------------------
