@@ -7,7 +7,7 @@ ONX
 A "Data-First" and "Local-First" project, part of the "Tools for Thought" or "Personal
 Knowledge Management" wave; partly inspired by Ink & Switch and their friends.
 
-See the [Digital Living Space](https://ambient-digital.space) website for my vision.
+See the [Digital Living Space](https://digital-living.space) website for my vision.
 
 ------
 
