@@ -18,7 +18,7 @@ extern uint16_t screen_width;
 extern uint16_t screen_height;
 
 #define NO_FASTNESS_TEST  // DO_FASTNESS_TEST
-#define DO_UNCONN_RED     // DO_UNCONN_RED
+#define NO_UNCONN_RED     // DO_UNCONN_RED
 
 #ifdef DO_FASTNESS_TEST
 #define LINES_AT_A_TIME 4
@@ -159,26 +159,26 @@ void dsi_draw_right_on_fbs();
 
 IRAM_ATTR void startup_core0_loop(){
 
-  onx_u_loop();
-
 #ifdef DO_FASTNESS_TEST
-  int64_t ct = 0;
-  int64_t lt = 0;
-  int64_t frames = 0;
-  while(1){
+  static int64_t ct = 0;
+  static int64_t lt = 0;
+  static int64_t frames = 0;
 
-    draw_test_animation();
-    frames++;
+  draw_test_animation();
 
-    ct = time_us();
-    if((ct-lt) > 1000*1000){
-      float secs = (float)(ct-lt) / (1000*1000);
-      lt=ct;
-      printf("%.1ffps\n", frames / secs);
-      frames=0;
-    }
+  frames++;
+
+  ct = time_us();
+  if((ct-lt) > 1000*1000){
+    float secs = (float)(ct-lt) / (1000*1000);
+    lt=ct;
+    log_write("%.1ffps\n", frames / secs);
+    frames=0;
   }
+  return;
 #endif
+
+  onx_u_loop();
 
   dsi_loop();
 

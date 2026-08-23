@@ -55,6 +55,10 @@ IRAM_ATTR static bool dma_done_cb(esp_lcd_panel_handle_t panel, esp_lcd_dpi_pane
   return false; // need yield
 }
 
+IRAM_ATTR static bool dma_vsyn_cb(esp_lcd_panel_handle_t panel, esp_lcd_dpi_panel_event_data_t *edata, void *user_ctx){
+  return false;
+}
+
 const uint16_t screen_width=1280;
 const uint16_t screen_height=800;
 
@@ -101,6 +105,7 @@ void dsi_init(){
 
   esp_lcd_dpi_panel_event_callbacks_t cbs = {
       .on_color_trans_done = dma_done_cb,
+      .on_refresh_done     = dma_vsyn_cb,
   };
   esp_lcd_dpi_panel_register_event_callbacks(panel, &cbs, 0);
 
@@ -199,7 +204,7 @@ void dsi_draw_right_on_fbs(){
       }
     }
     esp_lcd_panel_draw_bitmap(panel, 2, y, x+100, y+100, fbs[i % 2]);
-    time_delay_ms(1000);
+    time_delay_ms(100);
   }
 }
 
@@ -216,6 +221,8 @@ void dsi_draw_bitmap(void* buf, uint16_t x, uint16_t y, uint16_t w, uint16_t h, 
   if(wait_for) for(uint32_t t=0; t< wait_for && !dma_done; t++) time_delay_us(1);
   dma_done=false;
 }
+
+
 
 
 

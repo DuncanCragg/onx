@@ -306,8 +306,8 @@ void onx_u_init(){
   io_init(io_cb);
 
   g2d_init();
-  g2d_x_pos=100;
-  g2d_y_pos=100;
+  g2d_x_pos=10;
+  g2d_y_pos=10;
 
   init_onx();
 
