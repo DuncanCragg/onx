@@ -14,6 +14,7 @@ See the [Digital Living Space](https://digital-living.space) website for my visi
 ONX includes both:
 
  - a graph database of data objects, including state handling and update propagation
+ - a peer-to-peer network protocol manifesting a distributed graph database
  - a tablet-sized touchscreen for exploring and updating those data objects
 
 ------
