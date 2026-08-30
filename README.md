@@ -11,26 +11,27 @@ See the [Digital Living Space](https://digital-living.space) website for my visi
 
 ------
 
-ONX includes both:
+ONX includes:
 
  - a graph database of data objects, including state handling and update propagation
  - a peer-to-peer network protocol manifesting a distributed graph database
- - a tablet-sized touchscreen for exploring and updating those data objects
+ - a touchscreen HCI for exploring and updating those data objects
 
 ------
 
-The first demo I'm working on is a family Digital Living Space (DLS) device built on the
-ESP32-P4 Seeed Studio reTerminal D1001 and the M5Stack Tab5 tablets.
+The first demo I'm working on is a family Digital Living Space (DLS) mobile device built
+with Nordic chipsets (nRF52 and nRF54) driving 4-inch touchscreens. I've also got a bright
+LED lamp and a small remote control device for that, communicating over a radio mesh.
 
 Here the data objects are hyperdata such as notes, documents, messages, comments, tasks,
 events, contacts, etc., all gathered and organised in lists, collections, sequences and
 workspaces, building up into notebooks, chat groups, shopping lists, calendars, address
 books and shared trip or daily planning spaces. There will also be clocks, weather
-forecasts and calculators. You'll be able to pull in pages from Wikipedia and mash up
-paragraphs from there. All these objects can be arbitrarily interlinked and shared live
-over the family WiFi.
+forecasts and calculators, as well as a screen for setting the colour of the LED lamp.
+You'll be able to pull in pages from Wikipedia and mash up paragraphs from there. All these
+objects can be arbitrarily interlinked and shared live over the radio mesh.
 
-The DLS device is a view into the single Digital Living Space that I envisage in the
-article above.
+The DLS device is a view into the single Digital Living Space or "DL-space" that I envisage
+in the article above.
 
 ---------------------------
