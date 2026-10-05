@@ -150,7 +150,7 @@ static void send_another_chunk(){
   int16_t len = chunkbuf_read(radio_write_buf, buf, RFM69_MAX_MESSAGE_LEN-1, -1);
                                                      // REVISIT scared of Off-By-One!
                                                      // REVISIT why not 128 bytes?
-  rh_write_fifo((uint8_t*)buf, len);
+  rh_write_fifo((uint8_t*)buf, len); // REVISIT what if len is an error?
   rh_set_mode_tx();
 }
 
