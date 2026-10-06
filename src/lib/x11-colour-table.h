@@ -1,14 +1,16 @@
-#ifndef COLOR_TABLE_H
-#define COLOR_TABLE_H
+#ifndef X11_COLOUR_TABLE_H
+#define X11_COLOUR_TABLE_H
 
 #include <stdint.h>
 
 typedef struct {
-    const char *name;
-    uint32_t value;
-} ColorName;
 
-static const ColorName colorNames[] = {
+  char*     name;
+  uint32_t  value;
+
+} colour_name_val_t;
+
+static const colour_name_val_t colour_name_vals[] = {
     {"snow", 0xfffafa},
     {"ghostwhite", 0xf8f8ff},
     {"whitesmoke", 0xf5f5f5},
@@ -667,7 +669,7 @@ static const ColorName colorNames[] = {
     {"darkmagenta", 0x8b008b},
     {"darkred", 0x8b0000},
     {"lightgreen", 0x90ee90},
-    {NULL, 0} // End marker
+    {0,0}
 };
 
-#endif // COLOR_TABLE_H
+#endif

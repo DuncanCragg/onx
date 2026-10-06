@@ -1,13 +1,23 @@
-#ifndef IO_H
-#define IO_H
+#ifndef USER_IN_H
+#define USER_IN_H
 
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <string.h>
 #include <stdbool.h>
-#include <pthread.h>
+
+/*
+  user_in: input devices for user viewing and driving a screen as output
+
+     - home/back buttons
+     - d-pad buttons
+     - keyboard
+     - touch
+     - mouse
+     - joystick
+     - head 9dof
+*/
 
 typedef struct {
 
@@ -39,14 +49,17 @@ typedef struct {
 
   char     key;
 
-} io_state_t;
+} user_in_state_t;
 
-extern io_state_t io;
+extern user_in_state_t user_in;
 
-void io_state_show();
+typedef void (*user_in_state_changed_cb_t)();
 
-typedef void (*io_state_changed_cb_t)();
+void user_in_init(user_in_state_changed_cb_t cb);
 
-void io_init(io_state_changed_cb_t cb);
+bool user_in_touch_event_1(uint16_t x,   uint16_t y,   bool touched);
+bool user_in_touch_event_n(uint16_t x[], uint16_t y[], uint8_t n);
+
+void user_in_state_show();
 
 #endif
