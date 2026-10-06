@@ -1,0 +1,6 @@
+target extended-remote localhost:3333
+file ./onx-kernel.out
+set print pretty on
+break HardFault_Handler
+set unwindonsignal on
+#monitor reset init
