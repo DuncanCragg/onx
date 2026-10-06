@@ -11,6 +11,7 @@
 #include <esp_heap_caps.h>
 
 #include <onx/time.h>
+#include <onx/gpio.h>
 #include <onx/log.h>
 #include <onx/dsi.h>
 
@@ -99,6 +100,8 @@ static void draw_image_from_psram(uint8_t im){
 }
 
 IRAM_ATTR void startup_core0_init(){
+
+  gpio_init();
 
   dsi_init();
 

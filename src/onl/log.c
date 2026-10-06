@@ -5,12 +5,20 @@
 
 #include <sync-and-mem.h>
 
+#ifdef NRF5
+#include <nrf_log.h>
+#include <nrf_log_ctrl.h>
+#include <nrf_log_default_backends.h>
+#endif
+
 #include <onx/lib.h>
 #include <onx/boot.h>
 #include <onx/mem.h>
 #include <onx/time.h>
 #include <onx/log.h>
 #include <onx/gpio.h>
+#include <onx/user-io.h>
+#include <onx/serial.h>
 
 #include <persistence.h>
 
@@ -23,7 +31,7 @@ extern bool log_arch_connected();
 #define LOG_BUF_SIZE 2048
 static volatile char log_buffer[LOG_BUF_SIZE];
 static volatile list* saved_messages = 0;
-       volatile list* gfx_log_buffer = 0;
+       volatile list* g2d_log_buffer = 0;
 
 static volatile bool initialised=false;
 
@@ -52,32 +60,25 @@ void log_init() {
   CRITICAL_SECTION_INIT(cs);
 
   if(!saved_messages) saved_messages = list_new(64);
-  gfx_log_buffer = list_new(32);
-
-#if defined(RTT_LOG_ENABLED)
-  if(log_to_rtt){
-    RTT_LOG_INIT(NULL);
-    RTT_LOG_DEFAULT_BACKENDS_INIT();
-  }
-#endif
 
   if(!log_arch_init()) return;
 
-  if(log_to_led){
-    gpio_init();
-#define LEDS_ACTIVE_STATE 1 // REVISIT: set in board defs
-#if defined(LED2_R_PIN)
-    gpio_mode(LED2_R_PIN, GPIO_MODE_OUTPUT);
-    gpio_mode(LED2_G_PIN, GPIO_MODE_OUTPUT);
-    gpio_mode(LED2_B_PIN, GPIO_MODE_OUTPUT);
-    gpio_set(LED2_R_PIN, !LEDS_ACTIVE_STATE);
-    gpio_set(LED2_G_PIN, !LEDS_ACTIVE_STATE);
-    gpio_set(LED2_B_PIN, !LEDS_ACTIVE_STATE);
-#elif defined(LED_PIN)
-    gpio_mode(LED_PIN, GPIO_MODE_OUTPUT);
-    gpio_set(LED_PIN,  !LEDS_ACTIVE_STATE);
+  if(log_to_rtt){
+#ifdef NRF5
+    NRF_LOG_INIT(0);
+    NRF_LOG_DEFAULT_BACKENDS_INIT();
+    NRF_LOG_INFO("--------- NRF Logging started ---------------");
+    NRF_LOG_FLUSH();
+    NRF_LOG_PROCESS();
 #endif
-    time_init();
+  }
+
+  if(log_to_g2d){
+    g2d_log_buffer = list_new(32);
+  }
+
+  if(log_to_led){
+    user_io_init(0);
     log_flash(0,1,0);
   }
 
@@ -86,9 +87,9 @@ void log_init() {
 
 #define LOG_EARLY_MS 800
 
-#define FLUSH_TO_STDIO  1
-#define FLUSH_TO_RTT    2
-#define FLUSH_TO_GFX    3
+#define FLUSH_TO_STD  1
+#define FLUSH_TO_RTT  2
+#define FLUSH_TO_G2D  3
 
 static bool already_in_log_write = false;
 
@@ -116,9 +117,10 @@ static void flush_saved_messages(uint8_t to){
   if(!ls) return;
   for(uint8_t i=1; i<=ls; i++){
 
+    bool free_msg=true;
     char* msg = list_get_n(saved_messages_copy, i);
 
-    if(to==FLUSH_TO_STDIO){
+    if(to==FLUSH_TO_STD){
       if(i==1)  printf("+---- saved messages --------------\n");
       static bool within_line=false;
       if(!within_line) printf("| ");
@@ -126,23 +128,22 @@ static void flush_saved_messages(uint8_t to){
       if(i==ls) printf("+----------------------------------\n");
       within_line=!strchr(msg,'\n');
     }
-    if(to==FLUSH_TO_GFX){
-      list_add(gfx_log_buffer, msg);
-    }
-#if defined(RTT_LOG_ENABLED)
     if(to==FLUSH_TO_RTT){
-      RTT_LOG_DEBUG("%s", msg);
-    }
+#ifdef NRF5
+      if(i==1)  NRF_LOG_INFO("+---- saved messages --------------");
+      msg[strcspn(msg, "\r\n")]=0;
+      NRF_LOG_INFO("| %s", msg);
+      if(i==ls) NRF_LOG_INFO("+----------------------------------");
+      NRF_LOG_FLUSH();
+      NRF_LOG_PROCESS();
 #endif
-    free(msg);
+    }
+    if(to==FLUSH_TO_G2D){
+      free_msg = !list_add(g2d_log_buffer, msg);
+    }
+    if(free_msg) free(msg);
   }
   list_free(saved_messages_copy, false);
-
-#if defined(RTT_LOG_ENABLED)
-  if(to==FLUSH_TO_RTT){
-    RTT_LOG_FLUSH();
-  }
-#endif
 }
 
 _Pragma(__STRING(weak log_user_key_cb))
@@ -176,20 +177,11 @@ bool log_loop() {
     char_recvd=0;
   }
 
-  if(log_to_std){
-    flush_saved_messages(FLUSH_TO_STDIO);
-  }
-  if(log_to_gfx){
-    flush_saved_messages(FLUSH_TO_GFX);
-  }
-#if defined(RTT_LOG_ENABLED)
-  if(log_to_rtt){
-    flush_saved_messages(FLUSH_TO_RTT);
-  }
-  return RTT_LOG_PROCESS();
-#else
+  if(log_to_std) flush_saved_messages(FLUSH_TO_STD);
+  if(log_to_rtt) flush_saved_messages(FLUSH_TO_RTT);
+  if(log_to_g2d) flush_saved_messages(FLUSH_TO_G2D);
+
   return false;
-#endif
 }
 
 #define LOGCHK if(r >= LOG_BUF_SIZE){ log_flash(1,0,0); return 0; }
@@ -222,10 +214,10 @@ int16_t log_write_mode(uint8_t mode, char* file, uint32_t line, const char* fmt,
     }
     r+=     vsnprintf(log_buffer+r, LOG_BUF_SIZE-r, fmt, args);                                            LOGCHK
     within_line=!strchr(log_buffer,'\n');
-    char* lb=strdup(log_buffer);
+    char* msg=strdup(log_buffer);
     if(!saved_messages) saved_messages = list_new(64);
     CRITICAL_SECTION_ENTER(cs);
-    if(!list_add(saved_messages, lb)) free(lb);
+    if(!list_add(saved_messages, msg)) free(msg);
     CRITICAL_SECTION_EXIT(cs);
     return 0;
   }
@@ -248,37 +240,44 @@ int16_t log_write_mode_main(uint8_t mode, char* file, uint32_t line, const char*
   bool nw=(mode==2 || mode==3);
 #endif
 
-  int16_t r=0;
-
   if(log_to_std){
-    flush_saved_messages(FLUSH_TO_STDIO);
+    flush_saved_messages(FLUSH_TO_STD);
+    int16_t r=0;
     r+=fl? printf("[%ld](%s:%ld) ", (uint32_t)time_ms(), file, line): 0;
     r+=    vprintf(fmt, args);
   }
-  if(log_to_gfx){
-    flush_saved_messages(FLUSH_TO_GFX);
+  if(log_to_g2d){
+    flush_saved_messages(FLUSH_TO_G2D);
+    int16_t r=0;
     r+=fl? snprintf(log_buffer+r, LOG_BUF_SIZE-r, "[%ld](%s:%ld) ", (uint32_t)time_ms(), file, line): 0; LOGCHK
     r+=   vsnprintf(log_buffer+r, LOG_BUF_SIZE-r, fmt, args);                                            LOGCHK
     if(string_is_blank(log_buffer)){
       r=0;
       r+=snprintf(log_buffer+r, LOG_BUF_SIZE-r, "[%ld](%s:%ld) [blank]", (uint32_t)time_ms(), file, line); LOGCHK
     }
-    char* lb=strdup(log_buffer);
-    if(!list_add(gfx_log_buffer, lb)) free(lb);
+    char* msg=strdup(log_buffer);
+    if(!list_add(g2d_log_buffer, msg)) free(msg);
   }
-#if defined(RTT_LOG_ENABLED)
   if(log_to_rtt){
+#ifdef NRF5
     flush_saved_messages(FLUSH_TO_RTT);
+    int16_t r=0;
     r+=fl? snprintf(log_buffer+r, LOG_BUF_SIZE-r, "[%ld](%s:%ld) ", (uint32_t)time_ms(), file, line): 0; LOGCHK
     r+=   vsnprintf(log_buffer+r, LOG_BUF_SIZE-r, fmt, args);                                            LOGCHK
-    RTT_LOG_DEBUG("%s", log_buffer);
-    time_delay_ms(2);
-    RTT_LOG_FLUSH();
+    if(string_is_blank(log_buffer)){
+      r=0;
+      r+=snprintf(log_buffer+r, LOG_BUF_SIZE-r, "[%ld](%s:%ld) [blank]", (uint32_t)time_ms(), file, line); LOGCHK
+    }
+    log_buffer[strcspn(log_buffer, "\r\n")]=0;
+    NRF_LOG_INFO("%s", log_buffer);
     time_delay_ms(2); // REVISIT
-  }
+    NRF_LOG_FLUSH();
+    NRF_LOG_PROCESS();
+    time_delay_ms(2); // REVISIT
 #endif
+  }
 
-  return r;
+  return 0; // why return the random chars written to a random channel?
 }
 
 static volatile bool    flash_on=false;
@@ -288,13 +287,8 @@ static volatile uint8_t flash_g=0;
 static volatile uint8_t flash_b=0;
 
 static void set_flash_state(){
-#if defined(LED2_R_PIN)
-  if(flash_r) gpio_set(LED2_R_PIN, flash_on? LEDS_ACTIVE_STATE: !LEDS_ACTIVE_STATE);
-  if(flash_g) gpio_set(LED2_G_PIN, flash_on? LEDS_ACTIVE_STATE: !LEDS_ACTIVE_STATE);
-  if(flash_b) gpio_set(LED2_B_PIN, flash_on? LEDS_ACTIVE_STATE: !LEDS_ACTIVE_STATE);
-#elif defined(LED_PIN)
-  ;           gpio_set(LED_PIN,  flash_on? LEDS_ACTIVE_STATE: !LEDS_ACTIVE_STATE);
-#endif
+  uint8_t n=user_io_led_number();
+  user_io_led_set(n, flash_on && flash_r, flash_on && flash_g, flash_on && flash_b);
 }
 
 #define FLASHES_NUM 3
@@ -328,13 +322,15 @@ void log_flash_current_file_line(char* file, uint32_t line, uint8_t r, uint8_t g
 }
 
 void log_flush() {
+
   if(!initialised) return;
-#if defined(RTT_LOG_ENABLED)
+
   if(log_to_rtt){
-    RTT_LOG_FLUSH();
-  }
-  time_delay_ms(5); // REVISIT
+#ifdef NRF5
+    NRF_LOG_FLUSH();
+    NRF_LOG_PROCESS();
 #endif
+  }
 }
 
 bool log_connected(){ return log_arch_connected(); }

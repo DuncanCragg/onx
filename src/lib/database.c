@@ -9,7 +9,7 @@
 #include <onx/lib.h>
 #include <onx/mem.h>
 #include <onx/database.h>
-#include <onx/show_bytes_n_chars.h>
+#include <onx/show-bytes-n-chars.h>
 
 #include <onn.h>
 

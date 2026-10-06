@@ -2,7 +2,7 @@
 #include <string.h>
 #include <strings.h>
 
-#include "color_table.h"
+#include "x11-colour-table.h"
 
 #include <onx/colours.h>
 
@@ -56,18 +56,18 @@ uint8_t colours_hex_to_int(char c) {
 
 colours_rgb colours_parse_string(char* cs) {
 
-  colours_rgb black = {0, 0, 0};
+  colours_rgb black = {0,0,0};
 
-  if (!cs || *cs == '\0') return black;
+  if(!cs || !(*cs)) return black;
 
-  for (const ColorName *entry = colorNames; entry->name; ++entry) {
-      if (strcasecmp(cs, entry->name) == 0) {
-          return (colours_rgb){
-            (entry->value >> 16) & 0xFF,
-            (entry->value >>  8) & 0xFF,
-            (entry->value      ) & 0xFF
-          };
-      }
+  for(colour_name_val_t* cnv = colour_name_vals; cnv->name; ++cnv) {
+    if(!strcasecmp(cs, cnv->name)) {
+      return (colours_rgb){
+        (cnv->value >> 16) & 0xff,
+        (cnv->value >>  8) & 0xff,
+        (cnv->value      ) & 0xff
+      };
+    }
   }
 
   if(!(cs[0]=='#' || cs[0]=='%')) return black;
@@ -78,6 +78,7 @@ colours_rgb colours_parse_string(char* cs) {
 
   size_t len = strlen(cs);
   if (len == 7) { // e.g., "#ff0000"
+
     for (int i = 1; i <= 6; i++) {
 
       int val = colours_hex_to_int(cs[i]);
@@ -92,6 +93,7 @@ colours_rgb colours_parse_string(char* cs) {
   }
   else
   if (len == 4) { // e.g., "#f00"
+
     for (int i = 1; i <= 3; i++) {
 
       int val = colours_hex_to_int(cs[i]);

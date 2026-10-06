@@ -3,8 +3,15 @@
 #include <onx/i2c.h>
 #include <onx/seesaw.h>
 
-#define SEESAW_I2C_SPEED_KHZ 100 // REVISIT see TWI_CLOCK in:
-                                 // ~/.arduino15/packages/rp2040/hardware/rp2040/5.1.0/libraries/Wire/src/Wire.h
+// see Adafruit_seesaw.cpp for source code
+
+#define SEESAW_DEVICE_CHIPSET_SAMD09   0x55
+#define SEESAW_DEVICE_CHIPSET_TINY806  0x84
+#define SEESAW_DEVICE_CHIPSET_TINY807  0x85
+#define SEESAW_DEVICE_CHIPSET_TINY816  0x86
+#define SEESAW_DEVICE_CHIPSET_TINY817  0x87
+#define SEESAW_DEVICE_CHIPSET_TINY1616 0x88
+#define SEESAW_DEVICE_CHIPSET_TINY1617 0x89
 
 #define SEESAW_HI_STATUS         0x00
 #define SEESAW_HI_GPIO           0x01
@@ -52,39 +59,27 @@
 #define SEESAW_LO_ENCODER_POSITION 0x30
 #define SEESAW_LO_ENCODER_DELTA    0x40
 
-static void* i2c_d=0; // default i2c
-static void* i2c_2=0; // non-default alt i2c
-
-static bool i2c_is_default[128];
-
-#define I2C_FOR_ADDRESS(a) (i2c_is_default[a]? i2c_d: i2c_2)
+static void* i2c_inst=0;
 
 static void sw_reset(uint8_t addr){
   uint8_t e;
   uint8_t b=0xff;
-  e=i2c_write_register_hi_lo(I2C_FOR_ADDRESS(addr), addr, SEESAW_HI_STATUS, SEESAW_LO_STATUS_SWRST, &b, 1);
+  e=i2c_write_reg_hilo(i2c_inst, addr, SEESAW_HI_STATUS, SEESAW_LO_STATUS_SWRST, &b, 1);
   time_delay_ms(80);
 }
 
-void seesaw_init(uint8_t addr, bool reset){
+void seesaw_init(uint8_t addr){
+  if(i2c_inst) return;
   time_delay_ms(50); // seesaw needs a minute to get its head straight
-  if(!i2c_d) i2c_d=i2c_init(SEESAW_I2C_SPEED_KHZ);
-  i2c_is_default[addr]=true;
-  if(reset) sw_reset(addr);
-}
-
-void seesaw_init_2(uint8_t addr, bool reset, uint8_t sda_pin, uint8_t scl_pin){
-  time_delay_ms(50); // seesaw needs a minute to get its head straight
-  if(!i2c_2) i2c_2=i2c_init_2(SEESAW_I2C_SPEED_KHZ, sda_pin, scl_pin);
-  i2c_is_default[addr]=false;
-  if(reset) sw_reset(addr);
+  i2c_inst = i2c_init();
+  sw_reset(addr);
 }
 
 char* seesaw_device_chipset(uint8_t addr){
 
   uint8_t e;
   uint8_t c;
-  e=i2c_read_register_hi_lo(I2C_FOR_ADDRESS(addr), addr, SEESAW_HI_STATUS, SEESAW_LO_STATUS_HW_ID, &c, 1);
+  e=i2c_read_reg_hilo(i2c_inst, addr, SEESAW_HI_STATUS, SEESAW_LO_STATUS_HW_ID, &c, 1, 150);
   if(e) return "error reading chipset";
 
   switch(c){
@@ -103,7 +98,7 @@ uint32_t seesaw_device_id(uint8_t addr){
 
   uint8_t e;
   uint8_t data[4];
-  e=i2c_read_register_hi_lo(I2C_FOR_ADDRESS(addr), addr, SEESAW_HI_STATUS, SEESAW_LO_STATUS_VERSION, data, 4);
+  e=i2c_read_reg_hilo(i2c_inst, addr, SEESAW_HI_STATUS, SEESAW_LO_STATUS_VERSION, data, 4, 150);
   if(e) return 0;
 
   uint32_t id = ((uint32_t)data[0] << 24) |
@@ -125,6 +120,20 @@ uint16_t seesaw_device_id_lo(uint8_t addr){
   return id_lo;
 }
 
+uint32_t seesaw_device_options(uint8_t addr){
+
+  uint8_t e;
+  uint8_t data[4];
+  e=i2c_read_reg_hilo(i2c_inst, addr, SEESAW_HI_STATUS, SEESAW_LO_STATUS_OPTIONS, data, 4, 150);
+  if(e) return 0;
+
+  uint32_t op = ((uint32_t)data[0] << 24) |
+                ((uint32_t)data[1] << 16) |
+                ((uint32_t)data[2] <<  8) |
+                ((uint32_t)data[3]      );
+  return op;
+}
+
 void seesaw_gpio_mode(uint8_t addr, uint32_t gpio_mask, uint8_t mode){
 
   uint8_t m[] = {
@@ -137,23 +146,23 @@ void seesaw_gpio_mode(uint8_t addr, uint32_t gpio_mask, uint8_t mode){
   uint8_t e;
   switch(mode){
     case SEESAW_GPIO_MODE_OUTPUT: {
-      e=i2c_write_register_hi_lo(I2C_FOR_ADDRESS(addr), addr, SEESAW_HI_GPIO, SEESAW_LO_GPIO_DIRSET_BULK, m, 4);
+      e=i2c_write_reg_hilo(i2c_inst, addr, SEESAW_HI_GPIO, SEESAW_LO_GPIO_DIRSET_BULK, m, 4);
       break;
     }
     case SEESAW_GPIO_MODE_INPUT: {
-      e=i2c_write_register_hi_lo(I2C_FOR_ADDRESS(addr), addr, SEESAW_HI_GPIO, SEESAW_LO_GPIO_DIRCLR_BULK, m, 4);
+      e=i2c_write_reg_hilo(i2c_inst, addr, SEESAW_HI_GPIO, SEESAW_LO_GPIO_DIRCLR_BULK, m, 4);
       break;
     }
     case SEESAW_GPIO_MODE_INPUT_PULLUP: {
-      e=i2c_write_register_hi_lo(I2C_FOR_ADDRESS(addr), addr, SEESAW_HI_GPIO, SEESAW_LO_GPIO_DIRCLR_BULK, m, 4);
-      e=i2c_write_register_hi_lo(I2C_FOR_ADDRESS(addr), addr, SEESAW_HI_GPIO, SEESAW_LO_GPIO_PULLENSET,   m, 4);
-      e=i2c_write_register_hi_lo(I2C_FOR_ADDRESS(addr), addr, SEESAW_HI_GPIO, SEESAW_LO_GPIO_BULK_SET,    m, 4);
+      e=i2c_write_reg_hilo(i2c_inst, addr, SEESAW_HI_GPIO, SEESAW_LO_GPIO_DIRCLR_BULK, m, 4);
+      e=i2c_write_reg_hilo(i2c_inst, addr, SEESAW_HI_GPIO, SEESAW_LO_GPIO_PULLENSET,   m, 4);
+      e=i2c_write_reg_hilo(i2c_inst, addr, SEESAW_HI_GPIO, SEESAW_LO_GPIO_BULK_SET,    m, 4);
       break;
     }
     case SEESAW_GPIO_MODE_INPUT_PULLDOWN: {
-      e=i2c_write_register_hi_lo(I2C_FOR_ADDRESS(addr), addr, SEESAW_HI_GPIO, SEESAW_LO_GPIO_DIRCLR_BULK, m, 4);
-      e=i2c_write_register_hi_lo(I2C_FOR_ADDRESS(addr), addr, SEESAW_HI_GPIO, SEESAW_LO_GPIO_PULLENSET,   m, 4);
-      e=i2c_write_register_hi_lo(I2C_FOR_ADDRESS(addr), addr, SEESAW_HI_GPIO, SEESAW_LO_GPIO_BULK_CLR,    m, 4);
+      e=i2c_write_reg_hilo(i2c_inst, addr, SEESAW_HI_GPIO, SEESAW_LO_GPIO_DIRCLR_BULK, m, 4);
+      e=i2c_write_reg_hilo(i2c_inst, addr, SEESAW_HI_GPIO, SEESAW_LO_GPIO_PULLENSET,   m, 4);
+      e=i2c_write_reg_hilo(i2c_inst, addr, SEESAW_HI_GPIO, SEESAW_LO_GPIO_BULK_CLR,    m, 4);
       break;
     }
   }
@@ -169,15 +178,15 @@ void seesaw_gpio_interrupts(uint8_t addr, uint32_t gpio_mask, bool enabled){
   };
 
   uint8_t e;
-  if (enabled) e=i2c_write_register_hi_lo(I2C_FOR_ADDRESS(addr), addr, SEESAW_HI_GPIO, SEESAW_LO_GPIO_INTENSET, m, 4);
-  else         e=i2c_write_register_hi_lo(I2C_FOR_ADDRESS(addr), addr, SEESAW_HI_GPIO, SEESAW_LO_GPIO_INTENCLR, m, 4);
+  if (enabled) e=i2c_write_reg_hilo(i2c_inst, addr, SEESAW_HI_GPIO, SEESAW_LO_GPIO_INTENSET, m, 4);
+  else         e=i2c_write_reg_hilo(i2c_inst, addr, SEESAW_HI_GPIO, SEESAW_LO_GPIO_INTENCLR, m, 4);
 }
 
 uint32_t seesaw_gpio_read(uint8_t addr){
 
   uint8_t data[4];
   uint8_t e;
-  e=i2c_read_register_hi_lo(I2C_FOR_ADDRESS(addr), addr, SEESAW_HI_GPIO, SEESAW_LO_GPIO_BULK, data, 4);
+  e=i2c_read_reg_hilo(i2c_inst, addr, SEESAW_HI_GPIO, SEESAW_LO_GPIO_BULK, data, 4, 250);
   if(e) return 0;
 
   uint32_t pin_bits = ((uint32_t)data[0] << 24) |
@@ -188,18 +197,19 @@ uint32_t seesaw_gpio_read(uint8_t addr){
   return pin_bits;
 }
 
+// see Adafruit_seesaw.cpp where samd09 pins are mapped; we don't
 uint16_t seesaw_analog_read(uint8_t addr, uint8_t pin){
 
   uint8_t e;
 
-  uint8_t data[2];      // REVISIT: adafruit have a 500us delay in the following as extra arg
-  e=i2c_read_register_hi_lo(I2C_FOR_ADDRESS(addr), addr, SEESAW_HI_ADC, SEESAW_LO_ADC_CHANNEL_OFFSET+pin, data, 2);
+  uint8_t data[2]; // ADC delay https://cdn-learn.adafruit.com/downloads/pdf/adafruit-seesaw-atsamd09-breakout.pdf
+  e=i2c_read_reg_hilo(i2c_inst, addr, SEESAW_HI_ADC, SEESAW_LO_ADC_CHANNEL_OFFSET+pin, data, 2, 500);
   if(e) return 0;
 
   uint16_t value = ((uint16_t)data[0] << 8) |
                    ((uint16_t)data[1]     );
 
-  time_delay_ms(1);
+  time_delay_ms(1); // REVISIT
   return value;
 }
 
@@ -208,7 +218,7 @@ int32_t seesaw_encoder_position(uint8_t addr) {
   uint8_t e;
 
   uint8_t data[4];
-  e=i2c_read_register_hi_lo(I2C_FOR_ADDRESS(addr), addr, SEESAW_HI_ENCODER, SEESAW_LO_ENCODER_POSITION, data, 4);
+  e=i2c_read_reg_hilo(i2c_inst, addr, SEESAW_HI_ENCODER, SEESAW_LO_ENCODER_POSITION, data, 4, 150);
   if(e) return 0;
 
   int32_t position = ((uint32_t)data[0] << 24) |

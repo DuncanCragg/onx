@@ -750,7 +750,7 @@ void device_init() {
 // ----------------------------------------------
 
 #define NOT_IN_EVAL(o,action,act) \
-  if(!log_to_gfx){ \
+  if(!log_to_g2d){ \
     log_write("--------------------------\n" \
               action " property in an object but not running in an evaluator!\n" \
               "uid: %s is: %s @ %s: '%s'\n" \
@@ -767,7 +767,7 @@ void device_init() {
 */
 
 #define IN_EVAL(o) \
-  if(!log_to_gfx){ \
+  if(!log_to_g2d){ \
     log_write("--------------------------\n" \
               "Already in evaluators! %s\n" \
               "--------------------------\n", \

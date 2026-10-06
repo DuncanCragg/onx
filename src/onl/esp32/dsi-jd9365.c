@@ -29,6 +29,7 @@
 
 #include <onx/log.h>
 #include <onx/dsi.h>
+#include <onx/user-in.h>
 
 #define LCD_BIT_PER_PIXEL 24
 #define PIN_NUM_LCD_RST -1
@@ -158,8 +159,6 @@ void dsi_init(){
   esp_lcd_touch_new_i2c_gt911(touch_i2c, &touch_config, &touch);
 }
 
-extern void touch_i2c_event(uint16_t x[], uint16_t y[], uint8_t n);
-
 void dsi_loop(){
 
   uint16_t x[5];
@@ -172,12 +171,12 @@ void dsi_loop(){
 
   static bool pending_untouch=false;
   if(touched){
-    touch_i2c_event(x,y,n);
+    user_in_touch_event_n(x,y,n);
     pending_untouch=true;
   }
   else
   if(pending_untouch){
-    touch_i2c_event(0,0,0);
+    user_in_touch_event_n(0,0,0);
     pending_untouch=false;
   }
 }

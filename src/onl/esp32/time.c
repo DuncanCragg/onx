@@ -15,6 +15,8 @@
 #include <onx/time.h>
 #include <onx/log.h>
 
+// ----------------------------------------------------
+
 static volatile bool initialised=false;
 
 static volatile uint64_t epoch_seconds=1675959628;
@@ -23,20 +25,32 @@ static void every_second(void*) {
   epoch_seconds++;
 }
 
-// ----------------------------------------------------
-
 void time_init_set(uint64_t es) {
   if(es) epoch_seconds=es;
   time_init();
 }
 
 void time_init() {
+
   if(initialised) return;
-  time_tick(every_second, 0, 1000);
+
+  // ----------
+
   initialised=true;
+
+  time_tick(every_second, 0, 1000);
 }
 
 // ----------------------------------------------------
+
+uint64_t time_es() {
+  if(!initialised) return 0;
+  return epoch_seconds;
+}
+
+void time_es_set(uint64_t es) {
+  epoch_seconds=es;
+}
 
 uint32_t time_s() {
   if(!initialised) return 0;
@@ -60,6 +74,7 @@ uint64_t time_us(){
 // ----------------------------------------------------
 
 void time_delay_ms(uint32_t ms) {
+  if(!ms) return;
   if(in_interrupt_context()){
     log_flash(1,0,0);
 ;   return;
@@ -68,6 +83,7 @@ void time_delay_ms(uint32_t ms) {
 }
 
 void time_delay_us(uint32_t us) {
+  if(!us) return;
   if(in_interrupt_context()){
     if(us<=10) esp_rom_delay_us(us);
     else log_flash(1,0,0);
@@ -78,18 +94,12 @@ void time_delay_us(uint32_t us) {
 
 // ----------------------------------------------------
 
-uint64_t time_es() {
-  if(!initialised) return 0;
-  return epoch_seconds;
-}
-
-void time_es_set(uint64_t es) {
-  epoch_seconds=es;
-}
-
-// ----------------------------------------------------
-
 uint16_t time_tick(time_up_cb cb, void* arg, uint32_t every_ms){
+
+  if(!initialised) return 0;
+
+  if(!cb || !every_ms) return 0;
+
   const esp_timer_create_args_t periodic_timer_args = {
     .callback = cb,
     .arg = arg,
@@ -104,6 +114,11 @@ uint16_t time_tick(time_up_cb cb, void* arg, uint32_t every_ms){
 }
 
 uint16_t time_once(time_up_cb cb, void* arg, uint32_t after_ms){
+
+  if(!initialised) return 0;
+
+  if(!cb || !after_ms) return 0;
+
   const esp_timer_create_args_t oneshot_timer_args = {
     .callback = cb,
     .arg = arg,
@@ -117,12 +132,8 @@ uint16_t time_once(time_up_cb cb, void* arg, uint32_t after_ms){
   return 0;
 }
 
-void time_stop(uint16_t id) {
-}
-
-// ----------------------------------------------------
-
-void time_end() {
+bool time_stop(uint16_t id) {
+  return false;
 }
 
 // ----------------------------------------------------

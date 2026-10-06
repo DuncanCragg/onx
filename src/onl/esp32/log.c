@@ -57,10 +57,8 @@ static void IRAM_ATTR usb_serial_jtag_connected_monitor() {
   }
 }
 
-extern void log_char_recvd(uint8_t ch); // call up to onl/log.c
-
 void usb_serial_jtag_char_recvd_cb(uint8_t char_recvd){
-  log_char_recvd(char_recvd);
+  log_char_recvd(char_recvd); // call up to onl/log.c
 }
 
 bool log_arch_init(){  // call down from onl/log.c

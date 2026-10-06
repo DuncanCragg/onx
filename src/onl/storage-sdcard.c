@@ -11,7 +11,7 @@
 #include <onx/gpio.h>
 #include <onx/spi.h>
 #include <onx/chunkbuf.h>
-#include <onx/show_bytes_n_chars.h>
+#include <onx/show-bytes-n-chars.h>
 #include <onx/storage.h>
 
 char* storage_init(char* allids){

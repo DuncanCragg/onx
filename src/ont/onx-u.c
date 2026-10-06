@@ -6,7 +6,8 @@
 #include <onx/log.h>
 #include <onx/gpio.h>
 #include <onx/items.h>
-#include <onx/io.h>
+#include <onx/motion.h>
+#include <onx/user-in.h>
 
 #include <onn.h>
 #include <onr.h>
@@ -20,7 +21,7 @@
 
 // -----------------------------------------------------
 
-extern uint16_t screen_width;  // from hstx, etc
+extern uint16_t screen_width;  // from dsi, etc
 extern uint16_t screen_height;
 
 uint16_t g2d_x_pos=0;
@@ -31,12 +32,13 @@ uint16_t g2d_y_pos=0;
 char* useruid;
 char* homeuid;
 char* inventoryuid;
-
-static char* batteryuid;
-static char* touchuid;
-static char* buttonuid;
-static char* clockuid;
-static char* aboutuid;
+char* batteryuid;
+char* touchuid;
+char* motionuid;
+char* buttonuid;
+char* backlightuid;
+char* clockuid;
+char* aboutuid;
 
 object* user;
 object* responses;
@@ -51,6 +53,7 @@ volatile uint32_t pending_user_event_time;
 static void every_second(void*){
   onn_run_evaluators(clockuid, 0);
   onn_run_evaluators(aboutuid, 0);
+  onn_run_evaluators(motionuid, 0);
 }
 
 static void every_10s(void*){
@@ -59,42 +62,46 @@ static void every_10s(void*){
 
 // ------------------------------------------------------------------------
 
-static bool touch_down=false;
+static void user_in_cb() {
 
-static void io_cb() {
+#ifndef NRF5 // so move it
 
-  int16_t touch_x = ((int16_t)io.touch_x)-g2d_x_pos;
-  int16_t touch_y = ((int16_t)io.touch_y)-g2d_y_pos;
+  int16_t touch_x = ((int16_t)user_in.touch_x)-g2d_x_pos;
+  int16_t touch_y = ((int16_t)user_in.touch_y)-g2d_y_pos;
   if(touch_x<0) touch_x=0; if(touch_x>g2d_width)  touch_x=g2d_width;
   if(touch_y<0) touch_y=0; if(touch_y>g2d_height) touch_y=g2d_height;
 
-  if(io.touched){
-    touch_down = true;
+  static bool pending_untouch=false;
+  if(user_in.touched){
     g2d_touch_event(true, touch_x, touch_y);
+    pending_untouch = true;
   }
   else
-  if(touch_down){ // you can get >1 touch up event so reduce to just one
-    touch_down=false;
+  if(pending_untouch){ // you can get >1 touch up event so reduce to just one
     g2d_touch_event(false, touch_x, touch_y);
+    pending_untouch=false;
   }
 
-  onn_run_evaluators(touchuid, 0); // reads global io so don't need to pass here
+  onn_run_evaluators(touchuid, 0); // reads global user_in so don't need to pass here
 
   // simulate physical back button with bottom-left of screen
-  if(io.touched && !button_pressed){
-    #define BACK_BUTTON_SIZE 200                  // screen_height not width!
-    if(io.touch_x < BACK_BUTTON_SIZE && io.touch_y > screen_width-BACK_BUTTON_SIZE){
+  if(user_in.touched && !button_pressed){
+    #define BACK_BUTTON_SIZE 200                            // screen_height not width!
+    if(user_in.touch_x < BACK_BUTTON_SIZE && user_in.touch_y > screen_width-BACK_BUTTON_SIZE){
       button_pressed=true;
       onn_run_evaluators(buttonuid, (void*)button_pressed);
       onn_run_evaluators(useruid, (void*)USER_EVENT_BUTTON);
     }
   }
   else
-  if(!io.touched && button_pressed){
+  if(!user_in.touched && button_pressed){
     button_pressed = false;
     onn_run_evaluators(buttonuid, (void*)button_pressed);
     onn_run_evaluators(useruid, (void*)USER_EVENT_BUTTON);
   }
+
+#endif
+
 }
 
 // ------------------------------------------------------------------------
@@ -136,6 +143,10 @@ void init_onx(){
 
   log_write("Starting ONX.....\n");
 
+#if defined(BOARD_MAGIC3)
+  magic3_io_evaluators_init();
+#endif
+
   onn_set_evaluators("eval_default",   evaluate_edit_rule, evaluate_default, 0);
   onn_set_evaluators("eval_editable",  evaluate_edit_rule, 0);
   onn_set_evaluators("eval_clock",     evaluate_clock_sync_logic, evaluate_clock_logic, 0);
@@ -144,11 +155,17 @@ void init_onx(){
   onn_set_evaluators("eval_battery",   evaluate_battery_in, 0);
   onn_set_evaluators("eval_touch",     evaluate_touch_in, 0);
   onn_set_evaluators("eval_button",    evaluate_button_in, 0);
+#if defined(BOARD_MAGIC3)
+  onn_set_evaluators("eval_motion",    evaluate_motion_in, 0);
+  onn_set_evaluators("eval_backlight", evaluate_edit_rule, evaluate_light_logic, evaluate_backlight_out, 0);
+#endif
   onn_set_evaluators("eval_about",     evaluate_about_in, 0);
 
   object* battery;
   object* touch;
+  object* motion;
   object* button;
+  object* backlight;
   object* bcs;
   object* oclock;
   object* watchface;
@@ -178,7 +195,9 @@ void init_onx(){
     responses =object_new(0, "eval_default",   "user responses", 12); // REVISIT "editable"?
     battery   =object_new(0, "eval_battery",   "battery", 4);
     touch     =object_new(0, "eval_touch",     "touch", 6);
+    motion    =object_new(0, "eval_motion",    "motion", 8);
     button    =object_new(0, "eval_button",    "button", 4);
+    backlight =object_new(0, "eval_backlight", "light editable", 12);
     bcs       =object_new(0, "eval_editable",  "bcs editable", 5);
     oclock    =object_new(0, "eval_clock",     "clock event", 12);
     watchface =object_new(0, "eval_editable",  "watchface editable", 9);
@@ -196,7 +215,9 @@ void init_onx(){
     responsesuid =object_property(responses, "UID");
     batteryuid   =object_property(battery, "UID");
     touchuid     =object_property(touch, "UID");
+    motionuid    =object_property(motion, "UID");
     buttonuid    =object_property(button, "UID");
+    backlightuid =object_property(backlight, "UID");
     bcsuid       =object_property(bcs, "UID");
     clockuid     =object_property(oclock, "UID");
     watchfaceuid =object_property(watchface, "UID");
@@ -211,6 +232,13 @@ void init_onx(){
 
     object_property_set(user, "responses", responsesuid);
     object_property_set(user, "inventory", inventoryuid);
+
+    object_property_set(backlight, "light", "on");
+    object_property_set(backlight, "level", "high");
+    object_property_set(backlight, "timeout", "45000");
+    object_property_set(backlight, "touch", touchuid);
+    object_property_set(backlight, "motion", motionuid);
+    object_property_set(backlight, "button", buttonuid);
 
     object_property_set(bcs, "brightness", "128");
     object_property_set(bcs, "colour",     "128");
@@ -256,8 +284,10 @@ void init_onx(){
     object_property_add(allobjects, "list", clockuid);
     object_property_add(allobjects, "list", batteryuid);
     object_property_add(allobjects, "list", touchuid);
+    object_property_add(allobjects, "list", motionuid);
     object_property_add(allobjects, "list", buttonuid);
     object_property_add(allobjects, "list", watchfaceuid);
+    object_property_add(allobjects, "list", backlightuid);
     object_property_add(allobjects, "list", useruid);
     object_property_add(allobjects, "list", note1uid);
     object_property_add(allobjects, "list", note2uid);
@@ -274,11 +304,14 @@ void init_onx(){
     object_property_add(onn_device_object, "user", useruid);
     object_property_add(onn_device_object, "io",   batteryuid);
     object_property_add(onn_device_object, "io",   touchuid);
+    object_property_add(onn_device_object, "io",   motionuid);
     object_property_add(onn_device_object, "io",   buttonuid);
+    object_property_add(onn_device_object, "io",   backlightuid);
     object_property_add(onn_device_object, "io",   clockuid);
 
     object_set_persist(battery, "none");
     object_set_persist(touch,   "none");
+    object_set_persist(motion,  "none");
     object_set_persist(button,  "none");
     object_set_persist(about,   "none");
 
@@ -293,7 +326,9 @@ void init_onx(){
   }
   onn_run_evaluators(batteryuid, 0);
   onn_run_evaluators(clockuid, 0);
+  onn_run_evaluators(backlightuid, 0);
   onn_run_evaluators(aboutuid, 0);
+  onn_run_evaluators(motionuid, 0);
   onn_run_evaluators(useruid, (void*)USER_EVENT_INITIAL);
 }
 
@@ -301,9 +336,7 @@ void init_onx(){
 
 void onx_u_init(){
 
-  gpio_init();
-
-  io_init(io_cb);
+  user_in_init(user_in_cb);
 
   g2d_init();
   g2d_x_pos=10;
@@ -327,7 +360,7 @@ void onx_u_loop(){
   if(g2d_pending()){
     onn_run_evaluators(useruid, (void*)USER_EVENT_TOUCH);
   }
-  if(gfx_log_buffer && list_size(gfx_log_buffer)){
+  if(g2d_log_buffer && list_size(g2d_log_buffer)){
     onn_run_evaluators(useruid, (void*)USER_EVENT_LOG);
   }
   if(pending_user_event_time && ct > pending_user_event_time){

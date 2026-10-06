@@ -1,6 +1,10 @@
 #ifndef QSPI_FLASH_H
 #define QSPI_FLASH_H
 
+#if defined(NRF52840_XXAA)
+#include <nrfx_qspi.h>
+#endif
+
 #define QSPI_FLASH_ERASE_LEN_4KB   1
 #define QSPI_FLASH_ERASE_LEN_64KB  2
 #define QSPI_FLASH_ERASE_LEN_ALL   3

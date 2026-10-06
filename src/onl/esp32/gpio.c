@@ -4,12 +4,10 @@
 
 #include <onx/log.h>
 #include <onx/gpio.h>
-#undef gpio_init
-#undef gpio_get
 
 static volatile bool initialised=false;
 
-void gpio_init_avoid_sdk() {
+void gpio_init() {
 
   if(initialised) return;
 
@@ -41,7 +39,7 @@ void gpio_mode_cb(uint8_t pin, uint8_t mode, uint8_t edge, gpio_pin_cb cb) {
 
 // ------------------------------------------
 
-uint8_t gpio_get_avoid_sdk(uint8_t pin) {
+uint8_t gpio_get(uint8_t pin) {
   return 0;
 }
 
@@ -54,14 +52,11 @@ void gpio_toggle(uint8_t pin) {
 
 // ------------------------------------------
 
-void gpio_adc(uint8_t pin, uint8_t channel) {
-
+void gpio_adc_init(uint8_t pin, uint8_t channel){
 }
 
 int16_t gpio_adc_read(uint8_t channel) {
-
   gpio_wake();
-
   uint16_t value = 0.0f;
   return value;
 }

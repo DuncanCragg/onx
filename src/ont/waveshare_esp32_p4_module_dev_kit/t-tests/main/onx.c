@@ -10,7 +10,7 @@
 #include <onx/log.h>
 #include <onx/mem.h>
 #include <onx/gpio.h>
-#include <onx/io.h>
+#include <onx/user-in.h>
 
 #include <onx/chunkbuf.h>
 #include <onx/colours.h>
@@ -28,19 +28,17 @@
 const uint8_t  psram_clock_divider = 3;
 
 const bool log_to_std = true;
-const bool log_to_gfx = false;
+const bool log_to_g2d = false;
 const bool log_to_rtt = false;
 const bool log_to_led = false;
 
 const bool  onp_log         = false;
 const char* onp_channels    = 0;
+const char* onp_serial_ttys = 0;
 const char* onp_ipv6_groups = 0;
 const char* onp_radio_bands = 0;
 
 const char* onn_test_uid_prefix = 0;
-
-const int8_t led_matrix_dotstar_sck_pin = 10;
-const int8_t led_matrix_dotstar_tx_pin  = 11;
 
 // -----------------------------------------------------
 
@@ -97,8 +95,8 @@ void char_received(char ch){
   char_recvd = ch;
 }
 
-void io_cb(){
-  io_state_show();
+void user_in_cb(){
+  user_in_state_show();
 }
 
 void startup_core0_init(){
@@ -107,7 +105,7 @@ void startup_core0_init(){
 
   log_set_usb_cb(char_received);
 
-  io_init(io_cb);
+  user_in_init(user_in_cb);
 
   time_tick(tick_cb, "core-0-banana",  850);
   time_once(once_cb, "core-0-mango!", 2500);
