@@ -106,6 +106,9 @@ void run_colour_tests(){
   log_write("%s = rgb: { %02x %02x %02x }\n", colour_chars, from_chars.r, from_chars.g, from_chars.b);
   colour_chars = "#557f7f"; from_chars = colours_parse_string(colour_chars);
   log_write("%s = rgb: { %02x %02x %02x }\n", colour_chars, from_chars.r, from_chars.g, from_chars.b);
+
+  colour_chars = "khaki";   from_chars = colours_parse_string(colour_chars);
+  log_write("%s = rgb: { %02x %02x %02x }\n", colour_chars, from_chars.r, from_chars.g, from_chars.b);
 }
 
 // -----------------------------------------------------

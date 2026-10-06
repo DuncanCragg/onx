@@ -19,9 +19,9 @@ ONX includes:
 
 ------
 
-The first demo I'm working on is a family Digital Living Space (DLS) mobile device built
-with Nordic chipsets (nRF52 and nRF54) driving 4-inch touchscreens. I've also got a bright
-LED lamp and a small remote control device for that, communicating over a radio mesh.
+The first demo I'm working on is a family Digital Living Space mobile device built on
+the M5Stack Tab5. I've also got a bright LED lamp and a small remote control device for
+that, built on the Nordic nRF52 and communicating over a radio mesh.
 
 Here the data objects are hyperdata such as notes, documents, messages, comments, tasks,
 events, contacts, etc., all gathered and organised in lists, collections, sequences and
@@ -31,7 +31,7 @@ forecasts and calculators, as well as a screen for setting the colour of the LED
 You'll be able to pull in pages from Wikipedia and mash up paragraphs from there. All these
 objects can be arbitrarily interlinked and shared live over the radio mesh.
 
-The DLS device is a view into the single Digital Living Space or "DL-space" that I envisage
-in the article above.
+The ONX device is a view into the single Digital Living Space that I envisage in the
+article above.
 
 ---------------------------

@@ -114,6 +114,7 @@ bool evaluate_light_logic(object* o, void* d){
 #ifdef DO_BUTTON_DISCOVERY
   discover_io_peer(o, "button", "button", 4);
 #endif
+#define NO_BCS_DISCOVERY
 #ifdef DO_BCS_DISCOVERY
   discover_io_peer(o, "bcs", "bcs", 4);
 #endif

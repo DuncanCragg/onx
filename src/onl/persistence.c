@@ -2,8 +2,8 @@
 // NOT sure what this is for: it's just a thin wrapper around database
 // move code to ONN?
 
-#if defined(BOARD_YOU_FLASH)
-#define FLASH_NOT_FAKE
+#if defined(BOARD_MAGIC3) || defined(BOARD_FEATHER_SENSE)
+#define FLASH_NOT_FAKEx
 #endif
 
 #include <inttypes.h>

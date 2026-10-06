@@ -181,7 +181,7 @@ void g2d_touch_event(bool down, uint16_t tx, uint16_t ty){
   static uint16_t    drag_cb_control=0;
   static uint16_t    drag_cb_data=0;
 
-  for(uint8_t n=next_node-1; n && !cb_node; n--){
+  if(down) for(uint8_t n=next_node-1; n && !cb_node; n--){
 
     if(!is_inside(n, tx, ty)) continue;
 

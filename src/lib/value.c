@@ -176,7 +176,6 @@ void value_dump() {
     char* key=properties_key_n(all_values, i);
     value* val=(value*)properties_get_n(all_values, i);
     log_write("[%d|%s|%d]\n", i, key, val->refs);
-    log_flush();
   }
   log_write("#vals=%d\n", s);
 }
